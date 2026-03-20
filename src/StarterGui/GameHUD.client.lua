@@ -10,9 +10,20 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remotes ───────────────────────────────────────────────────────────────────
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
-local openPaintShop = remotesFolder:WaitForChild("OpenPaintShop")
-local openGarage    = remotesFolder:WaitForChild("OpenGarage")
+local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+if not remotesFolder then
+	warn("GameHUD: 'Remotes' folder not found in ReplicatedStorage")
+end
+
+local openPaintShop = remotesFolder and remotesFolder:WaitForChild("OpenPaintShop", 10)
+local openGarage    = remotesFolder and remotesFolder:WaitForChild("OpenGarage", 10)
+
+if not openPaintShop then
+	warn("GameHUD: RemoteEvent 'OpenPaintShop' not found in Remotes folder")
+end
+if not openGarage then
+	warn("GameHUD: RemoteEvent 'OpenGarage' not found in Remotes folder")
+end
 
 -- ── Theme ─────────────────────────────────────────────────────────────────────
 local COLOR_BG     = Color3.fromRGB(20, 20, 25)
@@ -24,6 +35,7 @@ local BTN_W, BTN_H, BTN_GAP = 140, 44, 8
 -- ── ScreenGui ─────────────────────────────────────────────────────────────────
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name           = "GameHUD"
+screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn   = false
 screenGui.Enabled        = false
 screenGui.Parent         = playerGui
@@ -112,12 +124,16 @@ notifCorner.Parent = mapNotif
 -- Shop: ask the server to open the paint shop (server fires ownedMapsSync back,
 -- which PaintShopButton.client.lua catches to show the shop panel).
 shopBtn.MouseButton1Click:Connect(function()
-	openPaintShop:FireServer()
+	if openPaintShop then
+		openPaintShop:FireServer()
+	end
 end)
 
 -- Garage: ask server to open the garage UI (server echoes OpenGarage:FireClient).
 garageBtn.MouseButton1Click:Connect(function()
-	openGarage:FireServer()
+	if openGarage then
+		openGarage:FireServer()
+	end
 end)
 
 -- Map: show a brief "coming soon" popup instead of opening a menu.
