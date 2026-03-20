@@ -1,3 +1,6 @@
+--[[
+TEMPORARILY DISABLED - uncomment to re-enable High Speed map
+
 if not workspace:FindFirstChild("HighSpeedMap") then
 local START_POS = Vector3.new(8000, 0, 0)
 
@@ -405,3 +408,5 @@ print("Terrain fills: " .. terrainFills .. " calls")
 print("Parts placed: " .. partsPlaced)
 
 end
+
+--]]

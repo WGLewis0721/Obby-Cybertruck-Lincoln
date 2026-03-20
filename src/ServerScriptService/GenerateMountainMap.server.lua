@@ -1,3 +1,6 @@
+--[[
+TEMPORARILY DISABLED - uncomment to re-enable Big Foot map
+
 if not workspace:FindFirstChild("BigFootMap") then
 local START_POS = Vector3.new(4000, 0, 0)
 
@@ -385,3 +388,5 @@ print("Terrain fills: " .. terrainFills .. " calls")
 print("Parts placed: " .. partsPlaced)
 
 end
+
+--]]
