@@ -17,6 +17,7 @@ local MapData = {
 		SpawnName      = "SkyscraperSpawn",
 		Thumbnail      = "rbxassetid://0"
 	},
+	--[[ TEMPORARILY DISABLED
 	{
 		Id             = "bigfoot",
 		Name           = "Big Foot",
@@ -43,6 +44,7 @@ local MapData = {
 		SpawnName      = "HighSpeedSpawn",
 		Thumbnail      = "rbxassetid://0"
 	},
+	--]]
 }
 
 return MapData

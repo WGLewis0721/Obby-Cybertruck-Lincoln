@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 local SELECTED_MAP = workspace:GetAttribute("SelectedMap")
 if SELECTED_MAP ~= "bigfoot" then
 	if SELECTED_MAP then
@@ -13,6 +14,12 @@ if workspace:FindFirstChild("BigFootMap") then
 	return
 end
 
+=======
+--[[
+TEMPORARILY DISABLED - uncomment to re-enable Big Foot map
+
+if not workspace:FindFirstChild("BigFootMap") then
+>>>>>>> 4937df332a39dcc6a89f2ae5fcd0b9e49466f21e
 local START_POS = Vector3.new(4000, 0, 0)
 
 -- ============================================================
@@ -399,3 +406,5 @@ print("Terrain fills: " .. terrainFills .. " calls")
 print("Parts placed: " .. partsPlaced)
 
 end
+
+--]]
