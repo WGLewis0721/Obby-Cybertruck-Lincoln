@@ -12,7 +12,24 @@
     },
 
     "ReplicatedStorage": {
-      "$path": "src/ReplicatedStorage"
+      "$path": "src/ReplicatedStorage",
+      "OpenPaintShop": {
+        "$className": "RemoteEvent"
+      },
+      "PurchaseSuccess": {
+        "$className": "RemoteEvent"
+      },
+      "ApplyPaintJob": {
+        "$className": "RemoteEvent"
+      }
+    },
+
+    "StarterPlayer": {
+      "$path": "src/StarterPlayer"
+    },
+
+    "StarterGui": {
+      "$path": "src/StarterGui"
     }
   }
 }
