@@ -36,6 +36,45 @@ local MapData = {
 		ProductId       = 0, -- placeholder – replace with real Developer Product ID
 		Price           = 299,
 		GeneratorModule = "GenerateRaceTrackMap",
+local MapData = {
+	{
+		Id = "skyscraper",
+		Name = "Skyscraper",
+		Description = "Navigate surface streets and underground tunnels through a neon-lit city.",
+		Unlocked = true,
+		Type = "Free",
+		Price = 0,
+		ProductId = 0,
+		BestTimeTarget = 180,
+		FolderName = "CityMap",
+		SpawnName = "CityMapSpawn",
+		Thumbnail = "rbxassetid://0"
+	},
+	{
+		Id = "big_foot",
+		Name = "Big Foot",
+		Description = "Wind your way up a mountain through dense forest into the snow-capped summit.",
+		Unlocked = false,
+		Type = "Robux",
+		Price = 199,
+		ProductId = 0, -- replace with real Developer Product ID
+		BestTimeTarget = 240,
+		FolderName = "MountainMap",
+		SpawnName = "MountainMapSpawn",
+		Thumbnail = "rbxassetid://0"
+	},
+	{
+		Id = "high_speed",
+		Name = "High Speed",
+		Description = "A full street circuit with grandstands, DRS zone, chicane and hairpin.",
+		Unlocked = false,
+		Type = "Robux",
+		Price = 299,
+		ProductId = 0, -- replace with real Developer Product ID
+		BestTimeTarget = 120,
+		FolderName = "RaceTrackMap",
+		SpawnName = "RaceTrackSpawn",
+		Thumbnail = "rbxassetid://0"
 	},
 }
 
