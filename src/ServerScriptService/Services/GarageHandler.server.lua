@@ -1,47 +1,74 @@
--- GarageHandler.server.lua
--- Handles EquipVehicle remote events from the client.
--- Verifies ownership, swaps the player's vehicle model in Workspace,
--- and persists the selection to DataStore "PlayerData_v1".
---
--- NOTE: MarketplaceService.ProcessReceipt is already defined in
--- PaintShopHandler.server.lua — this script does NOT redefine it.
+--[[
+	GarageHandler.server.lua
+	Description: Handles EquipVehicle remote; verifies ownership; spawns/replaces
+	             the player's vehicle model in Workspace. Uses PlayerDataInterface
+	             for all persistence — no direct DataStore calls.
+	Author: Cybertruck Obby Lincoln
+	Last Updated: 2026
 
-local DataStoreService  = game:GetService("DataStoreService")
+	Dependencies:
+		- Constants           (ReplicatedStorage.Shared.Constants)
+		- Logger              (ReplicatedStorage.Shared.Logger)
+		- VehicleData         (ReplicatedStorage.Shared.VehicleData)
+		- MapData             (ReplicatedStorage.Shared.MapData)
+		- PlayerData          (ReplicatedStorage.Shared.PlayerData)
+		- PlayerDataInterface (ServerScriptService.Services.PlayerDataInterface)
+		- EventBus            (ReplicatedStorage.Shared.EventBus)
+
+	Events Fired (via EventBus):
+		- VehicleSpawned(player, vehicleId)
+
+	Events Listened (via EventBus):
+		- PlayerDataLoaded(player) — triggers initial vehicle spawn
+
+	Remote Events Handled:
+		- Remotes.EquipVehicle (C->S)
+		- Remotes.OpenGarage   (C->S echo -> S->C)
+		- Remotes.SelectMap    (C->S)
+
+	NOTE: ProcessReceipt is defined ONLY in PaintShopHandler.server.lua.
+--]]
+
+-- 1. Services
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
 
--- ── DataStore ─────────────────────────────────────────────────────────────────
--- Follows the "PaintJobs_v1" naming convention from PaintShopHandler.
-local playerDataStore = DataStoreService:GetDataStore("PlayerData_v1")
+-- 2. Constants & shared modules
+local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
+local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
+local VehicleData  = require(sharedFolder:WaitForChild("VehicleData", 10))
+local MapData      = require(sharedFolder:WaitForChild("MapData", 10))
+local PlayerData   = require(sharedFolder:WaitForChild("PlayerData", 10))
 
--- ── Remote events ─────────────────────────────────────────────────────────────
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+-- 3. Server-only dependencies
+local servicesFolder      = script.Parent
+local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInterface", 10))
+local EventBus            = require(sharedFolder:WaitForChild("EventBus", 10))
+
+local TAG = "GarageHandler"
+
+-- 4. Remote events
+local remotesFolder = ReplicatedStorage:WaitForChild(Constants.REMOTES_PATH, 10)
 if not remotesFolder then
-	warn("GarageHandler: Remotes folder not found in ReplicatedStorage")
+	Logger.Error(TAG, "Remotes folder not found in ReplicatedStorage")
 	return
 end
 
 local equipVehicleEvent = remotesFolder:WaitForChild("EquipVehicle", 10)
+local openGarageEvent   = remotesFolder:WaitForChild("OpenGarage", 10)
+local selectMapEvent    = remotesFolder:FindFirstChild("SelectMap")
+
 if not equipVehicleEvent then
-	warn("GarageHandler: EquipVehicle RemoteEvent not found")
+	Logger.Error(TAG, "EquipVehicle RemoteEvent not found")
 	return
 end
 
-local openGarageEvent = remotesFolder:WaitForChild("OpenGarage", 10)
-if not openGarageEvent then
-	warn("GarageHandler: OpenGarage RemoteEvent not found")
-end
+-- 5. Private functions
 
--- ── Shared data modules ───────────────────────────────────────────────────────
-local sharedFolder  = ReplicatedStorage:WaitForChild("Shared", 10)
-local vehicleData   = require(sharedFolder:WaitForChild("VehicleData"))
-local MapData       = require(sharedFolder:WaitForChild("MapData"))
-local PlayerData    = require(sharedFolder:WaitForChild("PlayerData"))
-
--- ── Helper: get vehicle definition by Id ──────────────────────────────────────
 local function getVehicleById(vehicleId)
-	for _, v in ipairs(vehicleData) do
+	for _, v in ipairs(VehicleData) do
 		if v.Id == vehicleId then
 			return v
 		end
@@ -49,102 +76,26 @@ local function getVehicleById(vehicleId)
 	return nil
 end
 
--- ── Helper: load player data from DataStore ───────────────────────────────────
--- Returns a fresh default if no data is stored yet.
-local function loadPlayerData(userId)
-	local success, data = pcall(function()
-		return playerDataStore:GetAsync("Player_" .. userId)
-	end)
-	if success and data then
-		-- Merge defaults in case new fields were added since last save
-		local defaults = PlayerData.GetDefault()
-		for k, v in pairs(defaults) do
-			if data[k] == nil then
-				data[k] = v
-			end
-		end
-		return data
-	end
-	if not success then
-		warn("GarageHandler: DataStore load failed for", userId, "—", data)
-	end
-	return PlayerData.GetDefault()
-end
-
--- ── Helper: save player data to DataStore ─────────────────────────────────────
-local function savePlayerData(userId, data)
-	local success, err = pcall(function()
-		playerDataStore:SetAsync("Player_" .. userId, data)
-	end)
-	if not success then
-		warn("GarageHandler: DataStore save failed for", userId, "—", err)
-	end
-end
-
--- ── In-memory cache so we don't hit DataStore on every equip ─────────────────
-local playerDataCache = {}
-
--- Populate cache when a player joins
-Players.PlayerAdded:Connect(function(player)
-	playerDataCache[player.UserId] = loadPlayerData(player.UserId)
-
-	player.CharacterAdded:Connect(function(character)
-		local data = playerDataCache[player.UserId]
-		if not data then
-			data = loadPlayerData(player.UserId)
-			playerDataCache[player.UserId] = data
-		end
-
-		local vehicleId = data.EquippedVehicle or 1
-		local vehicle = getVehicleById(vehicleId)
-		if vehicle then
-			spawnVehicle(player, vehicle)
-		end
-	end)
-end)
-
--- Flush cache and save when a player leaves
-Players.PlayerRemoving:Connect(function(player)
-	local data = playerDataCache[player.UserId]
-	if data then
-		savePlayerData(player.UserId, data)
-	end
-	playerDataCache[player.UserId] = nil
-
-	-- Also remove the player's vehicle from Workspace on disconnect
-	local vehicleName = "Vehicle_" .. player.UserId
-	local existing = workspace:FindFirstChild(vehicleName)
-	if existing then
-		existing:Destroy()
-	end
-end)
-
--- ── Helper: spawn / replace a player's vehicle in Workspace ──────────────────
 local function spawnVehicle(player, vehicle)
-	local vehicleName = "Vehicle_" .. player.UserId
+	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
 
-	-- Remove the old vehicle model if one exists
+	-- Remove old vehicle
 	local existing = workspace:FindFirstChild(vehicleName)
 	if existing then
 		existing:Destroy()
 	end
 
-	-- Look for the model in ServerStorage
 	local modelTemplate = ServerStorage:FindFirstChild(vehicle.ModelName)
 	if not modelTemplate then
-		warn("GarageHandler: Model '" .. vehicle.ModelName .. "' not found in ServerStorage")
+		Logger.Warn(TAG, "Model '%s' not found in ServerStorage", vehicle.ModelName)
 		return
 	end
 
 	local newVehicle = modelTemplate:Clone()
 	newVehicle.Name = vehicleName
 
-	-- Determine spawn position:
-	-- 1. Prefer first VehicleSpawn part in workspace.
-	-- 2. Prefer selected map's spawn location (MapData.SpawnName).
-	-- 3. Fall back to 10 studs in front of the player's character.
-	-- 4. Fall back to world origin.
-	local spawnCFrame = CFrame.new(0, 5, 0)
+	-- Determine spawn CFrame (priority: VehicleSpawn > map spawn > HumanoidRootPart > origin)
+	local spawnCFrame = CFrame.new(Constants.VEHICLE_SPAWN_OFFSET)
 
 	local spawnMarker = workspace:FindFirstChild("VehicleSpawn")
 	if spawnMarker and spawnMarker:IsA("BasePart") then
@@ -163,22 +114,21 @@ local function spawnVehicle(player, vehicle)
 			end
 		end
 
-		if spawnCFrame == CFrame.new(0, 5, 0) then
+		if spawnCFrame == CFrame.new(Constants.VEHICLE_SPAWN_OFFSET) then
 			local character = player.Character
 			if character then
 				local rootPart = character:FindFirstChild("HumanoidRootPart")
 				if rootPart then
 					spawnCFrame = rootPart.CFrame * CFrame.new(0, 0, -10)
 				else
-					warn("GarageHandler: HumanoidRootPart not found for " .. player.Name .. " — using default spawn location")
+					Logger.Warn(TAG, "HumanoidRootPart not found for %s — using default spawn", player.Name)
 				end
 			else
-				warn("GarageHandler: No character for " .. player.Name .. " — using default spawn location")
+				Logger.Warn(TAG, "No character for %s — using default spawn", player.Name)
 			end
 		end
 	end
 
-	-- Place the vehicle using PrimaryPart when available, otherwise pivot the whole model.
 	if newVehicle.PrimaryPart then
 		newVehicle:SetPrimaryPartCFrame(spawnCFrame)
 	else
@@ -187,84 +137,113 @@ local function spawnVehicle(player, vehicle)
 
 	newVehicle.Parent = workspace
 
-	-- Sit player in the vehicle driver seat when possible.
+	-- Seat the player in VehicleSeat if present
 	local vehicleSeat = newVehicle:FindFirstChildWhichIsA("VehicleSeat", true)
 	if vehicleSeat and player.Character then
 		local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
 		if humanoid then
-			-- Small delay to avoid conflicts with spawn/respawn timing.
 			task.delay(0.1, function()
 				if vehicleSeat and vehicleSeat.Parent and humanoid.Parent then
-					if vehicleSeat:IsA("VehicleSeat") then
-						vehicleSeat:Sit(humanoid)
-					end
+					vehicleSeat:Sit(humanoid)
 				end
 			end)
 		end
 	end
+
+	EventBus:Fire("VehicleSpawned", player, vehicle.Id)
+	Logger.Info(TAG, "Spawned '%s' (Id=%d) for %s", vehicle.Name, vehicle.Id, player.Name)
 end
 
--- ── EquipVehicle handler ──────────────────────────────────────────────────────
+local function spawnEquippedVehicle(player)
+	local data = PlayerDataInterface.GetData(player.UserId)
+	if not data then return end
+	local vehicleId = data.EquippedVehicle or Constants.DEFAULT_VEHICLE_ID
+	local vehicle   = getVehicleById(vehicleId)
+	if vehicle then
+		spawnVehicle(player, vehicle)
+	else
+		Logger.Warn(TAG, "No vehicle found for Id=%d (player=%s)", vehicleId, player.Name)
+	end
+end
+
+-- 6. Event handlers
+
+-- Spawn vehicle once player data is ready, and wire CharacterAdded for respawns.
+-- Using EventBus("PlayerDataLoaded") ensures data is in cache before spawning.
+EventBus:On("PlayerDataLoaded", function(player)
+	-- Wire CharacterAdded for all future spawns (respawns after death)
+	player.CharacterAdded:Connect(function()
+		spawnEquippedVehicle(player)
+	end)
+	-- Spawn immediately if the character was already loaded when data arrived
+	if player.Character then
+		spawnEquippedVehicle(player)
+	end
+end)
+
+-- Remove vehicle when player leaves
+Players.PlayerRemoving:Connect(function(player)
+	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
+	local existing    = workspace:FindFirstChild(vehicleName)
+	if existing then
+		existing:Destroy()
+	end
+end)
+
+-- EquipVehicle: validate, check ownership, and equip
 equipVehicleEvent.OnServerEvent:Connect(function(player, vehicleId)
-	-- Basic type validation
+	if typeof(player) ~= "Instance" or not player:IsA("Player") then return end
 	if type(vehicleId) ~= "number" then
-		warn("GarageHandler: invalid vehicleId from", player.Name)
+		Logger.Warn(TAG, "Invalid vehicleId type from %s: %s", player.Name, typeof(vehicleId))
 		return
 	end
 
 	local vehicle = getVehicleById(vehicleId)
 	if not vehicle then
-		warn("GarageHandler: unknown vehicleId", vehicleId, "from", player.Name)
+		Logger.Warn(TAG, "Unknown vehicleId %d from %s", vehicleId, player.Name)
 		return
 	end
 
-	-- Load (or retrieve cached) player data
-	local data = playerDataCache[player.UserId]
+	local data = PlayerDataInterface.GetData(player.UserId)
 	if not data then
-		data = loadPlayerData(player.UserId)
-		playerDataCache[player.UserId] = data
+		Logger.Warn(TAG, "No data in cache for %s", player.Name)
+		return
 	end
 
-	-- Verify ownership: always allow if vehicle is free/unlocked
 	local owns = vehicle.Unlocked or PlayerData.OwnsVehicle(data, vehicleId)
 	if not owns then
-		warn("GarageHandler:", player.Name, "does not own vehicle", vehicleId)
+		Logger.Warn(TAG, "%s does not own vehicle Id=%d", player.Name, vehicleId)
 		return
 	end
 
-	-- Update equipped vehicle in cache and save
-	data.EquippedVehicle = vehicleId
-	savePlayerData(player.UserId, data)
+	PlayerDataInterface.UpdateData(player.UserId, function(d)
+		d.EquippedVehicle = vehicleId
+		return d
+	end)
 
-	-- Swap vehicle model in Workspace
 	spawnVehicle(player, vehicle)
-
-	print(string.format("GarageHandler: %s equipped '%s' (Id=%d)", player.Name, vehicle.Name, vehicleId))
+	Logger.Info(TAG, "%s equipped '%s' (Id=%d)", player.Name, vehicle.Name, vehicleId)
 end)
 
--- When the player selects a map, re-spawn their equipped vehicle at the selected map spawn.
-local selectMapEvent = remotesFolder:FindFirstChild("SelectMap")
+-- SelectMap: re-spawn vehicle at the new map's spawn point
 if selectMapEvent then
 	selectMapEvent.OnServerEvent:Connect(function(player, mapId)
-		local data = playerDataCache[player.UserId]
-		if not data then
-			data = loadPlayerData(player.UserId)
-			playerDataCache[player.UserId] = data
+		if typeof(player) ~= "Instance" or not player:IsA("Player") then return end
+		if type(mapId) ~= "string" or #mapId == 0 then
+			Logger.Warn(TAG, "Invalid mapId from %s: %s", player.Name, tostring(mapId))
+			return
 		end
-
-		local vehicleId = data.EquippedVehicle or 1
-		local vehicle = getVehicleById(vehicleId)
-		if vehicle then
-			spawnVehicle(player, vehicle)
-		end
+		spawnEquippedVehicle(player)
 	end)
 end
 
--- ── OpenGarage echo: client fires → server fires back → client opens garage UI ─
--- GameHUD's Garage button calls openGarage:FireServer(); here we echo it back so
--- GarageMenu.client.lua's openGarageEvent.OnClientEvent handler can open the UI.
+-- OpenGarage echo: client fires -> server echoes back -> client opens garage UI
 if openGarageEvent then
 	openGarageEvent.OnServerEvent:Connect(function(player)
+		if typeof(player) ~= "Instance" or not player:IsA("Player") then return end
 		openGarageEvent:FireClient(player)
 	end)
 end
+
+-- 7. Initialization
+Logger.Info(TAG, "GarageHandler ready")

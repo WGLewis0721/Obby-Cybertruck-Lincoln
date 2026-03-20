@@ -1,53 +1,72 @@
--- CheckpointHandler.server.lua
--- Core race-loop state machine.
---
--- Responsibilities:
---   • Discovers checkpoint Parts from every map folder listed in MapData.
---   • Wires Touched events using vehicle-name detection (no Humanoid needed).
---   • Enforces checkpoint order and prevents duplicate triggers.
---   • Starts the race timer on Checkpoint_1; stops it on Checkpoint_99 (finish).
---   • Delegates best-time persistence to TimerHandler via ProcessRaceTime.
---   • Delegates coin awards to CoinHandler via ProcessRaceCoins.
---   • Fires RemoteEvents to the driving client (RaceStarted, CheckpointReached, RaceFinished).
---   • Resets a player's race state when RaceAgain fires from the client.
+--[[
+	CheckpointHandler.server.lua
+	Description: Core race-loop state machine. Discovers checkpoint Parts from
+	             map folders, wires Touched events, enforces checkpoint order,
+	             fires EventBus events and client RemoteEvents.
+	Author: Cybertruck Obby Lincoln
+	Last Updated: 2026
 
+	Dependencies:
+		- Constants (ReplicatedStorage.Shared.Constants)
+		- Logger    (ReplicatedStorage.Shared.Logger)
+		- MapData   (ReplicatedStorage.Shared.MapData)
+		- EventBus  (ReplicatedStorage.Shared.EventBus)
+
+	Events Fired (via EventBus):
+		- RaceStarted(player, mapId)
+		- CheckpointHit(player, checkpointNum, total)
+		- RaceFinished(player, mapId, elapsed)
+
+	Events Listened (via EventBus):
+		- None (uses BindableFunctions for synchronous TimerHandler/CoinHandler results)
+
+	Remote Events Fired (S->C):
+		- Remotes.RaceStarted
+		- Remotes.CheckpointReached
+		- Remotes.RaceFinished
+
+	Remote Events Handled (C->S):
+		- Remotes.RaceAgain
+--]]
+
+-- 1. Services
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
 
--- ── Shared modules ────────────────────────────────────────────────────────────
+-- 2. Constants & shared modules
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
-local MapData      = require(sharedFolder:WaitForChild("MapData"))
+local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
+local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
+local MapData      = require(sharedFolder:WaitForChild("MapData", 10))
 
--- ── Remote events (Remotes folder declared via Remotes.model.json) ────────────
-local remotesFolder      = ReplicatedStorage:WaitForChild("Remotes", 10)
+-- 3. Server-only dependencies
+local EventBus = require(sharedFolder:WaitForChild("EventBus", 10))
+
+local TAG = "CheckpointHandler"
+
+-- 4. Remote events
+local remotesFolder      = ReplicatedStorage:WaitForChild(Constants.REMOTES_PATH, 10)
 local checkpointReached  = remotesFolder:WaitForChild("CheckpointReached", 10)
 local raceStartedRemote  = remotesFolder:WaitForChild("RaceStarted", 10)
 local raceFinishedRemote = remotesFolder:WaitForChild("RaceFinished", 10)
 local raceAgainRemote    = remotesFolder:WaitForChild("RaceAgain", 10)
 
--- ── BindableFunctions (set up by TimerHandler / CoinHandler on server) ────────
+-- 5. BindableFunctions (synchronous request-reply with TimerHandler / CoinHandler)
 local raceHandlers     = ServerStorage:WaitForChild("RaceHandlers", 30)
 local processRaceTime  = raceHandlers:WaitForChild("ProcessRaceTime", 30)
 local processRaceCoins = raceHandlers:WaitForChild("ProcessRaceCoins", 30)
 
--- ── Per-player race state ─────────────────────────────────────────────────────
--- playerRace[userId] = {
---   mapId            : string   – which map the player is racing
---   nextCheckpoint   : number   – next sequential checkpoint number expected
---   totalCheckpoints : number   – count of numbered checkpoints (excluding 99)
---   startClock       : number   – os.clock() captured at Checkpoint_1
---   active           : boolean
--- }
+-- 6. Private state
+-- playerRace[userId] = { mapId, nextCheckpoint, totalCheckpoints, startClock, active }
 local playerRace = {}
 
--- ── Discovered checkpoint parts, keyed by mapId ───────────────────────────────
 -- mapCheckpoints[mapId][num] = BasePart
 local mapCheckpoints = {}
 
--- ── Helper: resolve a touching part → player, userId ─────────────────────────
--- Vehicles are named "Vehicle_[UserId]" by GarageHandler.
--- The touching part is a descendant of that Model; there is no Humanoid.
+-- 7. Private functions
+
+-- Resolve a touching part to the owning player via "Vehicle_[UserId]" naming
 local function getPlayerFromHit(hit)
 	local model = hit:FindFirstAncestorWhichIsA("Model")
 	if not model then return nil, nil end
@@ -57,13 +76,13 @@ local function getPlayerFromHit(hit)
 	return player, userId
 end
 
--- ── Discover checkpoint Parts from all map folders ────────────────────────────
+-- Discover checkpoint Parts from all configured map folders
 local function discoverCheckpoints()
 	local selectedMapId = workspace:GetAttribute("SelectedMap")
 	if selectedMapId then
-		print("CheckpointHandler: limiting map discovery to selected map '" .. tostring(selectedMapId) .. "'")
+		Logger.Info(TAG, "Limiting discovery to selected map '%s'", tostring(selectedMapId))
 	else
-		print("CheckpointHandler: no SelectedMap attribute; discovering all configured maps")
+		Logger.Info(TAG, "No SelectedMap attribute; discovering all configured maps")
 	end
 
 	for _, map in ipairs(MapData) do
@@ -73,7 +92,7 @@ local function discoverCheckpoints()
 
 		local folder = workspace:FindFirstChild(map.FolderName)
 		if not folder then
-			warn("CheckpointHandler: map folder not found in Workspace:", map.FolderName)
+			Logger.Warn(TAG, "Map folder not found in Workspace: %s", map.FolderName)
 			continue
 		end
 
@@ -88,37 +107,31 @@ local function discoverCheckpoints()
 		end
 
 		if next(checkpoints) == nil then
-			warn("CheckpointHandler: no checkpoint parts found in map folder:", map.FolderName)
+			Logger.Warn(TAG, "No checkpoint parts found in: %s", map.FolderName)
 			continue
 		end
 
-		-- Count numbered checkpoints excluding the finish line (99)
 		local total = 0
 		for num in pairs(checkpoints) do
-			if num ~= 99 then
+			if num ~= Constants.CHECKPOINT_FINISH then
 				total = total + 1
 			end
 		end
 
 		mapCheckpoints[map.Id] = checkpoints
-		print(string.format(
-			"CheckpointHandler: %-20s → %d checkpoint(s) + finish",
-			map.FolderName, total
-		))
+		Logger.Info(TAG, "%-20s -> %d checkpoint(s) + finish", map.FolderName, total)
 	end
 end
 
--- ── Wire Touched events for every discovered checkpoint ───────────────────────
+-- Wire Touched events for every discovered checkpoint
 local function wireCheckpoints()
 	for mapId, checkpoints in pairs(mapCheckpoints) do
-		-- Count numbered checkpoints (not 99) for this map
 		local total = 0
 		for num in pairs(checkpoints) do
-			if num ~= 99 then total = total + 1 end
+			if num ~= Constants.CHECKPOINT_FINISH then total = total + 1 end
 		end
 
 		for num, part in pairs(checkpoints) do
-			-- Capture loop variables so the closure is correct per checkpoint
 			local capturedNum   = num
 			local capturedMapId = mapId
 			local capturedTotal = total
@@ -129,24 +142,34 @@ local function wireCheckpoints()
 
 				local race = playerRace[userId]
 
-				-- ── Finish line (Checkpoint_99) ────────────────────────────────
-				if capturedNum == 99 then
+				-- Finish line (Checkpoint_99)
+				if capturedNum == Constants.CHECKPOINT_FINISH then
 					if not race or not race.active then return end
 					if race.mapId ~= capturedMapId then return end
-					-- Only accept finish once all prior checkpoints were cleared
 					if race.nextCheckpoint ~= capturedTotal + 1 then return end
 
-					-- Stop the race and clear state immediately to prevent re-triggers
 					local elapsed = os.clock() - race.startClock
+
+					-- Anti-cheat: reject suspiciously fast completions
+					if elapsed < Constants.MIN_RACE_TIME then
+						Logger.Warn(TAG, "ANTI-CHEAT: %s finished '%s' in %.2fs (min=%ds) — rejected",
+							player.Name, capturedMapId, elapsed, Constants.MIN_RACE_TIME)
+						return
+					end
+
+					-- Stop the race
 					race.active = false
 					playerRace[userId] = nil
 
-					-- Ask TimerHandler to persist best time and return comparison result
+					-- Delegate to TimerHandler (best-time persistence)
 					local timeResult = processRaceTime:Invoke(player, capturedMapId, elapsed)
-					-- Ask CoinHandler to award coins and return totals
+					-- Delegate to CoinHandler (coin awards)
 					local coinResult = processRaceCoins:Invoke(player, capturedMapId)
 
-					-- Fire full result payload to the client
+					-- Notify via EventBus for additional observers
+					EventBus:Fire("RaceFinished", player, capturedMapId, elapsed)
+
+					-- Send full result payload to the client
 					raceFinishedRemote:FireClient(player, {
 						mapId       = capturedMapId,
 						elapsed     = elapsed,
@@ -156,18 +179,22 @@ local function wireCheckpoints()
 						totalCoins  = coinResult and coinResult.totalCoins  or 0,
 					})
 
-					print(string.format(
-						"CheckpointHandler: %s finished '%s' in %.3fs | newBest=%s | coins+%d",
+					Logger.Info(TAG, "%s finished '%s' in %.3fs | newBest=%s | coins+%d",
 						player.Name, capturedMapId, elapsed,
 						tostring(timeResult and timeResult.isNewBest),
-						coinResult and coinResult.coinsEarned or 0
-					))
+						coinResult and coinResult.coinsEarned or 0)
 
-				-- ── Numbered checkpoint ────────────────────────────────────────
+				-- Numbered checkpoint
 				else
 					if not race or not race.active then
-						-- Only checkpoint 1 can start a new race
 						if capturedNum ~= 1 then return end
+
+						-- Anti-cheat: verify vehicle exists in Workspace
+						local vehicleName = string.format("Vehicle_%d", userId)
+						if not workspace:FindFirstChild(vehicleName) then
+							Logger.Warn(TAG, "ANTI-CHEAT: %s hit CP1 but no vehicle in Workspace", player.Name)
+							return
+						end
 
 						playerRace[userId] = {
 							mapId            = capturedMapId,
@@ -177,53 +204,48 @@ local function wireCheckpoints()
 							active           = true,
 						}
 						race = playerRace[userId]
+
+						EventBus:Fire("RaceStarted", player, capturedMapId)
 						raceStartedRemote:FireClient(player, { mapId = capturedMapId })
-						print(string.format(
-							"CheckpointHandler: race started — %s on '%s'",
-							player.Name, capturedMapId
-						))
+						Logger.Info(TAG, "Race started — %s on '%s'", player.Name, capturedMapId)
 					end
 
-					-- Ignore checkpoints from a different map while a race is active
 					if race.mapId ~= capturedMapId then return end
-					-- Ignore out-of-order or already-hit checkpoints
 					if capturedNum ~= race.nextCheckpoint then return end
 
-					-- Accept this checkpoint
 					race.nextCheckpoint = race.nextCheckpoint + 1
+
+					EventBus:Fire("CheckpointHit", player, capturedNum, capturedTotal)
 					checkpointReached:FireClient(player, {
 						mapId = capturedMapId,
 						index = capturedNum,
 						total = capturedTotal,
 					})
 
-					print(string.format(
-						"CheckpointHandler: %s hit CP %d/%d on '%s'",
-						player.Name, capturedNum, capturedTotal, capturedMapId
-					))
+					Logger.Info(TAG, "%s hit CP %d/%d on '%s'",
+						player.Name, capturedNum, capturedTotal, capturedMapId)
 				end
 			end)
 		end
 	end
 end
 
--- ── RaceAgain: reset the player's race state so they can start fresh ──────────
+-- 8. Event handlers
+
 raceAgainRemote.OnServerEvent:Connect(function(player)
+	if typeof(player) ~= "Instance" or not player:IsA("Player") then return end
 	playerRace[player.UserId] = nil
-	print("CheckpointHandler: race state reset for", player.Name)
+	Logger.Info(TAG, "Race state reset for %s", player.Name)
 end)
 
--- ── Clean up on player disconnect ─────────────────────────────────────────────
 Players.PlayerRemoving:Connect(function(player)
 	playerRace[player.UserId] = nil
 end)
 
--- ── Initialise: wait for map generators to finish, then discover checkpoints ──
--- Map-generator scripts are synchronous (no task.wait) so they complete before
--- this script resumes after its first yield. 5 s gives a comfortable margin for
--- even the heaviest map (HighSpeedMap) to place all its Parts.
-local CHECKPOINT_DISCOVERY_DELAY = 5   -- seconds; covers the slowest map generator
+-- 9. Initialization
+-- Wait for map generators (synchronous scripts) to finish placing checkpoint Parts.
+local CHECKPOINT_DISCOVERY_DELAY = 5
 task.wait(CHECKPOINT_DISCOVERY_DELAY)
 discoverCheckpoints()
 wireCheckpoints()
-print("CheckpointHandler: ready — monitoring", #MapData, "map(s)")
+Logger.Info(TAG, "Ready — monitoring %d map(s)", #MapData)

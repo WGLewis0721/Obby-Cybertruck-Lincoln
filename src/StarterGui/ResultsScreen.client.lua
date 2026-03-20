@@ -1,14 +1,21 @@
--- ResultsScreen.client.lua
--- Displays the post-race results panel when the server fires RaceFinished.
---
--- Shows:
---   • Final race time
---   • Personal-best status (new best star, or current best)
---   • Coins earned this run + total balance
---   • "Race Again" button → fires RaceAgain RemoteEvent to server, closes panel
---
--- The panel slides up from off-screen on arrival and is destroyed when the
--- player clicks Race Again.
+--[[
+    ResultsScreen.client.lua
+    Description: Displays post-race results panel when RaceFinished fires.
+                 Shows final time, personal-best status, coins earned, and a
+                 Race Again button.
+    Author: Cybertruck Obby Lincoln
+    Last Updated: 2026
+
+    Dependencies:
+        - Remotes.RaceFinished (S->C)
+        - Remotes.RaceAgain    (C->S)
+
+    Events Fired:
+        - Remotes.RaceAgain (C->S on button click)
+
+    Events Listened:
+        - Remotes.RaceFinished
+--]]
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

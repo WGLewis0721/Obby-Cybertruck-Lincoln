@@ -1,14 +1,21 @@
--- BoostHandler.client.lua
--- Manages the Perks Hotbar – a Roblox-style row of square icon buttons anchored
--- to the bottom center of the screen, modelled after the native tool hotbar.
---
--- Each perk button is hidden until the server confirms the player owns that perk.
--- Currently implemented perks:
---   ⚡ Speed Boost – appears when ApplyBoost fires; clicking it re-applies the
---       30 % MaxSpeed increase to the current vehicle.
---
--- Future perks (shield, magnet, …) can be added by calling makePerkButton() and
--- wiring up their own RemoteEvent listeners.
+--[[
+    BoostHandler.client.lua
+    Description: Manages the Perks Hotbar. Each perk button is hidden until the
+                 server confirms ownership. Handles Speed Boost application.
+    Author: Cybertruck Obby Lincoln
+    Last Updated: 2026
+
+    Dependencies:
+        - Remotes.ApplyBoost      (S->C)
+        - Remotes.BundlePurchased (S->C)
+
+    Events Fired:
+        - None
+
+    Events Listened:
+        - Remotes.ApplyBoost
+        - Remotes.BundlePurchased
+--]]
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
