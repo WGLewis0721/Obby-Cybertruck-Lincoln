@@ -18,9 +18,9 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remote events ─────────────────────────────────────────────────────────────
-local raceFolder      = ReplicatedStorage:WaitForChild("Race", 10)
-local raceFinished    = raceFolder:WaitForChild("RaceFinished", 10)
-local raceAgainRemote = raceFolder:WaitForChild("RaceAgain", 10)
+local remotesFolder   = ReplicatedStorage:WaitForChild("Remotes", 10)
+local raceFinished    = remotesFolder:WaitForChild("RaceFinished", 10)
+local raceAgainRemote = remotesFolder:WaitForChild("RaceAgain", 10)
 
 -- ── ScreenGui ─────────────────────────────────────────────────────────────────
 local screenGui = Instance.new("ScreenGui")

@@ -14,10 +14,10 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remote events ─────────────────────────────────────────────────────────────
-local raceFolder        = ReplicatedStorage:WaitForChild("Race", 10)
-local checkpointReached = raceFolder:WaitForChild("CheckpointReached", 10)
-local raceStarted       = raceFolder:WaitForChild("RaceStarted", 10)
-local raceFinished      = raceFolder:WaitForChild("RaceFinished", 10)
+local remotesFolder     = ReplicatedStorage:WaitForChild("Remotes", 10)
+local checkpointReached = remotesFolder:WaitForChild("CheckpointReached", 10)
+local raceStarted       = remotesFolder:WaitForChild("RaceStarted", 10)
+local raceFinished      = remotesFolder:WaitForChild("RaceFinished", 10)
 
 -- ── Race state ────────────────────────────────────────────────────────────────
 local raceActive  = false
@@ -192,12 +192,11 @@ local function makeMapChoiceButton(label, mapId, offsetY)
 	btn.TextColor3 = Color3.new(1, 1, 1)
 	btn.Parent = mapMenu
 	btn.MouseButton1Click:Connect(function()
-		local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
-		local selectMap = eventsFolder and eventsFolder:FindFirstChild("SelectMap")
+		local selectMap = remotesFolder:FindFirstChild("SelectMap")
 		if selectMap then
 			selectMap:FireServer(mapId)
 		else
-			warn("MapSelector: SelectMap RemoteEvent is missing")
+			warn("RaceHUD: SelectMap RemoteEvent is missing")
 		end
 		mapMenu.Visible = false
 	end)
@@ -214,16 +213,14 @@ mapButton.MouseButton1Click:Connect(function()
 end)
 
 shopBtn.MouseButton1Click:Connect(function()
-	local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
-	local openShop = eventsFolder and eventsFolder:FindFirstChild("OpenPaintShop")
+	local openShop = remotesFolder:FindFirstChild("OpenPaintShop")
 	if openShop then
 		openShop:FireServer()
 	end
 end)
 
 garageBtn.MouseButton1Click:Connect(function()
-	local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
-	local openGarage = eventsFolder and eventsFolder:FindFirstChild("OpenGarage")
+	local openGarage = remotesFolder:FindFirstChild("OpenGarage")
 	if openGarage then
 		openGarage:FireServer()
 	end

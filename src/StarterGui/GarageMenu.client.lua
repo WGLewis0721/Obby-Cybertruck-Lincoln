@@ -11,42 +11,39 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remote events ─────────────────────────────────────────────────────────────
-local eventsFolder = ReplicatedStorage:WaitForChild("Events", 10)
-if not eventsFolder then
-	warn("GarageMenu: Events folder not found in ReplicatedStorage")
+local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+if not remotesFolder then
+	warn("GarageMenu: Remotes folder not found in ReplicatedStorage")
 	return
 end
 
-local openGarageEvent = eventsFolder:WaitForChild("OpenGarage", 10)
+local openGarageEvent = remotesFolder:WaitForChild("OpenGarage", 10)
 if not openGarageEvent then
 	warn("GarageMenu: OpenGarage RemoteEvent not found")
 	return
 end
 
-local equipVehicleEvent = eventsFolder:WaitForChild("EquipVehicle", 10)
+local equipVehicleEvent = remotesFolder:WaitForChild("EquipVehicle", 10)
 if not equipVehicleEvent then
 	warn("GarageMenu: EquipVehicle RemoteEvent not found")
 	return
 end
 
--- OpenPaintShop lives at the root of ReplicatedStorage (declared in default.project.json)
--- rather than inside the Events folder — this matches the pre-existing convention
--- used by PaintShopButton.client.lua and PaintShopHandler.server.lua.
-local openPaintShop = ReplicatedStorage:WaitForChild("OpenPaintShop", 10)
+local openPaintShop = remotesFolder:WaitForChild("OpenPaintShop", 10)
 if not openPaintShop then
 	warn("GarageMenu: OpenPaintShop RemoteEvent not found")
 	return
 end
 
-local purchaseSuccess = ReplicatedStorage:WaitForChild("PurchaseSuccess", 10)
+local purchaseSuccess = remotesFolder:WaitForChild("PurchaseSuccess", 10)
 if not purchaseSuccess then
 	warn("GarageMenu: PurchaseSuccess RemoteEvent not found")
 	return
 end
 
 -- ── Data modules ──────────────────────────────────────────────────────────────
-local moduleFolder  = ReplicatedStorage:WaitForChild("Module", 10)
-local vehicleData   = require(moduleFolder:WaitForChild("VehicleData"))
+local sharedFolder  = ReplicatedStorage:WaitForChild("Shared", 10)
+local vehicleData   = require(sharedFolder:WaitForChild("VehicleData"))
 
 -- ── Theme ─────────────────────────────────────────────────────────────────────
 local COLOR_BG          = Color3.fromRGB(15, 15, 20)

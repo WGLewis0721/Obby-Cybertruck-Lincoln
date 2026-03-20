@@ -5,6 +5,7 @@
 
     "Workspace": {
       "$className": "Workspace",
+      "$ignoreUnknownInstances": true,
       "MenuCameraAnchor": {
         "$className": "Part",
         "Transparency": {
@@ -23,11 +24,13 @@
     },
 
     "ServerScriptService": {
-      "$path": "src/ServerScriptService"
+      "$path": "src/ServerScriptService",
+      "$ignoreUnknownInstances": true
     },
 
     "ServerStorage": {
       "$className": "ServerStorage",
+      "$ignoreUnknownInstances": true,
       "RaceHandlers": {
         "$className": "Folder",
         "ProcessRaceTime": {
@@ -41,59 +44,26 @@
 
     "ReplicatedStorage": {
       "$path": "src/ReplicatedStorage",
-      "OpenPaintShop": {
-        "$className": "RemoteEvent"
-      },
-      "PurchaseSuccess": {
-        "$className": "RemoteEvent"
-      },
-      "ApplyPaintJob": {
-        "$className": "RemoteEvent"
-      },
-      "ApplyBoost": {
-        "$className": "RemoteEvent"
-      },
-      "BundlePurchased": {
-        "$className": "RemoteEvent"
-      },
-      "MapPurchased": {
-        "$className": "RemoteEvent"
-      },
-      "OwnedMapsSync": {
-        "$className": "RemoteEvent"
-      },
-      "Events": {
-        "$className": "Folder",
-        "OpenGarage": {
-          "$className": "RemoteEvent"
-        },
-        "EquipVehicle": {
-          "$className": "RemoteEvent"
-        }
-      },
-      "Race": {
-        "$className": "Folder",
-        "CheckpointReached": {
-          "$className": "RemoteEvent"
-        },
-        "RaceStarted": {
-          "$className": "RemoteEvent"
-        },
-        "RaceFinished": {
-          "$className": "RemoteEvent"
-        },
-        "RaceAgain": {
-          "$className": "RemoteEvent"
-        }
-      }
+      "$ignoreUnknownInstances": true
     },
 
     "StarterPlayer": {
-      "$path": "src/StarterPlayer"
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$path": "src/StarterPlayer/StarterPlayerScripts",
+        "$ignoreUnknownInstances": true
+      },
+      "StarterCharacterScripts": {
+        "$className": "StarterCharacterScripts",
+        "$path": "src/StarterPlayer/StarterCharacterScripts",
+        "$ignoreUnknownInstances": true
+      }
     },
 
     "StarterGui": {
-      "$path": "src/StarterGui"
+      "$path": "src/StarterGui",
+      "$ignoreUnknownInstances": true
     }
   }
 }
