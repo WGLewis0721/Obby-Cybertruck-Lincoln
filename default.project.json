@@ -28,6 +28,12 @@
       "BundlePurchased": {
         "$className": "RemoteEvent"
       },
+      "MapPurchased": {
+        "$className": "RemoteEvent"
+      },
+      "OwnedMapsSync": {
+        "$className": "RemoteEvent"
+      },
       "Events": {
         "$className": "Folder",
         "OpenGarage": {

@@ -7,10 +7,17 @@ local player        = Players.LocalPlayer
 local openPaintShop = ReplicatedStorage:WaitForChild("OpenPaintShop")
 -- ApplyBoost fires from the server when the player owns a Speed Boost
 local applyBoost    = ReplicatedStorage:WaitForChild("ApplyBoost")
+-- MapPurchased fires from the server when the player successfully buys a map
+local mapPurchased  = ReplicatedStorage:WaitForChild("MapPurchased")
+-- OwnedMapsSync fires from the server when the shop opens, sending the player's
+-- already-owned map names so buttons reflect their prior purchases correctly.
+local ownedMapsSync = ReplicatedStorage:WaitForChild("OwnedMapsSync")
 
 -- ── Shared shop data ───────────────────────────────────────────────────────────
 local moduleFolder = ReplicatedStorage:WaitForChild("Module")
 local ShopItems    = require(moduleFolder:WaitForChild("ShopItems"))
+-- MapData provides the list of maps (free and purchasable)
+local MapData      = require(moduleFolder:WaitForChild("MapData"))
 
 -- Extract product IDs and prices for the new item types from ShopItems
 local SPEED_BOOST_PRODUCT_ID = 0
@@ -31,6 +38,11 @@ end
 local boostOwned = false
 -- Reference to the buy button on the Upgrades card so we can grey it out
 local boostBuyBtn
+
+-- Track which maps the local player already owns this session (keyed by map Name)
+local ownedMaps = {}
+-- References to map buy buttons so MapPurchased can update them (keyed by map Name)
+local mapBuyBtns = {}
 
 -- ── Theme (matches LoadingScreen) ──────────────────────────────────────────────
 local COLOR_BG          = Color3.fromRGB(8, 8, 18)
@@ -87,7 +99,7 @@ tStroke.Parent = shopToggleBtn
 -- ── Shop frame (hidden by default) ────────────────────────────────────────────
 local frame = Instance.new("Frame")
 frame.Name = "ShopFrame"
-frame.Size = UDim2.new(0, 360, 0, 340)
+frame.Size = UDim2.new(0, 460, 0, 360)
 frame.Position = UDim2.new(0, 20, 0.5, -230)
 frame.BackgroundColor3 = COLOR_PANEL
 frame.BorderSizePixel = 0
@@ -103,6 +115,33 @@ fStroke.Color = COLOR_ACCENT
 fStroke.Thickness = 1.5
 fStroke.Transparency = 0.4
 fStroke.Parent = frame
+
+-- ── Map purchase notification ──────────────────────────────────────────────────
+-- Fades in above the shop frame when a map is purchased, then fades out after 3 s.
+local mapNotifLabel = Instance.new("TextLabel")
+mapNotifLabel.Name = "MapNotification"
+mapNotifLabel.Size = UDim2.new(0, 320, 0, 44)
+mapNotifLabel.Position = UDim2.new(0, 20, 0.5, -286)
+mapNotifLabel.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+mapNotifLabel.BorderSizePixel = 0
+mapNotifLabel.Text = ""
+mapNotifLabel.Font = Enum.Font.GothamBold
+mapNotifLabel.TextSize = 15
+mapNotifLabel.TextColor3 = Color3.fromRGB(74, 240, 255)
+mapNotifLabel.TextXAlignment = Enum.TextXAlignment.Center
+mapNotifLabel.BackgroundTransparency = 1
+mapNotifLabel.TextTransparency = 1
+mapNotifLabel.Parent = screenGui
+
+local notifCorner = Instance.new("UICorner")
+notifCorner.CornerRadius = UDim.new(0, 10)
+notifCorner.Parent = mapNotifLabel
+
+local notifStroke = Instance.new("UIStroke")
+notifStroke.Color = Color3.fromRGB(74, 240, 255)
+notifStroke.Thickness = 1.5
+notifStroke.Transparency = 1
+notifStroke.Parent = mapNotifLabel
 
 -- ── Header bar ─────────────────────────────────────────────────────────────────
 local header = Instance.new("Frame")
@@ -188,6 +227,7 @@ end
 local paintTab    = makeTab("🎨  Paint",    1)
 local upgradesTab = makeTab("⚡  Upgrades", 2)  -- NEW: Speed Boost and future upgrades
 local bundleTab   = makeTab("💎  Bundle",   3)  -- Ultimate Bundle (best value)
+local mapsTab     = makeTab("🗺️  Maps",    4)  -- Purchasable maps
 
 -- ── Content area ───────────────────────────────────────────────────────────────
 local contentArea = Instance.new("Frame")
@@ -476,11 +516,156 @@ bundleBuyBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- ── Maps tab content ───────────────────────────────────────────────────────────
+-- Shows only maps where Type == "Robux". Free maps (e.g. City Underground)
+-- are skipped because they are always available without purchase.
+local mapsContent = Instance.new("Frame")
+mapsContent.Name = "MapsContent"
+mapsContent.Size = UDim2.new(1, 0, 1, 0)
+mapsContent.BackgroundTransparency = 1
+mapsContent.Visible = false
+mapsContent.Parent = contentArea
+
+-- Horizontal layout: centres the cards in the content area
+local mapsLayout = Instance.new("UIListLayout")
+mapsLayout.FillDirection = Enum.FillDirection.Horizontal
+mapsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+mapsLayout.Padding = UDim.new(0, 12)
+mapsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+mapsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+mapsLayout.Parent = mapsContent
+
+-- Build one card per Robux map
+for idx, map in ipairs(MapData) do
+	if map.Type ~= "Robux" then continue end
+
+	-- ── Card container ────────────────────────────────────────────────────────
+	local card = Instance.new("Frame")
+	card.Name = map.Name
+	card.Size = UDim2.new(0, 200, 0, 240)
+	card.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+	card.BorderSizePixel = 0
+	card.LayoutOrder = idx
+	card.Parent = mapsContent
+
+	local cardCorner = Instance.new("UICorner")
+	cardCorner.CornerRadius = UDim.new(0, 12)
+	cardCorner.Parent = card
+
+	-- Cyan border consistent with the maps accent colour
+	local cardStroke = Instance.new("UIStroke")
+	cardStroke.Color = Color3.fromRGB(74, 240, 255)
+	cardStroke.Thickness = 2
+	cardStroke.Parent = card
+
+	-- ── Thumbnail image ────────────────────────────────────────────────────────
+	local thumbnail = Instance.new("ImageLabel")
+	thumbnail.Size = UDim2.new(1, 0, 0, 100)
+	thumbnail.Position = UDim2.new(0, 0, 0, 0)
+	thumbnail.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+	thumbnail.BorderSizePixel = 0
+	thumbnail.Image = map.Pic
+	thumbnail.ScaleType = Enum.ScaleType.Crop
+	thumbnail.Parent = card
+
+	local thumbCorner = Instance.new("UICorner")
+	thumbCorner.CornerRadius = UDim.new(0, 12)
+	thumbCorner.Parent = thumbnail
+
+	-- Square off the bottom edge of the thumbnail so it butts up to the card body
+	local thumbPatch = Instance.new("Frame")
+	thumbPatch.Size = UDim2.new(1, 0, 0, 12)
+	thumbPatch.Position = UDim2.new(0, 0, 1, -12)
+	thumbPatch.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+	thumbPatch.BorderSizePixel = 0
+	thumbPatch.Parent = thumbnail
+
+	-- ── Map name ──────────────────────────────────────────────────────────────
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Size = UDim2.new(1, -16, 0, 20)
+	nameLabel.Position = UDim2.new(0, 8, 0, 106)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Text = map.Name
+	nameLabel.Font = Enum.Font.GothamBold
+	nameLabel.TextSize = 14
+	nameLabel.TextColor3 = Color3.new(1, 1, 1)
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.Parent = card
+
+	-- ── Description (grey, small, wraps if needed) ────────────────────────────
+	local descLabel = Instance.new("TextLabel")
+	descLabel.Size = UDim2.new(1, -16, 0, 34)
+	descLabel.Position = UDim2.new(0, 8, 0, 130)
+	descLabel.BackgroundTransparency = 1
+	descLabel.Text = map.Description
+	descLabel.Font = Enum.Font.Gotham
+	descLabel.TextSize = 11
+	descLabel.TextColor3 = Color3.fromRGB(160, 160, 200)
+	descLabel.TextWrapped = true
+	descLabel.TextXAlignment = Enum.TextXAlignment.Left
+	descLabel.Parent = card
+
+	-- ── Best time target in accent cyan ──────────────────────────────────────
+	local bestTimeLabel = Instance.new("TextLabel")
+	bestTimeLabel.Size = UDim2.new(1, -16, 0, 16)
+	bestTimeLabel.Position = UDim2.new(0, 8, 0, 168)
+	bestTimeLabel.BackgroundTransparency = 1
+	bestTimeLabel.Text = "Best Time Target: " .. map.BestTimeTarget .. "s"
+	bestTimeLabel.Font = Enum.Font.Gotham
+	bestTimeLabel.TextSize = 11
+	bestTimeLabel.TextColor3 = Color3.fromRGB(74, 240, 255)
+	bestTimeLabel.TextXAlignment = Enum.TextXAlignment.Left
+	bestTimeLabel.Parent = card
+
+	-- ── Price / Owned button ──────────────────────────────────────────────────
+	local mapBuyBtn = Instance.new("TextButton")
+	mapBuyBtn.Name = "BuyMapBtn"
+	mapBuyBtn.Size = UDim2.new(1, -24, 0, 32)
+	mapBuyBtn.Position = UDim2.new(0, 12, 1, -44)
+	mapBuyBtn.BorderSizePixel = 0
+	mapBuyBtn.Font = Enum.Font.GothamBold
+	mapBuyBtn.TextSize = 14
+	mapBuyBtn.AutoButtonColor = false
+	mapBuyBtn.Parent = card
+
+	local mapBuyCorner = Instance.new("UICorner")
+	mapBuyCorner.CornerRadius = UDim.new(0, 8)
+	mapBuyCorner.Parent = mapBuyBtn
+
+	-- Store the button reference so MapPurchased can update it
+	mapBuyBtns[map.Name] = mapBuyBtn
+
+	if ownedMaps[map.Name] then
+		-- Already owned this session – show greyed-out Owned state
+		mapBuyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+		mapBuyBtn.TextColor3       = Color3.fromRGB(140, 140, 140)
+		mapBuyBtn.Text             = "✅ Owned"
+		mapBuyBtn.Active           = false
+	else
+		-- Not yet owned – show price and wire up purchase
+		mapBuyBtn.BackgroundColor3 = Color3.fromRGB(74, 240, 255)
+		mapBuyBtn.TextColor3       = Color3.fromRGB(15, 15, 20)
+		mapBuyBtn.Text             = map.Price .. " R$"
+
+		-- Capture loop variable for the closure
+		local capturedMap = map
+		mapBuyBtn.MouseButton1Click:Connect(function()
+			if ownedMaps[capturedMap.Name] then return end
+			if capturedMap.ProductId ~= 0 then
+				MarketplaceService:PromptProductPurchase(player, capturedMap.ProductId)
+			else
+				warn("Map ProductId not set for: " .. capturedMap.Name)
+			end
+		end)
+	end
+end
+
 -- ── Tab switching ──────────────────────────────────────────────────────────────
 local function switchTab(active)
 	paintContent.Visible    = (active == "Paint")
 	upgradesContent.Visible = (active == "Upgrades")
 	bundleContent.Visible   = (active == "Bundle")
+	mapsContent.Visible     = (active == "Maps")
 
 	paintTab.BackgroundColor3    = (active == "Paint")    and COLOR_TAB_ACTIVE or COLOR_TAB_IDLE
 	paintTab.TextColor3          = (active == "Paint")    and COLOR_BG         or COLOR_TEXT
@@ -488,6 +673,8 @@ local function switchTab(active)
 	upgradesTab.TextColor3       = (active == "Upgrades") and COLOR_BG         or COLOR_TEXT
 	bundleTab.BackgroundColor3   = (active == "Bundle")   and COLOR_TAB_ACTIVE or COLOR_TAB_IDLE
 	bundleTab.TextColor3         = (active == "Bundle")   and COLOR_BG         or COLOR_TEXT
+	mapsTab.BackgroundColor3     = (active == "Maps")     and COLOR_TAB_ACTIVE or COLOR_TAB_IDLE
+	mapsTab.TextColor3           = (active == "Maps")     and COLOR_BG         or COLOR_TEXT
 end
 
 switchTab("Paint")
@@ -502,6 +689,10 @@ end)
 
 bundleTab.MouseButton1Click:Connect(function()
 	switchTab("Bundle")
+end)
+
+mapsTab.MouseButton1Click:Connect(function()
+	switchTab("Maps")
 end)
 
 -- ── Hover effects ──────────────────────────────────────────────────────────────
@@ -540,5 +731,62 @@ applyBoost.OnClientEvent:Connect(function()
 		boostBuyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 		boostBuyBtn.TextColor3       = Color3.fromRGB(140, 140, 140)
 		boostBuyBtn.Text             = "Owned"
+	end
+end)
+
+-- ── MapPurchased: mark map as owned and show a notification above the shop ─────
+mapPurchased.OnClientEvent:Connect(function(mapName)
+	-- Record ownership so the button stays greyed if the shop is reopened
+	ownedMaps[mapName] = true
+
+	-- Update the corresponding buy button to show the Owned state
+	local btn = mapBuyBtns[mapName]
+	if btn then
+		btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+		btn.TextColor3       = Color3.fromRGB(140, 140, 140)
+		btn.Text             = "✅ Owned"
+		btn.Active           = false
+	end
+
+	-- Show notification above the shop frame, then fade it out after 3 seconds
+	mapNotifLabel.Text = "🗺️ " .. mapName .. " Unlocked!"
+	mapNotifLabel.TextTransparency      = 1
+	mapNotifLabel.BackgroundTransparency = 1
+	notifStroke.Transparency             = 1
+
+	-- Fade in
+	TweenService:Create(mapNotifLabel, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		TextTransparency      = 0,
+		BackgroundTransparency = 0.1,
+	}):Play()
+	TweenService:Create(notifStroke, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		Transparency = 0.4,
+	}):Play()
+
+	-- Fade out after 3 seconds
+	task.delay(3, function()
+		TweenService:Create(mapNotifLabel, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+			TextTransparency      = 1,
+			BackgroundTransparency = 1,
+		}):Play()
+		TweenService:Create(notifStroke, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+			Transparency = 1,
+		}):Play()
+	end)
+end)
+
+-- ── OwnedMapsSync: initialise map button states from the player's saved data ────
+-- Fires from the server each time the shop is opened, sending the list of map
+-- names the player already owns so buttons correctly reflect prior purchases.
+ownedMapsSync.OnClientEvent:Connect(function(ownedList)
+	for _, mapName in ipairs(ownedList) do
+		ownedMaps[mapName] = true
+		local btn = mapBuyBtns[mapName]
+		if btn then
+			btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+			btn.TextColor3       = Color3.fromRGB(140, 140, 140)
+			btn.Text             = "✅ Owned"
+			btn.Active           = false
+		end
 	end
 end)
