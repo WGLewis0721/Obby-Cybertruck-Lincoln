@@ -1,3 +1,4 @@
+--[[ TEMPORARILY DISABLED
 -- GenerateRaceTrackMap
 -- Procedurally generates the "High Speed" race track map.
 -- Call Generate(parent, origin) from a server Script to build the map inside `parent`.
@@ -82,3 +83,4 @@ function GenerateRaceTrackMap.Generate(parent, origin)
 end
 
 return GenerateRaceTrackMap
+--]]
