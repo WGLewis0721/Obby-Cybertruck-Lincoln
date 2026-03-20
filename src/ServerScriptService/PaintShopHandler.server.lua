@@ -30,15 +30,17 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
 
     for colorName, productId in pairs(paintProductIds) do
         if receiptInfo.ProductId == productId then
-            local truck = workspace:FindFirstChild("Tesla Cybertruck")
+            -- Recolor the player's currently equipped vehicle (named "Vehicle_[UserId]"
+            -- by GarageHandler) rather than a hardcoded model name.
+            local truck = workspace:FindFirstChild("Vehicle_" .. player.UserId)
             if not truck then
-                warn("🚨 Tesla Cybertruck not found in Workspace!")
+                warn("🚨 Vehicle not found in Workspace for " .. player.Name)
                 return Enum.ProductPurchaseDecision.NotProcessedYet
             end
 
             local bodyModel = truck:FindFirstChild("Body")
             if not bodyModel or not bodyModel:IsA("Model") then
-                warn("🚨 Body model not found inside Tesla Cybertruck!")
+                warn("🚨 Body model not found inside vehicle for " .. player.Name)
                 return Enum.ProductPurchaseDecision.NotProcessedYet
             end
 
@@ -48,7 +50,7 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
                 end
             end
 
-            print(player.Name .. " painted the Tesla Cybertruck " .. colorName)
+            print(player.Name .. " painted their vehicle " .. colorName)
             return Enum.ProductPurchaseDecision.PurchaseGranted
         end
     end
