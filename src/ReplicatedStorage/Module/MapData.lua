@@ -1,7 +1,7 @@
 local MapData = {
 	{
-		Id = "city_underground",
-		Name = "City Underground",
+		Id = "skyscraper",
+		Name = "Skyscraper",
 		Description = "Navigate surface streets and underground tunnels through a neon-lit city.",
 		Unlocked = true,
 		Type = "Free",
@@ -13,8 +13,8 @@ local MapData = {
 		Thumbnail = "rbxassetid://0"
 	},
 	{
-		Id = "mountain_forest",
-		Name = "Mountain & Forest",
+		Id = "big_foot",
+		Name = "Big Foot",
 		Description = "Wind your way up a mountain through dense forest into the snow-capped summit.",
 		Unlocked = false,
 		Type = "Robux",
@@ -26,8 +26,8 @@ local MapData = {
 		Thumbnail = "rbxassetid://0"
 	},
 	{
-		Id = "race_circuit",
-		Name = "Cybertruck Circuit",
+		Id = "high_speed",
+		Name = "High Speed",
 		Description = "A full street circuit with grandstands, DRS zone, chicane and hairpin.",
 		Unlocked = false,
 		Type = "Robux",

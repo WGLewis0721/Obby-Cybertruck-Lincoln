@@ -168,7 +168,7 @@ for i = 0, 5 do
 	end
 	-- Neon signs on buildings
 	if i % 3 == 0 then
-		local signs = {"SPEED ZONE", "CITY CIRCUIT", "NO LIMITS", "RACE ON"}
+		local signs = {"SPEED ZONE", "SKYSCRAPER", "NO LIMITS", "RACE ON"}
 		addNeonSign(
 			segPos + Vector3.new(-ROAD_WIDTH/2 - 1, WALL_HEIGHT/2, 0),
 			signs[(i % #signs) + 1], section1)

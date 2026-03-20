@@ -257,7 +257,7 @@ for _, seg in ipairs(circuit) do
 		-- Sponsor boards
 		addSponsorBoard(
 			segCenter + dir:Cross(Vector3.new(0,1,0)) * -(ROAD_WIDTH/2 + KERB_WIDTH + 14) + Vector3.new(0, 8, 0),
-			"CYBERTRUCK CIRCUIT", NEON_ORANGE, section)
+			"HIGH SPEED", NEON_ORANGE, section)
 
 		-- Checkered start/finish
 		local finish = makePart("FinishCheckered",
@@ -348,7 +348,7 @@ spawn.Parent = map
 -- TRACK SIGNAGE
 -- ============================================================
 local signs = {
-	{pos = START_POS + Vector3.new(0, 10, -20), text = "🏁 CYBERTRUCK CIRCUIT"},
+	{pos = START_POS + Vector3.new(0, 10, -20), text = "🏁 HIGH SPEED"},
 	{pos = START_POS + Vector3.new(60, 8, 200), text = "SECTOR 1"},
 	{pos = START_POS + Vector3.new(-100, 8, 400), text = "SECTOR 2"},
 	{pos = START_POS + Vector3.new(0, 8, 600), text = "SECTOR 3 - FINAL"},
