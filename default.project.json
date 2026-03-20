@@ -4,7 +4,22 @@
     "$className": "DataModel",
 
     "Workspace": {
-      "$className": "Workspace"
+      "$className": "Workspace",
+      "MenuCameraAnchor": {
+        "$className": "Part",
+        "Transparency": {
+          "$type": "Float",
+          "$value": 1
+        },
+        "CanCollide": {
+          "$type": "Bool",
+          "$value": false
+        },
+        "Anchored": {
+          "$type": "Bool",
+          "$value": true
+        }
+      }
     },
 
     "ServerScriptService": {

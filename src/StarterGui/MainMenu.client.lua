@@ -48,21 +48,43 @@ end
 -- Take full control of the camera so the orbit runs right away.
 camera.CameraType = Enum.CameraType.Scriptable
 
--- ── Locate the Cybertruck (placed in Workspace by Studio) ────────────────────
+-- ── Locate the Cybertruck and camera anchor (placed in Workspace by Studio) ──
 local cybertruck = Workspace:WaitForChild("Tesla Cybertruck", 15)
-local truckCenter = Vector3.new(0, 5, 0)  -- safe fallback
+local anchor     = Workspace:WaitForChild("MenuCameraAnchor", 15)
+
+if not cybertruck then
+	warn("MainMenu: Tesla Cybertruck not found — skipping orbit")
+	camera.CameraType = Enum.CameraType.Custom
+end
+if not anchor then
+	warn("MainMenu: MenuCameraAnchor not found — skipping orbit")
+end
+
+-- Use the anchor part's CFrame as the fixed starting reference for the orbit.
+-- Storing this follows the Roblox Dev Forum pattern; it documents the initial
+-- camera anchor orientation and can be used to reset the orbit start angle.
+local DefaultCFrame = anchor and anchor.CFrame  -- luacheck: ignore
+
+local truckCenter = Vector3.new(0, 5, 0)  -- safe fallback for character placement
 if cybertruck then
 	local truckCFrame, _ = cybertruck:GetBoundingBox()
 	truckCenter = truckCFrame.Position
-else
-	warn("MainMenu: Tesla Cybertruck not found in Workspace within 15 s – using fallback centre")
 end
 
 -- ── Orbit parameters ─────────────────────────────────────────────────────────
-local ORBIT_RADIUS = 28   -- studs from the truck centre
-local ORBIT_HEIGHT = 10   -- studs above the bounding-box centre Y
-local ORBIT_SPEED  = 0.3  -- radians per second (slow, cinematic)
+local ORBIT_RADIUS = 30    -- distance from truck
+local ORBIT_HEIGHT = 10    -- height above truck center
+local ORBIT_SPEED  = 0.25  -- radians per second, slow cinematic pan
 local orbitAngle   = 0
+
+-- ── Get the truck's current center each frame (accounts for dynamic bounding box) ──
+local function getTruckCenter()
+	local cf, size = cybertruck:GetBoundingBox()
+	-- Offset upward by 30 % of the bounding-box height so the camera looks at
+	-- the upper body of the truck rather than its geometric center (which sits
+	-- near ground level due to the wheels/chassis).
+	return cf.Position + Vector3.new(0, size.Y * 0.3, 0)
+end
 
 -- ── Character movement defaults ───────────────────────────────────────────────
 local DEFAULT_WALK_SPEED  = 16
@@ -194,13 +216,34 @@ local shopBtn     = makeButton("Shop",     SHOP_BOTTOM)
 local settingsBtn = makeButton("Settings", SETTINGS_BOTTOM)
 
 -- ── Orbiting camera (RenderStepped) ──────────────────────────────────────────
-local orbitConn = RunService.RenderStepped:Connect(function(dt)
-	orbitAngle = orbitAngle + ORBIT_SPEED * dt
-	local x = truckCenter.X + ORBIT_RADIUS * math.cos(orbitAngle)
-	local z = truckCenter.Z + ORBIT_RADIUS * math.sin(orbitAngle)
-	local y = truckCenter.Y + ORBIT_HEIGHT
-	camera.CFrame = CFrame.lookAt(Vector3.new(x, y, z), truckCenter)
-end)
+-- Only start the orbit if both the truck and anchor were found.
+local orbitConn
+if cybertruck and anchor then
+	orbitConn = RunService.RenderStepped:Connect(function(dt)
+		if not cybertruck or not cybertruck.Parent then
+			-- Truck was removed from Workspace; stop the orbit cleanly.
+			if orbitConn then
+				orbitConn:Disconnect()
+				orbitConn = nil
+			end
+			return
+		end
+
+		orbitAngle = orbitAngle + ORBIT_SPEED * dt
+
+		local center = getTruckCenter()
+
+		-- Calculate camera position orbiting around truck center.
+		local camX = center.X + math.cos(orbitAngle) * ORBIT_RADIUS
+		local camZ = center.Z + math.sin(orbitAngle) * ORBIT_RADIUS
+		local camY = center.Y + ORBIT_HEIGHT
+
+		local camPos = Vector3.new(camX, camY, camZ)
+
+		-- Always look at the truck center (anchor to a fixed look-at point).
+		camera.CFrame = CFrame.lookAt(camPos, center)
+	end)
+end
 
 -- ── Play button ───────────────────────────────────────────────────────────────
 playBtn.MouseButton1Click:Connect(function()
@@ -247,6 +290,7 @@ playBtn.MouseButton1Click:Connect(function()
 	fadeTween.Completed:Connect(function()
 		-- Hand camera back to Roblox's default follow-cam.
 		camera.CameraType = Enum.CameraType.Custom
+		camera.CameraSubjectDistance = 12
 
 		-- Re-enable character movement now that the player is in-game.
 		local character = player.Character
