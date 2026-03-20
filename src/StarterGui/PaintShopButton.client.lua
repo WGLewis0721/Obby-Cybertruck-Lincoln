@@ -99,7 +99,7 @@ tStroke.Parent = shopToggleBtn
 -- ── Shop frame (hidden by default) ────────────────────────────────────────────
 local frame = Instance.new("Frame")
 frame.Name = "ShopFrame"
-frame.Size = UDim2.new(0, 460, 0, 360)
+frame.Size = UDim2.new(0, 660, 0, 360)
 frame.Position = UDim2.new(0, 20, 0.5, -230)
 frame.BackgroundColor3 = COLOR_PANEL
 frame.BorderSizePixel = 0
@@ -517,8 +517,8 @@ bundleBuyBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ── Maps tab content ───────────────────────────────────────────────────────────
--- Shows only maps where Type == "Robux". Free maps (e.g. City Underground)
--- are skipped because they are always available without purchase.
+-- Shows only maps where Type == "Robux". Free maps are skipped because they are
+-- always available without purchase.
 local mapsContent = Instance.new("Frame")
 mapsContent.Name = "MapsContent"
 mapsContent.Size = UDim2.new(1, 0, 1, 0)
