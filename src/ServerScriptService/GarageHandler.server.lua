@@ -119,24 +119,37 @@ local function spawnVehicle(player, vehicle)
 	local newVehicle = modelTemplate:Clone()
 	newVehicle.Name = vehicleName
 
-	-- Position near the player's character, or at Vector3.zero if not found
-	local spawnPos = Vector3.new(0, 5, 0)
+	-- Determine spawn position:
+	-- 1. Prefer a Part named "VehicleSpawn" in Workspace so level designers can
+	--    control exactly where vehicles appear.
+	-- 2. Fall back to 10 studs in front of the player's character if no spawn
+	--    marker exists.
+	local spawnCFrame = CFrame.new(0, 5, 0)  -- absolute last-resort fallback (world origin)
 
-	local character = player.Character
-	if character then
-		local rootPart = character:FindFirstChild("HumanoidRootPart")
-		if rootPart then
-			-- Place the vehicle 10 studs in front of the character using CFrame arithmetic
-			spawnPos = (rootPart.CFrame * CFrame.new(0, 0, -10)).Position
+	local spawnMarker = workspace:FindFirstChild("VehicleSpawn")
+	if spawnMarker and spawnMarker:IsA("BasePart") then
+		-- Use the spawn marker's CFrame so the vehicle inherits its orientation too.
+		spawnCFrame = spawnMarker.CFrame
+	else
+		local character = player.Character
+		if character then
+			local rootPart = character:FindFirstChild("HumanoidRootPart")
+			if rootPart then
+				-- Place the vehicle 10 studs in front of the character using CFrame arithmetic
+				spawnCFrame = rootPart.CFrame * CFrame.new(0, 0, -10)
+			else
+				warn("GarageHandler: HumanoidRootPart not found for " .. player.Name .. " — spawning vehicle at world origin")
+			end
+		else
+			warn("GarageHandler: No character for " .. player.Name .. " — spawning vehicle at world origin")
 		end
 	end
 
-	-- If the model has a PrimaryPart, use SetPrimaryPartCFrame for proper placement
+	-- Place the vehicle using PrimaryPart when available, otherwise pivot the whole model.
 	if newVehicle.PrimaryPart then
-		newVehicle:SetPrimaryPartCFrame(CFrame.new(spawnPos))
+		newVehicle:SetPrimaryPartCFrame(spawnCFrame)
 	else
-		-- Fall back to pivoting the whole model to the target position
-		newVehicle:PivotTo(CFrame.new(spawnPos))
+		newVehicle:PivotTo(spawnCFrame)
 	end
 
 	newVehicle.Parent = workspace
