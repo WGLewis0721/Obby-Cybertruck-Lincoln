@@ -1,0 +1,48 @@
+Obby-Cybertruck-Lincoln/
+├── .gitattributes
+├── .gitignore
+├── .github/
+│   └── copilot-instructions.md
+├── GenerateCityMap.lua
+├── GenerateMountainMap.lua
+├── GenerateRaceTrackMap.lua
+├── README.md
+├── ROBLOX_AI_BRIEFING.md
+├── default.project.json
+├── _backup/
+│   ├── temp_init_debug.py
+│   ├── tesla_cybertruck.rbxm
+│   └── teslacybertruck.rbxm
+└── src/
+    ├── ReplicatedStorage/
+    │   └── Module/
+    │       ├── MapData.lua
+    │       ├── PlayerData.lua
+    │       ├── ShopItems.lua
+    │       └── VehicleData.lua
+    ├── ServerScriptService/
+    │   ├── CheckpointHandler.server.lua
+    │   ├── CoinHandler.server.lua
+    │   ├── GarageHandler.server.lua
+    │   ├── GenerateCityMap.lua
+    │   ├── GenerateMountainMap.lua
+    │   ├── GenerateRaceTrackMap.lua
+    │   ├── MapSelector.server.lua
+    │   ├── PaintShopHandler.server.lua
+    │   └── TimerHandler.server.lua
+    ├── StarterGui/
+    │   ├── BoostHandler.client.lua
+    │   ├── GarageMenu.client.lua
+    │   ├── MainMenu.client.lua
+    │   ├── PaintShopButton.client.lua
+    │   ├── RaceHUD.client.lua
+    │   ├── ResultsScreen.client.lua
+    │   └── ShopGui_d/
+    │       └── LoadShop.client.lua
+    └── StarterPlayer/
+        ├── StarterCharacterScripts/
+        │   └── .gitkeep
+        └── StarterPlayerScripts/
+            └── Client/
+                ├── ShopButtonHandler.client.lua
+                └── ShopMenuScript.client.lua
