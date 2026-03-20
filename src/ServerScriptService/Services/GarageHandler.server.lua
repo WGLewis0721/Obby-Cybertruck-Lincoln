@@ -28,11 +28,6 @@ if not equipVehicleEvent then
 	return
 end
 
-local gameStartedEvent = remotesFolder:WaitForChild("GameStarted", 10)
-if not gameStartedEvent then
-	warn("GarageHandler: GameStarted RemoteEvent not found")
-end
-
 local openGarageEvent = remotesFolder:WaitForChild("OpenGarage", 10)
 if not openGarageEvent then
 	warn("GarageHandler: OpenGarage RemoteEvent not found")
@@ -104,12 +99,6 @@ Players.PlayerAdded:Connect(function(player)
 		local vehicle = getVehicleById(vehicleId)
 		if vehicle then
 			spawnVehicle(player, vehicle)
-		end
-
-		-- Notify the client that the game state is ready so GameHUD can appear.
-		if gameStartedEvent then
-			task.wait(0.5)
-			gameStartedEvent:FireClient(player)
 		end
 	end)
 end)
