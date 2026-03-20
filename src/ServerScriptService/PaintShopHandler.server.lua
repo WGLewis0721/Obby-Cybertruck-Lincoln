@@ -7,8 +7,8 @@ local openPaintShop = ReplicatedStorage:WaitForChild("OpenPaintShop")
 -- 🎨 Developer Product IDs
 local paintProductIds = {
     Green = 3244954061,
-    Blue = 3244953838,
-    Gold = 3244953138
+    Blue = 3244953138,
+    Gold = 3244953838
 }
 
 -- 🎨 Color values
