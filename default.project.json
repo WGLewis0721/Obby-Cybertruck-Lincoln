@@ -11,6 +11,19 @@
       "$path": "src/ServerScriptService"
     },
 
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "RaceHandlers": {
+        "$className": "Folder",
+        "ProcessRaceTime": {
+          "$className": "BindableFunction"
+        },
+        "ProcessRaceCoins": {
+          "$className": "BindableFunction"
+        }
+      }
+    },
+
     "ReplicatedStorage": {
       "$path": "src/ReplicatedStorage",
       "OpenPaintShop": {
@@ -40,6 +53,21 @@
           "$className": "RemoteEvent"
         },
         "EquipVehicle": {
+          "$className": "RemoteEvent"
+        }
+      },
+      "Race": {
+        "$className": "Folder",
+        "CheckpointReached": {
+          "$className": "RemoteEvent"
+        },
+        "RaceStarted": {
+          "$className": "RemoteEvent"
+        },
+        "RaceFinished": {
+          "$className": "RemoteEvent"
+        },
+        "RaceAgain": {
           "$className": "RemoteEvent"
         }
       }

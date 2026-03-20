@@ -15,10 +15,12 @@ local PlayerData = {}
 --   BestTimes       - map of mapId -> best time (seconds)
 function PlayerData.GetDefault()
 	return {
-		EquippedVehicle = 1,        -- Cybertruck (Id=1) is the default free vehicle
-		OwnedVehicles   = { 1 },    -- every player starts with vehicle Id 1
-		OwnedMaps       = {},
-		BestTimes       = {},
+		EquippedVehicle  = 1,        -- Cybertruck (Id=1) is the default free vehicle
+		OwnedVehicles    = { 1 },    -- every player starts with vehicle Id 1
+		OwnedMaps        = {},
+		BestTimes        = {},
+		Coins            = 0,        -- total coins earned across all races
+		RaceCompletions  = {},       -- mapId → completion count; tracks first-finish bonus
 	}
 end
 
