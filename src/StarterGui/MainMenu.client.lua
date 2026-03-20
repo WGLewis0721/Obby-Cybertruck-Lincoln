@@ -44,9 +44,9 @@ if player:GetAttribute("HasPlayed") then
 	return
 end
 
--- ── Camera: Scriptable mode ───────────────────────────────────────────────────
--- Take full control of the camera so the orbit runs right away.
-camera.CameraType = Enum.CameraType.Scriptable
+-- ── Camera: Set to Custom mode for default gameplay view ──────────────────────
+-- Using default camera instead of orbiting for now. Orbit code is disabled below.
+camera.CameraType = Enum.CameraType.Custom
 
 -- ── Locate the Cybertruck and camera anchor (placed in Workspace by Studio) ──
 local cybertruck = Workspace:WaitForChild("Tesla Cybertruck", 15)
@@ -216,7 +216,8 @@ local shopBtn     = makeButton("Shop",     SHOP_BOTTOM)
 local settingsBtn = makeButton("Settings", SETTINGS_BOTTOM)
 
 -- ── Orbiting camera (RenderStepped) ──────────────────────────────────────────
--- Only start the orbit if both the truck and anchor were found.
+-- DISABLED: Using default camera mode instead. Orbit code preserved below for re-enabling.
+--[[
 local orbitConn
 if cybertruck and anchor then
 	orbitConn = RunService.RenderStepped:Connect(function(dt)
@@ -244,6 +245,7 @@ if cybertruck and anchor then
 		camera.CFrame = CFrame.lookAt(camPos, center)
 	end)
 end
+--]]
 
 -- ── Play button ───────────────────────────────────────────────────────────────
 playBtn.MouseButton1Click:Connect(function()
