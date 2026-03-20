@@ -69,6 +69,44 @@ for id, info in pairs(MAPS) do
 	end
 end
 
+local function generateMap(mapId)
+	local generator = generators[mapId]
+	if not generator then
+		warn("MapSelector: generator function unavailable for", mapId)
+		return false
+	end
+
+	workspace:SetAttribute("SelectedMap", mapId)
+	clearMaps()
+
+	local success, err = pcall(function()
+		generator(workspace)
+	end)
+	if not success then
+		warn("MapSelector: map generator failed for", mapId, err)
+		return false
+	end
+
+	print("MapSelector: map generation complete for", mapId)
+	return true
+end
+
+local function chooseDefaultMap()
+	local selected = workspace:GetAttribute("SelectedMap")
+	if selected and generators[selected] then
+		return selected
+	end
+	return "skyscraper"
+end
+
+local function ensureMapSelected()
+	local active = chooseDefaultMap()
+	if workspace:GetAttribute("SelectedMap") == active and workspace:FindFirstChild(MAPS[active].FolderName) then
+		return
+	end
+	generateMap(active)
+end
+
 selectMapEvent.OnServerEvent:Connect(function(player, mapId)
 	if type(mapId) ~= "string" then
 		warn("MapSelector: invalid mapId type from", player.Name)
@@ -83,22 +121,8 @@ selectMapEvent.OnServerEvent:Connect(function(player, mapId)
 	end
 
 	print("MapSelector: player", player.Name, "selected map", mapId)
-
-	workspace:SetAttribute("SelectedMap", mapId)
-	clearMaps()
-
-	local generate = generators[mapId]
-	if not generate then
-		warn("MapSelector: generator function unavailable for", mapId)
-		return
-	end
-
-	local ok, err = pcall(function()
-		generate(workspace)
-	end)
-	if not ok then
-		warn("MapSelector: map generator failed for", mapId, err)
-	else
-		print("MapSelector: map generation complete for", mapId)
-	end
+	generateMap(mapId)
 end)
+
+-- Ensure the map exists at start so race logic and spawn positions are valid.
+ensureMapSelected()
