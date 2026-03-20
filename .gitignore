@@ -10,3 +10,7 @@ sourcemap.json
 *.rbxlx.lock
 *.rbxmx
 full-game.rbxm
+fix*.js
+fix*.lua
+*.md.server.lua
+*.md.lua
