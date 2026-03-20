@@ -133,8 +133,12 @@ end)
 
 player.CharacterRemoving:Connect(function()
 	garageBtn.Visible = false
-	overlay.Visible = false
-	garagePanel.Visible = false
+	if overlay then
+		overlay.Visible = false
+	end
+	if garagePanel then
+		garagePanel.Visible = false
+	end
 end)
 
 -- ── Full-screen overlay ───────────────────────────────────────────────────────
@@ -372,7 +376,7 @@ listLabel.Font = Enum.Font.GothamBold
 listLabel.TextSize = 13
 listLabel.TextColor3 = COLOR_ACCENT
 listLabel.TextXAlignment = Enum.TextXAlignment.Left
-listLabel.LetterSpacingOffset = 2
+-- listLabel.LetterSpacingOffset = 2 -- This property isn’t supported for TextLabel here
 listLabel.Parent = rightCol
 
 -- Horizontal scrolling frame for vehicle cards
