@@ -1,88 +1,92 @@
--- TimerHandler.server.lua
--- Implements the ProcessRaceTime BindableFunction called by CheckpointHandler.
---
--- When CheckpointHandler invokes this function it receives:
---   player  : Player
---   mapId   : string   – map identifier matching MapData.Id
---   elapsed : number   – race time in seconds (os.clock() delta)
---
--- It returns:
---   { isNewBest = boolean, bestTime = number }
---
--- NOTE: This script performs its own DataStore read-modify-write on
--- "PlayerData_v1" rather than sharing GarageHandler's in-memory cache.
--- TODO (post-MVP): consolidate into a unified PlayerDataService.
+--[[
+	TimerHandler.server.lua
+	Description: Implements the ProcessRaceTime BindableFunction called by
+	             CheckpointHandler. Persists best times via PlayerDataInterface.
+	Author: Cybertruck Obby Lincoln
+	Last Updated: 2026
 
-local DataStoreService  = game:GetService("DataStoreService")
+	Dependencies:
+		- Constants           (ReplicatedStorage.Shared.Constants)
+		- Logger              (ReplicatedStorage.Shared.Logger)
+		- PlayerData          (ReplicatedStorage.Shared.PlayerData)
+		- PlayerDataInterface (ServerScriptService.Services.PlayerDataInterface)
+		- EventBus            (ServerScriptService.Services.EventBus)
+
+	Events Fired (via EventBus):
+		- RaceTimeProcessed(player, mapId, isNewBest, bestTime)
+
+	Events Listened (via EventBus):
+		- None
+
+	BindableFunction Implemented:
+		- ServerStorage.RaceHandlers.ProcessRaceTime
+--]]
+
+-- 1. Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
 
--- ── DataStore (same store used by GarageHandler and PaintShopHandler) ─────────
-local playerDataStore = DataStoreService:GetDataStore("PlayerData_v1")
-
--- ── Shared module ─────────────────────────────────────────────────────────────
+-- 2. Constants & shared modules
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
-local PlayerData   = require(sharedFolder:WaitForChild("PlayerData"))
+local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
+local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 
--- ── BindableFunction ──────────────────────────────────────────────────────────
+-- 3. Server-only dependencies
+local servicesFolder      = script.Parent
+local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInterface", 10))
+local EventBus            = require(servicesFolder:WaitForChild("EventBus", 10))
+
+local TAG = "TimerHandler"
+
+-- 4. BindableFunction
 local raceHandlers    = ServerStorage:WaitForChild("RaceHandlers", 30)
 local processRaceTime = raceHandlers:WaitForChild("ProcessRaceTime", 30)
 
--- ── Helper: load player data from DataStore ───────────────────────────────────
-local function loadPlayerData(userId)
-	local ok, data = pcall(function()
-		return playerDataStore:GetAsync("Player_" .. userId)
-	end)
-	if ok and data then
-		-- Merge any new default fields that were added after the player's last save
-		local defaults = PlayerData.GetDefault()
-		for k, v in pairs(defaults) do
-			if data[k] == nil then data[k] = v end
+-- 5. ProcessRaceTime implementation
+
+processRaceTime.OnInvoke = function(player, mapId, elapsed)
+	if typeof(player) ~= "Instance" or not player:IsA("Player") then
+		Logger.Warn(TAG, "ProcessRaceTime: invalid player argument")
+		return nil
+	end
+	if type(mapId) ~= "string" or #mapId == 0 then
+		Logger.Warn(TAG, "ProcessRaceTime: invalid mapId from %s", tostring(player))
+		return nil
+	end
+	if type(elapsed) ~= "number" or elapsed <= 0 then
+		Logger.Warn(TAG, "ProcessRaceTime: invalid elapsed from %s", player.Name)
+		return nil
+	end
+
+	local userId    = player.UserId
+	local isNewBest = false
+	local bestTime  = elapsed
+
+	-- Read-modify-write via PlayerDataInterface (no direct DataStore access)
+	PlayerDataInterface.UpdateData(userId, function(data)
+		if not data.BestTimes then data.BestTimes = {} end
+		local previous = data.BestTimes[mapId]
+		isNewBest = (previous == nil) or (elapsed < previous)
+		if isNewBest then
+			data.BestTimes[mapId] = elapsed
+			bestTime = elapsed
+		else
+			bestTime = previous or elapsed
 		end
 		return data
-	end
-	if not ok then
-		warn("TimerHandler: DataStore load failed for", userId, "—", data)
-	end
-	return PlayerData.GetDefault()
-end
-
--- ── Helper: save player data to DataStore ─────────────────────────────────────
-local function savePlayerData(userId, data)
-	local ok, err = pcall(function()
-		playerDataStore:SetAsync("Player_" .. userId, data)
 	end)
-	if not ok then
-		warn("TimerHandler: DataStore save failed for", userId, "—", err)
-	end
-end
-
--- ── ProcessRaceTime ───────────────────────────────────────────────────────────
--- Called synchronously by CheckpointHandler on the finish line.
--- Read-modify-write: only BestTimes is touched; all other fields are unchanged.
-processRaceTime.OnInvoke = function(player, mapId, elapsed)
-	local userId = player.UserId
-	local data   = loadPlayerData(userId)
-
-	-- BestTimes keys are stored as the raw mapId string (e.g. "highspeed")
-	if not data.BestTimes then data.BestTimes = {} end
-	local previous  = data.BestTimes[mapId]
-	local isNewBest = (previous == nil) or (elapsed < previous)
 
 	if isNewBest then
-		data.BestTimes[mapId] = elapsed
-		savePlayerData(userId, data)
-		print(string.format(
-			"TimerHandler: new best for %s on '%s' → %.3fs  (was %s)",
-			player.Name, mapId, elapsed,
-			previous and string.format("%.3fs", previous) or "none"
-		))
+		Logger.Info(TAG, "New best for %s on '%s' -> %.3fs", player.Name, mapId, elapsed)
 	end
+
+	EventBus:Fire("RaceTimeProcessed", player, mapId, isNewBest, bestTime)
 
 	return {
 		isNewBest = isNewBest,
-		bestTime  = isNewBest and elapsed or (previous or elapsed),
+		bestTime  = bestTime,
 	}
 end
 
-print("TimerHandler: ready")
+-- 6. Initialization
+Logger.Info(TAG, "TimerHandler ready")

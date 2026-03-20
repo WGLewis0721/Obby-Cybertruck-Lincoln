@@ -1,9 +1,25 @@
--- RaceHUD.client.lua
--- Minimal in-race HUD: live timer, checkpoint progress counter, coin total.
---
--- Shown while a race is active; hidden after the finish line.
--- The ResultsScreen takes over once the RaceFinished event fires.
--- Coin total is always visible so the player knows their balance at a glance.
+--[[
+    RaceHUD.client.lua
+    Description: In-race HUD showing live timer, checkpoint progress, and coin
+                 total. Shown during a race; hidden on finish.
+    Author: Cybertruck Obby Lincoln
+    Last Updated: 2026
+
+    Dependencies:
+        - Remotes.RaceStarted       (S->C)
+        - Remotes.CheckpointReached (S->C)
+        - Remotes.RaceFinished      (S->C)
+
+    Events Fired:
+        - Remotes.OpenPaintShop (C->S via Shop button)
+        - Remotes.OpenGarage    (C->S via Garage button)
+        - Remotes.SelectMap     (C->S via Map menu)
+
+    Events Listened:
+        - Remotes.RaceStarted
+        - Remotes.CheckpointReached
+        - Remotes.RaceFinished
+--]]
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

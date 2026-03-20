@@ -1,6 +1,21 @@
--- GameHUD.client.lua
--- Main gameplay navigation buttons shown during play.
--- Revealed when the player's character spawns.
+--[[
+    GameHUD.client.lua
+    Description: Main gameplay navigation buttons (Shop, Garage, Map) shown
+                 during play. Revealed when the player's character spawns.
+    Author: Cybertruck Obby Lincoln
+    Last Updated: 2026
+
+    Dependencies:
+        - Remotes.OpenPaintShop (RemoteEvent)
+        - Remotes.OpenGarage    (RemoteEvent)
+
+    Events Fired:
+        - Remotes.OpenPaintShop (C->S)
+        - Remotes.OpenGarage    (C->S)
+
+    Events Listened:
+        - None
+--]]
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
