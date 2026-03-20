@@ -74,38 +74,41 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 -- ── Shop toggle button ─────────────────────────────────────────────────────────
-local shopToggleBtn = Instance.new("TextButton")
-shopToggleBtn.Name = "ShopToggle"
-shopToggleBtn.Size = UDim2.new(0, 140, 0, 44)
-shopToggleBtn.Position = UDim2.new(0, 20, 0.5, -22)
-shopToggleBtn.BackgroundColor3 = COLOR_BTN
-shopToggleBtn.BorderSizePixel = 0
-shopToggleBtn.Text = "🎨  Shop"
-shopToggleBtn.Font = Enum.Font.GothamBold
-shopToggleBtn.TextSize = 15
-shopToggleBtn.TextColor3 = COLOR_TEXT
-shopToggleBtn.AutoButtonColor = false
-shopToggleBtn.Parent = screenGui
-shopToggleBtn.Visible = false -- Reveal only after player spawns
+-- Replaced by GameHUD.client.lua which provides the unified nav button bar.
+if false then -- replaced by GameHUD
+	local shopToggleBtn = Instance.new("TextButton")
+	shopToggleBtn.Name = "ShopToggle"
+	shopToggleBtn.Size = UDim2.new(0, 140, 0, 44)
+	shopToggleBtn.Position = UDim2.new(0, 20, 0.5, -22)
+	shopToggleBtn.BackgroundColor3 = COLOR_BTN
+	shopToggleBtn.BorderSizePixel = 0
+	shopToggleBtn.Text = "🎨  Shop"
+	shopToggleBtn.Font = Enum.Font.GothamBold
+	shopToggleBtn.TextSize = 15
+	shopToggleBtn.TextColor3 = COLOR_TEXT
+	shopToggleBtn.AutoButtonColor = false
+	shopToggleBtn.Parent = screenGui
+	shopToggleBtn.Visible = false -- Reveal only after player spawns
 
-local tCorner = Instance.new("UICorner")
-tCorner.CornerRadius = UDim.new(0, 10)
-tCorner.Parent = shopToggleBtn
+	local tCorner = Instance.new("UICorner")
+	tCorner.CornerRadius = UDim.new(0, 10)
+	tCorner.Parent = shopToggleBtn
 
-player.CharacterAdded:Connect(function()
-	shopToggleBtn.Visible = true
-end)
+	player.CharacterAdded:Connect(function()
+		shopToggleBtn.Visible = true
+	end)
 
-player.CharacterRemoving:Connect(function()
-	shopToggleBtn.Visible = false
-	frame.Visible = false
-end)
+	player.CharacterRemoving:Connect(function()
+		shopToggleBtn.Visible = false
+		frame.Visible = false
+	end)
 
-local tStroke = Instance.new("UIStroke")
-tStroke.Color = COLOR_ACCENT
-tStroke.Thickness = 1.5
-tStroke.Transparency = 0.4
-tStroke.Parent = shopToggleBtn
+	local tStroke = Instance.new("UIStroke")
+	tStroke.Color = COLOR_ACCENT
+	tStroke.Thickness = 1.5
+	tStroke.Transparency = 0.4
+	tStroke.Parent = shopToggleBtn
+end -- replaced by GameHUD
 
 -- ── Shop frame (hidden by default) ────────────────────────────────────────────
 local frame = Instance.new("Frame")
@@ -720,16 +723,8 @@ BackgroundColor3 = normalColor,
 end)
 end
 
-addHover(shopToggleBtn, COLOR_BTN, COLOR_BTN_HOVER)
+-- shopToggleBtn replaced by GameHUD; hover/click wiring removed
 addHover(closeBtn, COLOR_CLOSE, COLOR_CLOSE_HOVER)
-
--- ── Toggle / close logic ───────────────────────────────────────────────────────
-shopToggleBtn.MouseButton1Click:Connect(function()
-frame.Visible = not frame.Visible
-if frame.Visible then
-openPaintShop:FireServer()
-end
-end)
 
 closeBtn.MouseButton1Click:Connect(function()
 frame.Visible = false
@@ -789,7 +784,10 @@ end)
 -- ── OwnedMapsSync: initialise map button states from the player's saved data ────
 -- Fires from the server each time the shop is opened, sending the list of map
 -- names the player already owns so buttons correctly reflect prior purchases.
+-- Also shows the shop frame so GameHUD's Shop button (which fires OpenPaintShop
+-- to the server) causes this panel to open.
 ownedMapsSync.OnClientEvent:Connect(function(ownedList)
+	frame.Visible = true
 	for _, mapName in ipairs(ownedList) do
 		ownedMaps[mapName] = true
 		local btn = mapBuyBtns[mapName]

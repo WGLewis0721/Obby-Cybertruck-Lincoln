@@ -28,6 +28,16 @@ if not equipVehicleEvent then
 	return
 end
 
+local gameStartedEvent = remotesFolder:WaitForChild("GameStarted", 10)
+if not gameStartedEvent then
+	warn("GarageHandler: GameStarted RemoteEvent not found")
+end
+
+local openGarageEvent = remotesFolder:WaitForChild("OpenGarage", 10)
+if not openGarageEvent then
+	warn("GarageHandler: OpenGarage RemoteEvent not found")
+end
+
 -- ── Shared data modules ───────────────────────────────────────────────────────
 local sharedFolder  = ReplicatedStorage:WaitForChild("Shared", 10)
 local vehicleData   = require(sharedFolder:WaitForChild("VehicleData"))
@@ -94,6 +104,12 @@ Players.PlayerAdded:Connect(function(player)
 		local vehicle = getVehicleById(vehicleId)
 		if vehicle then
 			spawnVehicle(player, vehicle)
+		end
+
+		-- Notify the client that the game state is ready so GameHUD can appear.
+		if gameStartedEvent then
+			task.wait(0.5)
+			gameStartedEvent:FireClient(player)
 		end
 	end)
 end)
@@ -252,5 +268,14 @@ if selectMapEvent then
 		if vehicle then
 			spawnVehicle(player, vehicle)
 		end
+	end)
+end
+
+-- ── OpenGarage echo: client fires → server fires back → client opens garage UI ─
+-- GameHUD's Garage button calls openGarage:FireServer(); here we echo it back so
+-- GarageMenu.client.lua's openGarageEvent.OnClientEvent handler can open the UI.
+if openGarageEvent then
+	openGarageEvent.OnServerEvent:Connect(function(player)
+		openGarageEvent:FireClient(player)
 	end)
 end
