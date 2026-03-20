@@ -37,19 +37,35 @@ local function clearMaps()
 	end
 end
 
+local function getGeneratorModule(name)
+	-- Prefer ModuleScript upper-priority.  (Script with same name may exist from legacy design.)
+	local candidate = ServerScriptService:FindFirstChild(name)
+	if candidate and candidate:IsA("ModuleScript") then
+		return candidate
+	end
+
+	-- If there is a script prefab with same name, maybe modules are in a named subfolder.
+	local search = ServerScriptService:FindFirstChild(name, true)
+	if search and search:IsA("ModuleScript") then
+		return search
+	end
+
+	return nil
+end
+
 -- Build map generators table (module scripts in ServerScriptService).
 local generators = {}
 for id, info in pairs(MAPS) do
-	local moduleScript = ServerScriptService:FindFirstChild(info.Generator)
+	local moduleScript = getGeneratorModule(info.Generator)
 	if moduleScript then
 		local ok, module = pcall(require, moduleScript)
 		if ok and module and type(module.Generate) == "function" then
 			generators[id] = module.Generate
 		else
-			warn("MapSelector: failed to require generator module", info.Generator)
+			warn("MapSelector: failed to require generator module", info.Generator, "(module type:", module and type(module) or "nil", ")")
 		end
 	else
-		warn("MapSelector: missing generator module script", info.Generator)
+		warn("MapSelector: missing generator ModuleScript", info.Generator)
 	end
 end
 
