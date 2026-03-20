@@ -6,6 +6,10 @@ local ReplicatedStorage  = game:GetService("ReplicatedStorage")
 local openPaintShop   = ReplicatedStorage:WaitForChild("OpenPaintShop")
 local applyBoost      = ReplicatedStorage:WaitForChild("ApplyBoost")
 local bundlePurchased = ReplicatedStorage:WaitForChild("BundlePurchased")
+-- Fires to the purchasing client when a map product purchase is confirmed
+local mapPurchased    = ReplicatedStorage:WaitForChild("MapPurchased")
+-- Fires to the client when the shop opens so it can initialise owned-map state
+local ownedMapsSync   = ReplicatedStorage:WaitForChild("OwnedMapsSync")
 
 local eventsFolder  = ReplicatedStorage:WaitForChild("Events")
 local openGarage    = eventsFolder:WaitForChild("OpenGarage")
@@ -14,6 +18,8 @@ local openGarage    = eventsFolder:WaitForChild("OpenGarage")
 local moduleFolder = ReplicatedStorage:WaitForChild("Module")
 local VehicleData  = require(moduleFolder:WaitForChild("VehicleData"))
 local ShopItems    = require(moduleFolder:WaitForChild("ShopItems"))
+-- MapData provides the purchasable map definitions (ProductIds, prices, etc.)
+local MapData      = require(moduleFolder:WaitForChild("MapData"))
 
 -- ── DataStore (same store as GarageHandler) ───────────────────────────────────
 local playerDataStore = DataStoreService:GetDataStore("PlayerData_v1")
@@ -67,6 +73,9 @@ local colorValues = {
 -- 🖱️ Handle shop open request from client
 openPaintShop.OnServerEvent:Connect(function(player)
     print(player.Name .. " opened the paint shop")
+    -- Send the player's already-owned maps so the client can grey out those buttons
+    local data = loadPlayerData(player.UserId)
+    ownedMapsSync:FireClient(player, data.OwnedMaps or {})
 end)
 
 -- 💵 Handle all product purchases (paint jobs, Speed Boost, Ultimate Bundle)
@@ -156,6 +165,26 @@ MarketplaceService.ProcessReceipt = function(receiptInfo)
         openGarage:FireClient(player)
         print(player.Name .. " purchased Ultimate Bundle")
         return Enum.ProductPurchaseDecision.PurchaseGranted
+    end
+
+    -- ── Map purchases ─────────────────────────────────────────────────────────
+    -- Only handle maps with a real ProductId (non-zero placeholder).
+    for _, map in ipairs(MapData) do
+        if map.Type == "Robux" and map.ProductId ~= 0 and receiptInfo.ProductId == map.ProductId then
+            local data = loadPlayerData(player.UserId)
+            if not data.OwnedMaps then data.OwnedMaps = {} end
+
+            -- Avoid duplicate entries in the OwnedMaps list
+            if not table.find(data.OwnedMaps, map.Name) then
+                table.insert(data.OwnedMaps, map.Name)
+            end
+
+            savePlayerData(player.UserId, data)
+            -- Notify the client so the shop card updates immediately
+            mapPurchased:FireClient(player, map.Name)
+            print(player.Name .. " purchased map: " .. map.Name)
+            return Enum.ProductPurchaseDecision.PurchaseGranted
+        end
     end
 
     return Enum.ProductPurchaseDecision.NotProcessedYet
