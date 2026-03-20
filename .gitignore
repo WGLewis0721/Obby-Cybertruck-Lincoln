@@ -14,3 +14,4 @@ fix*.js
 fix*.lua
 *.md.server.lua
 *.md.lua
+src/Workspace/Export.gltf
