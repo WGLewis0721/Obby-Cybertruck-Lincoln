@@ -2,51 +2,22 @@
   "name": "Obby-Cybertruck-Lincoln",
   "tree": {
     "$className": "DataModel",
-
     "Workspace": {
       "$className": "Workspace",
-      "$ignoreUnknownInstances": true,
-      "MenuCameraAnchor": {
-        "$className": "Part",
-        "Transparency": {
-          "$type": "Float",
-          "$value": 1
-        },
-        "CanCollide": {
-          "$type": "Bool",
-          "$value": false
-        },
-        "Anchored": {
-          "$type": "Bool",
-          "$value": true
-        }
-      }
+      "$ignoreUnknownInstances": true
     },
-
     "ServerScriptService": {
       "$path": "src/ServerScriptService",
       "$ignoreUnknownInstances": true
     },
-
     "ServerStorage": {
       "$className": "ServerStorage",
-      "$ignoreUnknownInstances": true,
-      "RaceHandlers": {
-        "$className": "Folder",
-        "ProcessRaceTime": {
-          "$className": "BindableFunction"
-        },
-        "ProcessRaceCoins": {
-          "$className": "BindableFunction"
-        }
-      }
+      "$ignoreUnknownInstances": true
     },
-
     "ReplicatedStorage": {
       "$path": "src/ReplicatedStorage",
       "$ignoreUnknownInstances": true
     },
-
     "StarterPlayer": {
       "$className": "StarterPlayer",
       "StarterPlayerScripts": {
@@ -60,7 +31,6 @@
         "$ignoreUnknownInstances": true
       }
     },
-
     "StarterGui": {
       "$path": "src/StarterGui",
       "$ignoreUnknownInstances": true
