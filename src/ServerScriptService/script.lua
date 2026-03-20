@@ -1,24 +1,8 @@
-local ss = game:GetService("ServerScriptService")
-
-local toDelete = {
-    "PaintShopHandler",
-    "CoinHandler", 
-    "CheckpointHandler",
-    "TimerHandler",
-    "GarageHandler",
-    "GenerateCityMap",
-    "GenerateMountainMap",
-    "GenerateRaceTrackMap",
-}
-
-for _, name in ipairs(toDelete) do
-    local script = ss:FindFirstChild(name)
-    if script then
-        script:Destroy()
-        print("✅ Deleted root duplicate: " .. name)
-    else
-        print("⏭ Not found at root: " .. name)
+local setup = game.ServerScriptService:FindFirstChild("Setup")
+if setup then
+    local cityMap = setup:FindFirstChild("GenerateCityMap")
+    if cityMap then
+        cityMap.Disabled = true
+        print("✅ GenerateCityMap disabled")
     end
 end
-
-print("Done - restart playtest now")
