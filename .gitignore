@@ -24,3 +24,5 @@ cleanup*.js
 
 # Rojo build output
 *.rbxl
+
+_backup/
