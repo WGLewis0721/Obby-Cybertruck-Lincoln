@@ -21,6 +21,15 @@
       },
       "ApplyPaintJob": {
         "$className": "RemoteEvent"
+      },
+      "Events": {
+        "$className": "Folder",
+        "OpenGarage": {
+          "$className": "RemoteEvent"
+        },
+        "EquipVehicle": {
+          "$className": "RemoteEvent"
+        }
       }
     },
 
