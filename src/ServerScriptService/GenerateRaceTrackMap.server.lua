@@ -1,4 +1,5 @@
 if not workspace:FindFirstChild("HighSpeedMap") then
+local START_POS = Vector3.new(8000, 0, 0)
 
 -- ============================================================
 -- HIGH SPEED MAP GENERATOR - Street Circuit Race Track
@@ -21,7 +22,7 @@ local ROAD_WIDTH      = 32
 local ROAD_THICKNESS  = 2
 local KERB_WIDTH      = 4
 local BARRIER_HEIGHT  = 6
-local START_POS       = Vector3.new(-500, 0, 0) -- offset from other maps
+local START_POS = Vector3.new(8000, 0, 0) -- offset from other maps
 
 -- Colors (Parts only)
 local KERB_RED        = Color3.fromRGB(200, 40, 40)

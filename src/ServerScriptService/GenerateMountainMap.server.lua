@@ -1,4 +1,5 @@
 if not workspace:FindFirstChild("BigFootMap") then
+local START_POS = Vector3.new(4000, 0, 0)
 
 -- ============================================================
 -- BIG FOOT MAP GENERATOR - Winding Mountain Path
@@ -19,7 +20,7 @@ map.Parent = workspace
 local ROAD_WIDTH     = 24
 local ROAD_THICKNESS = 2
 local SEGMENT_LENGTH = 55
-local START_POS      = Vector3.new(500, 0, 0) -- offset from Skyscraper map
+local START_POS = Vector3.new(4000, 0, 0) -- offset from Skyscraper map
 
 -- Colors (Parts only)
 local BARRIER_COLOR = Color3.fromRGB(180, 140, 80)

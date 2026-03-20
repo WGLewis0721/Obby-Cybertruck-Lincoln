@@ -1,4 +1,5 @@
 if not workspace:FindFirstChild("SkyscraperMap") then
+local START_POS = Vector3.new(0, 0, 0)
 
 -- ============================================================
 -- SKYSCRAPER MAP GENERATOR - Underground Tunnels & City Streets
@@ -21,7 +22,7 @@ local ROAD_THICKNESS = 2
 local WALL_HEIGHT    = 16
 local TUNNEL_HEIGHT  = 20
 local SEGMENT_LENGTH = 60
-local START_POS      = Vector3.new(0, 0, 0)
+local START_POS = Vector3.new(0, 0, 0)
 
 -- Colors (Parts only – terrain uses Enum.Material)
 local WALL_COLOR     = Color3.fromRGB(60, 60, 70)
