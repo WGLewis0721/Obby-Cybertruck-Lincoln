@@ -1,6 +1,6 @@
 -- GameHUD.client.lua
 -- Main gameplay navigation buttons shown during play.
--- Hidden until the server fires GameStarted.
+-- Revealed when the player's character spawns.
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,10 +10,20 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remotes ───────────────────────────────────────────────────────────────────
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
-local gameStarted   = remotesFolder:WaitForChild("GameStarted")
-local openPaintShop = remotesFolder:WaitForChild("OpenPaintShop")
-local openGarage    = remotesFolder:WaitForChild("OpenGarage")
+local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+if not remotesFolder then
+	warn("GameHUD: 'Remotes' folder not found in ReplicatedStorage")
+end
+
+local openPaintShop = remotesFolder and remotesFolder:WaitForChild("OpenPaintShop", 10)
+local openGarage    = remotesFolder and remotesFolder:WaitForChild("OpenGarage", 10)
+
+if not openPaintShop then
+	warn("GameHUD: RemoteEvent 'OpenPaintShop' not found in Remotes folder")
+end
+if not openGarage then
+	warn("GameHUD: RemoteEvent 'OpenGarage' not found in Remotes folder")
+end
 
 -- ── Theme ─────────────────────────────────────────────────────────────────────
 local COLOR_BG     = Color3.fromRGB(20, 20, 25)
@@ -25,6 +35,7 @@ local BTN_W, BTN_H, BTN_GAP = 140, 44, 8
 -- ── ScreenGui ─────────────────────────────────────────────────────────────────
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name           = "GameHUD"
+screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn   = false
 screenGui.Enabled        = false
 screenGui.Parent         = playerGui
@@ -113,12 +124,16 @@ notifCorner.Parent = mapNotif
 -- Shop: ask the server to open the paint shop (server fires ownedMapsSync back,
 -- which PaintShopButton.client.lua catches to show the shop panel).
 shopBtn.MouseButton1Click:Connect(function()
-	openPaintShop:FireServer()
+	if openPaintShop then
+		openPaintShop:FireServer()
+	end
 end)
 
 -- Garage: ask server to open the garage UI (server echoes OpenGarage:FireClient).
 garageBtn.MouseButton1Click:Connect(function()
-	openGarage:FireServer()
+	if openGarage then
+		openGarage:FireServer()
+	end
 end)
 
 -- Map: show a brief "coming soon" popup instead of opening a menu.
@@ -146,8 +161,8 @@ mapBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
--- ── GameStarted: reveal HUD with slide-in animation ───────────────────────────
-gameStarted.OnClientEvent:Connect(function()
+-- ── Reveal HUD when the character spawns ─────────────────────────────────────
+local function showHUD()
 	screenGui.Enabled = true
 	container.Position = UDim2.new(-0.2, 0, 0.5, 0)
 
@@ -156,4 +171,13 @@ gameStarted.OnClientEvent:Connect(function()
 		TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		{ Position = UDim2.new(0, 12, 0.5, 0) }
 	):Play()
-end)
+end
+
+if player.Character then
+	showHUD()
+else
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5) -- brief pause so the character fully loads before the HUD slides in
+		showHUD()
+	end)
+end

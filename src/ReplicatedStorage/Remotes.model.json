@@ -15,7 +15,6 @@
     { "Name": "CoinsAwarded",      "ClassName": "RemoteEvent" },
     { "Name": "UpdateLeaderboard", "ClassName": "RemoteEvent" },
     { "Name": "RaceAgain",         "ClassName": "RemoteEvent" },
-    { "Name": "GameStarted",       "ClassName": "RemoteEvent" },
     { "Name": "MapPurchased",      "ClassName": "RemoteEvent" },
     { "Name": "OpenGarage",        "ClassName": "RemoteEvent" },
     { "Name": "EquipVehicle",      "ClassName": "RemoteEvent" },
