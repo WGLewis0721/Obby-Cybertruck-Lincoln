@@ -13,7 +13,7 @@
 		- MapData             (ReplicatedStorage.Shared.MapData)
 		- PlayerData          (ReplicatedStorage.Shared.PlayerData)
 		- PlayerDataInterface (ServerScriptService.Services.PlayerDataInterface)
-		- EventBus            (ServerScriptService.Services.EventBus)
+		- EventBus            (ReplicatedStorage.Shared.EventBus)
 
 	Events Fired (via EventBus):
 		- VehicleSpawned(player, vehicleId)
@@ -45,7 +45,7 @@ local PlayerData   = require(sharedFolder:WaitForChild("PlayerData", 10))
 -- 3. Server-only dependencies
 local servicesFolder      = script.Parent
 local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInterface", 10))
-local EventBus            = require(servicesFolder:WaitForChild("EventBus", 10))
+local EventBus            = require(sharedFolder:WaitForChild("EventBus", 10))
 
 local TAG = "GarageHandler"
 

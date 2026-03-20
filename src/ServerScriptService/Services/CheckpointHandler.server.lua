@@ -10,7 +10,7 @@
 		- Constants (ReplicatedStorage.Shared.Constants)
 		- Logger    (ReplicatedStorage.Shared.Logger)
 		- MapData   (ReplicatedStorage.Shared.MapData)
-		- EventBus  (ServerScriptService.Services.EventBus)
+		- EventBus  (ReplicatedStorage.Shared.EventBus)
 
 	Events Fired (via EventBus):
 		- RaceStarted(player, mapId)
@@ -41,8 +41,7 @@ local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 local MapData      = require(sharedFolder:WaitForChild("MapData", 10))
 
 -- 3. Server-only dependencies
-local servicesFolder = script.Parent
-local EventBus       = require(servicesFolder:WaitForChild("EventBus", 10))
+local EventBus = require(sharedFolder:WaitForChild("EventBus", 10))
 
 local TAG = "CheckpointHandler"
 

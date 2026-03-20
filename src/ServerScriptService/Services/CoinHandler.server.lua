@@ -9,7 +9,7 @@
 		- Constants           (ReplicatedStorage.Shared.Constants)
 		- Logger              (ReplicatedStorage.Shared.Logger)
 		- PlayerDataInterface (ServerScriptService.Services.PlayerDataInterface)
-		- EventBus            (ServerScriptService.Services.EventBus)
+		- EventBus            (ReplicatedStorage.Shared.EventBus)
 
 	Events Fired (via EventBus):
 		- CoinsAwarded(player, coinsEarned, totalCoins)
@@ -35,7 +35,7 @@ local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 -- 3. Server-only dependencies
 local servicesFolder      = script.Parent
 local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInterface", 10))
-local EventBus            = require(servicesFolder:WaitForChild("EventBus", 10))
+local EventBus            = require(sharedFolder:WaitForChild("EventBus", 10))
 
 local TAG = "CoinHandler"
 

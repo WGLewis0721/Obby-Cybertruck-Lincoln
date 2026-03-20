@@ -10,7 +10,7 @@
         - Constants  (ReplicatedStorage.Shared.Constants)
         - Logger     (ReplicatedStorage.Shared.Logger)
         - PlayerData (ReplicatedStorage.Shared.PlayerData)
-        - EventBus   (ServerScriptService.Services.EventBus)
+        - EventBus   (ReplicatedStorage.Shared.EventBus)
 
     Events Fired (via EventBus):
         - PlayerDataLoaded(player) — when a player's data is ready in cache
@@ -35,9 +35,7 @@ local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
 local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
 local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 local PlayerData   = require(sharedFolder:WaitForChild("PlayerData", 10))
-
-local servicesFolder     = script.Parent
-local EventBus           = require(servicesFolder:WaitForChild("EventBus", 10))
+local EventBus     = require(sharedFolder:WaitForChild("EventBus", 10))
 
 local TAG = "PlayerDataInterface"
 

@@ -15,7 +15,8 @@
         - (All game events are routed through this module)
 
     Usage:
-        local EventBus = require(script.Parent.EventBus)
+        local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+        local EventBus = require(sharedFolder:WaitForChild("EventBus", 10))
         EventBus:On("RaceFinished", function(player, mapId, elapsed) end)
         EventBus:Fire("RaceFinished", player, mapId, elapsed)
 --]]
