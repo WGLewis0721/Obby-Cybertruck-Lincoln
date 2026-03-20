@@ -3,8 +3,34 @@ local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService      = game:GetService("TweenService")
 
-local player       = Players.LocalPlayer
+local player        = Players.LocalPlayer
 local openPaintShop = ReplicatedStorage:WaitForChild("OpenPaintShop")
+-- ApplyBoost fires from the server when the player owns a Speed Boost
+local applyBoost    = ReplicatedStorage:WaitForChild("ApplyBoost")
+
+-- ── Shared shop data ───────────────────────────────────────────────────────────
+local moduleFolder = ReplicatedStorage:WaitForChild("Module")
+local ShopItems    = require(moduleFolder:WaitForChild("ShopItems"))
+
+-- Extract product IDs and prices for the new item types from ShopItems
+local SPEED_BOOST_PRODUCT_ID = 0
+local SPEED_BOOST_PRICE      = 150
+local BUNDLE_PRODUCT_ID      = 0
+local BUNDLE_PRICE           = 1000
+for _, item in ipairs(ShopItems) do
+	if item.Name == "Speed Boost" then
+		SPEED_BOOST_PRODUCT_ID = item.ProductId
+		SPEED_BOOST_PRICE      = item.Price
+	elseif item.Name == "Ultimate Bundle" then
+		BUNDLE_PRODUCT_ID = item.ProductId
+		BUNDLE_PRICE      = item.Price
+	end
+end
+
+-- Local flag – set to true when the server confirms the player owns a Speed Boost
+local boostOwned = false
+-- Reference to the buy button on the Upgrades card so we can grey it out
+local boostBuyBtn
 
 -- ── Theme (matches LoadingScreen) ──────────────────────────────────────────────
 local COLOR_BG          = Color3.fromRGB(8, 8, 18)
@@ -19,20 +45,14 @@ local COLOR_CLOSE_HOVER = Color3.fromRGB(220, 60, 60)
 local COLOR_TAB_ACTIVE  = Color3.fromRGB(0, 210, 255)
 local COLOR_TAB_IDLE    = Color3.fromRGB(30, 30, 60)
 
--- ── Paint jobs (Blue/Gold ProductIds corrected) ────────────────────────────────
-local paintJobs = {
-{ Name = "Green", ProductId = 3244954061, Color = Color3.fromRGB(0, 255, 0),   Price = 50 },
-{ Name = "Blue",  ProductId = 3244953138, Color = Color3.fromRGB(0, 85, 255),  Price = 50 },
-{ Name = "Gold",  ProductId = 3244953838, Color = Color3.fromRGB(255, 215, 0), Price = 50 },
-}
-
--- ── Cars available for Robux purchase ─────────────────────────────────────────
--- TODO: Replace ProductId = 0 placeholders with real Roblox developer product IDs
-local carItems = {
-{ Name = "Tesla Model 3",  ProductId = 0, Price = 100, Icon = "🚗" },
-{ Name = "Tesla Roadster", ProductId = 0, Price = 200, Icon = "🏎️" },
-{ Name = "Tesla Model Y",  ProductId = 0, Price = 150, Icon = "🚙" },
-}
+-- ── Paint jobs: filter from the shared ShopItems module ───────────────────────
+-- Only include purchasable paint items (Color field present, ProductId non-zero).
+local paintJobs = {}
+for _, item in ipairs(ShopItems) do
+	if item.Color ~= nil and item.ProductId ~= 0 then
+		table.insert(paintJobs, item)
+	end
+end
 
 -- ── ScreenGui ──────────────────────────────────────────────────────────────────
 local screenGui = Instance.new("ScreenGui")
@@ -149,12 +169,12 @@ tabLayout.Parent = tabBar
 local function makeTab(label, order)
 local tab = Instance.new("TextButton")
 tab.Name = label .. "Tab"
-tab.Size = UDim2.new(0, 110, 1, 0)
+tab.Size = UDim2.new(0, 100, 1, 0)
 tab.BackgroundColor3 = COLOR_TAB_IDLE
 tab.BorderSizePixel = 0
 tab.Text = label
 tab.Font = Enum.Font.GothamBold
-tab.TextSize = 14
+tab.TextSize = 13
 tab.TextColor3 = COLOR_TEXT
 tab.AutoButtonColor = false
 tab.LayoutOrder = order
@@ -165,8 +185,9 @@ tc.Parent = tab
 return tab
 end
 
-local paintTab = makeTab("🎨  Paint", 1)
-local carsTab  = makeTab("🚗  Cars",  2)
+local paintTab    = makeTab("🎨  Paint",    1)
+local upgradesTab = makeTab("⚡  Upgrades", 2)  -- NEW: Speed Boost and future upgrades
+local bundleTab   = makeTab("💎  Bundle",   3)  -- Ultimate Bundle (best value)
 
 -- ── Content area ───────────────────────────────────────────────────────────────
 local contentArea = Instance.new("Frame")
@@ -252,115 +273,235 @@ MarketplaceService:PromptProductPurchase(player, job.ProductId)
 end)
 end
 
--- ── Cars tab content ───────────────────────────────────────────────────────────
-local carsContent = Instance.new("Frame")
-carsContent.Name = "CarsContent"
-carsContent.Size = UDim2.new(1, 0, 1, 0)
-carsContent.BackgroundTransparency = 1
-carsContent.Visible = false
-carsContent.Parent = contentArea
+-- ── Upgrades tab content ───────────────────────────────────────────────────────
+-- Shows purchasable upgrade items (Speed Boost, etc.). Future perks can be
+-- appended here following the same card pattern.
+local upgradesContent = Instance.new("Frame")
+upgradesContent.Name = "UpgradesContent"
+upgradesContent.Size = UDim2.new(1, 0, 1, 0)
+upgradesContent.BackgroundTransparency = 1
+upgradesContent.Visible = false
+upgradesContent.Parent = contentArea
 
-local carsLayout = Instance.new("UIListLayout")
-carsLayout.FillDirection = Enum.FillDirection.Vertical
-carsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-carsLayout.Padding = UDim.new(0, 8)
-carsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-carsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-carsLayout.Parent = carsContent
+-- ── Speed Boost card ──────────────────────────────────────────────────────────
+local boostCard = Instance.new("Frame")
+boostCard.Name = "SpeedBoostCard"
+boostCard.Size = UDim2.new(0, 220, 0, 210)
+boostCard.Position = UDim2.new(0.5, -110, 0.5, -105)
+boostCard.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+boostCard.BorderSizePixel = 0
+boostCard.Parent = upgradesContent
 
-for idx, car in ipairs(carItems) do
-local row = Instance.new("Frame")
-row.Name = car.Name
-row.Size = UDim2.new(1, 0, 0, 56)
-row.BackgroundColor3 = COLOR_BTN
-row.BorderSizePixel = 0
-row.LayoutOrder = idx
-row.Parent = carsContent
+local boostCardCorner = Instance.new("UICorner")
+boostCardCorner.CornerRadius = UDim.new(0, 12)
+boostCardCorner.Parent = boostCard
 
-local rowCorner = Instance.new("UICorner")
-rowCorner.CornerRadius = UDim.new(0, 10)
-rowCorner.Parent = row
+-- Cyan border matches Upgrades tab accent
+local boostCardStroke = Instance.new("UIStroke")
+boostCardStroke.Color = Color3.fromRGB(74, 240, 255)
+boostCardStroke.Thickness = 2
+boostCardStroke.Parent = boostCard
 
-local rowStroke = Instance.new("UIStroke")
-rowStroke.Color = COLOR_ACCENT
-rowStroke.Thickness = 1
-rowStroke.Transparency = 0.6
-rowStroke.Parent = row
+-- Large ⚡ icon centered at the top of the card
+local boostIconLabel = Instance.new("TextLabel")
+boostIconLabel.Size = UDim2.new(1, 0, 0, 68)
+boostIconLabel.Position = UDim2.new(0, 0, 0, 10)
+boostIconLabel.BackgroundTransparency = 1
+boostIconLabel.Text = "⚡"
+boostIconLabel.Font = Enum.Font.GothamBold
+boostIconLabel.TextSize = 46
+boostIconLabel.TextColor3 = COLOR_TEXT
+boostIconLabel.TextXAlignment = Enum.TextXAlignment.Center
+boostIconLabel.Parent = boostCard
 
-local iconLabel = Instance.new("TextLabel")
-iconLabel.Size = UDim2.new(0, 48, 1, 0)
-iconLabel.Position = UDim2.new(0, 8, 0, 0)
-iconLabel.BackgroundTransparency = 1
-iconLabel.Text = car.Icon
-iconLabel.TextSize = 26
-iconLabel.Font = Enum.Font.GothamBold
-iconLabel.TextColor3 = COLOR_TEXT
-iconLabel.Parent = row
+local boostNameLabel = Instance.new("TextLabel")
+boostNameLabel.Size = UDim2.new(1, -16, 0, 24)
+boostNameLabel.Position = UDim2.new(0, 8, 0, 84)
+boostNameLabel.BackgroundTransparency = 1
+boostNameLabel.Text = "Speed Boost"
+boostNameLabel.Font = Enum.Font.GothamBold
+boostNameLabel.TextSize = 16
+boostNameLabel.TextColor3 = COLOR_TEXT
+boostNameLabel.TextXAlignment = Enum.TextXAlignment.Center
+boostNameLabel.Parent = boostCard
 
-local carNameLabel = Instance.new("TextLabel")
-carNameLabel.Size = UDim2.new(0, 160, 1, 0)
-carNameLabel.Position = UDim2.new(0, 62, 0, 0)
-carNameLabel.BackgroundTransparency = 1
-carNameLabel.Text = car.Name
-carNameLabel.Font = Enum.Font.GothamBold
-carNameLabel.TextSize = 14
-carNameLabel.TextColor3 = COLOR_TEXT
-carNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-carNameLabel.Parent = row
+local boostDescLabel = Instance.new("TextLabel")
+boostDescLabel.Size = UDim2.new(1, -16, 0, 38)
+boostDescLabel.Position = UDim2.new(0, 8, 0, 112)
+boostDescLabel.BackgroundTransparency = 1
+boostDescLabel.Text = "Permanent top speed increase for your vehicle"
+boostDescLabel.Font = Enum.Font.Gotham
+boostDescLabel.TextSize = 12
+boostDescLabel.TextColor3 = COLOR_SUBTEXT
+boostDescLabel.TextWrapped = true
+boostDescLabel.TextXAlignment = Enum.TextXAlignment.Center
+boostDescLabel.Parent = boostCard
 
-local buyCarBtn = Instance.new("TextButton")
-buyCarBtn.Name = "BuyBtn"
-buyCarBtn.Size = UDim2.new(0, 80, 0, 36)
-buyCarBtn.Position = UDim2.new(1, -92, 0.5, -18)
-buyCarBtn.BackgroundColor3 = COLOR_ACCENT
-buyCarBtn.BorderSizePixel = 0
-buyCarBtn.Text = car.Price .. " R$"
-buyCarBtn.Font = Enum.Font.GothamBold
-buyCarBtn.TextSize = 13
-buyCarBtn.TextColor3 = COLOR_BG
-buyCarBtn.AutoButtonColor = false
-buyCarBtn.Parent = row
+-- Cyan price button at the bottom; becomes greyed out once the player owns the boost
+boostBuyBtn = Instance.new("TextButton")
+boostBuyBtn.Name = "BuyBoostBtn"
+boostBuyBtn.Size = UDim2.new(1, -24, 0, 36)
+boostBuyBtn.Position = UDim2.new(0, 12, 1, -48)
+boostBuyBtn.BackgroundColor3 = Color3.fromRGB(74, 240, 255)
+boostBuyBtn.BorderSizePixel = 0
+boostBuyBtn.Text = SPEED_BOOST_PRICE .. " R$"
+boostBuyBtn.Font = Enum.Font.GothamBold
+boostBuyBtn.TextSize = 14
+boostBuyBtn.TextColor3 = COLOR_BG
+boostBuyBtn.AutoButtonColor = false
+boostBuyBtn.Parent = boostCard
 
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 8)
-btnCorner.Parent = buyCarBtn
+local boostBuyCorner = Instance.new("UICorner")
+boostBuyCorner.CornerRadius = UDim.new(0, 8)
+boostBuyCorner.Parent = boostBuyBtn
 
-buyCarBtn.MouseButton1Click:Connect(function()
-if car.ProductId ~= 0 then
-MarketplaceService:PromptProductPurchase(player, car.ProductId)
-else
-warn("Car ProductId not set for: " .. car.Name)
-end
+boostBuyBtn.MouseButton1Click:Connect(function()
+	if boostOwned then return end
+	if SPEED_BOOST_PRODUCT_ID ~= 0 then
+		MarketplaceService:PromptProductPurchase(player, SPEED_BOOST_PRODUCT_ID)
+	else
+		warn("Speed Boost ProductId not set yet")
+	end
 end)
-end
+
+-- ── Bundle tab content ─────────────────────────────────────────────────────────
+-- Shows the Ultimate Bundle – a single highlighted card with gold border and
+-- "BEST VALUE" badge, larger than regular cards.
+local bundleContent = Instance.new("Frame")
+bundleContent.Name = "BundleContent"
+bundleContent.Size = UDim2.new(1, 0, 1, 0)
+bundleContent.BackgroundTransparency = 1
+bundleContent.Visible = false
+bundleContent.Parent = contentArea
+
+-- Ultimate Bundle card: gold border, larger than other cards
+local bundleCard = Instance.new("Frame")
+bundleCard.Name = "UltimateBundleCard"
+bundleCard.Size = UDim2.new(0, 260, 0, 226)
+bundleCard.Position = UDim2.new(0.5, -130, 0.5, -113)
+bundleCard.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+bundleCard.BorderSizePixel = 0
+bundleCard.Parent = bundleContent
+
+local bundleCardCorner = Instance.new("UICorner")
+bundleCardCorner.CornerRadius = UDim.new(0, 12)
+bundleCardCorner.Parent = bundleCard
+
+-- Gold border to highlight Best Value status
+local bundleCardStroke = Instance.new("UIStroke")
+bundleCardStroke.Color = Color3.fromRGB(255, 200, 0)
+bundleCardStroke.Thickness = 2.5
+bundleCardStroke.Parent = bundleCard
+
+-- "BEST VALUE" badge centered above the top edge of the card
+local bestValueBadge = Instance.new("Frame")
+bestValueBadge.Name = "BestValueBadge"
+bestValueBadge.Size = UDim2.new(0, 110, 0, 22)
+bestValueBadge.Position = UDim2.new(0.5, -55, 0, -11)
+bestValueBadge.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+bestValueBadge.BorderSizePixel = 0
+bestValueBadge.Parent = bundleCard
+
+local badgeCorner = Instance.new("UICorner")
+badgeCorner.CornerRadius = UDim.new(0, 6)
+badgeCorner.Parent = bestValueBadge
+
+local badgeLabel = Instance.new("TextLabel")
+badgeLabel.Size = UDim2.new(1, 0, 1, 0)
+badgeLabel.BackgroundTransparency = 1
+badgeLabel.Text = "★  BEST VALUE"
+badgeLabel.Font = Enum.Font.GothamBold
+badgeLabel.TextSize = 11
+badgeLabel.TextColor3 = Color3.fromRGB(20, 20, 25)
+badgeLabel.TextXAlignment = Enum.TextXAlignment.Center
+badgeLabel.Parent = bestValueBadge
+
+local bundleIconLabel = Instance.new("TextLabel")
+bundleIconLabel.Size = UDim2.new(1, 0, 0, 60)
+bundleIconLabel.Position = UDim2.new(0, 0, 0, 18)
+bundleIconLabel.BackgroundTransparency = 1
+bundleIconLabel.Text = "💎"
+bundleIconLabel.Font = Enum.Font.GothamBold
+bundleIconLabel.TextSize = 40
+bundleIconLabel.TextColor3 = COLOR_TEXT
+bundleIconLabel.TextXAlignment = Enum.TextXAlignment.Center
+bundleIconLabel.Parent = bundleCard
+
+local bundleNameLabel = Instance.new("TextLabel")
+bundleNameLabel.Size = UDim2.new(1, -16, 0, 24)
+bundleNameLabel.Position = UDim2.new(0, 8, 0, 84)
+bundleNameLabel.BackgroundTransparency = 1
+bundleNameLabel.Text = "Ultimate Bundle"
+bundleNameLabel.Font = Enum.Font.GothamBold
+bundleNameLabel.TextSize = 17
+bundleNameLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+bundleNameLabel.TextXAlignment = Enum.TextXAlignment.Center
+bundleNameLabel.Parent = bundleCard
+
+local bundleDescLabel = Instance.new("TextLabel")
+bundleDescLabel.Size = UDim2.new(1, -16, 0, 40)
+bundleDescLabel.Position = UDim2.new(0, 8, 0, 112)
+bundleDescLabel.BackgroundTransparency = 1
+bundleDescLabel.Text = "Unlock ALL vehicles and ALL paint jobs forever. Best value."
+bundleDescLabel.Font = Enum.Font.Gotham
+bundleDescLabel.TextSize = 12
+bundleDescLabel.TextColor3 = COLOR_SUBTEXT
+bundleDescLabel.TextWrapped = true
+bundleDescLabel.TextXAlignment = Enum.TextXAlignment.Center
+bundleDescLabel.Parent = bundleCard
+
+-- Gold price button matching the card's accent colour
+local bundleBuyBtn = Instance.new("TextButton")
+bundleBuyBtn.Name = "BuyBundleBtn"
+bundleBuyBtn.Size = UDim2.new(1, -24, 0, 36)
+bundleBuyBtn.Position = UDim2.new(0, 12, 1, -48)
+bundleBuyBtn.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+bundleBuyBtn.BorderSizePixel = 0
+bundleBuyBtn.Text = BUNDLE_PRICE .. " R$"
+bundleBuyBtn.Font = Enum.Font.GothamBold
+bundleBuyBtn.TextSize = 14
+bundleBuyBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+bundleBuyBtn.AutoButtonColor = false
+bundleBuyBtn.Parent = bundleCard
+
+local bundleBuyCorner = Instance.new("UICorner")
+bundleBuyCorner.CornerRadius = UDim.new(0, 8)
+bundleBuyCorner.Parent = bundleBuyBtn
+
+bundleBuyBtn.MouseButton1Click:Connect(function()
+	if BUNDLE_PRODUCT_ID ~= 0 then
+		MarketplaceService:PromptProductPurchase(player, BUNDLE_PRODUCT_ID)
+	else
+		warn("Bundle ProductId not set yet")
+	end
+end)
 
 -- ── Tab switching ──────────────────────────────────────────────────────────────
 local function switchTab(active)
-if active == "Paint" then
-paintContent.Visible = true
-carsContent.Visible = false
-paintTab.BackgroundColor3 = COLOR_TAB_ACTIVE
-paintTab.TextColor3 = COLOR_BG
-carsTab.BackgroundColor3 = COLOR_TAB_IDLE
-carsTab.TextColor3 = COLOR_TEXT
-else
-paintContent.Visible = false
-carsContent.Visible = true
-paintTab.BackgroundColor3 = COLOR_TAB_IDLE
-paintTab.TextColor3 = COLOR_TEXT
-carsTab.BackgroundColor3 = COLOR_TAB_ACTIVE
-carsTab.TextColor3 = COLOR_BG
-end
+	paintContent.Visible    = (active == "Paint")
+	upgradesContent.Visible = (active == "Upgrades")
+	bundleContent.Visible   = (active == "Bundle")
+
+	paintTab.BackgroundColor3    = (active == "Paint")    and COLOR_TAB_ACTIVE or COLOR_TAB_IDLE
+	paintTab.TextColor3          = (active == "Paint")    and COLOR_BG         or COLOR_TEXT
+	upgradesTab.BackgroundColor3 = (active == "Upgrades") and COLOR_TAB_ACTIVE or COLOR_TAB_IDLE
+	upgradesTab.TextColor3       = (active == "Upgrades") and COLOR_BG         or COLOR_TEXT
+	bundleTab.BackgroundColor3   = (active == "Bundle")   and COLOR_TAB_ACTIVE or COLOR_TAB_IDLE
+	bundleTab.TextColor3         = (active == "Bundle")   and COLOR_BG         or COLOR_TEXT
 end
 
 switchTab("Paint")
 
 paintTab.MouseButton1Click:Connect(function()
-switchTab("Paint")
+	switchTab("Paint")
 end)
 
-carsTab.MouseButton1Click:Connect(function()
-switchTab("Cars")
+upgradesTab.MouseButton1Click:Connect(function()
+	switchTab("Upgrades")
+end)
+
+bundleTab.MouseButton1Click:Connect(function()
+	switchTab("Bundle")
 end)
 
 -- ── Hover effects ──────────────────────────────────────────────────────────────
@@ -390,4 +531,14 @@ end)
 
 closeBtn.MouseButton1Click:Connect(function()
 frame.Visible = false
+end)
+
+-- ── ApplyBoost: mark boost as owned and grey out the buy button ────────────────
+applyBoost.OnClientEvent:Connect(function()
+	boostOwned = true
+	if boostBuyBtn then
+		boostBuyBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+		boostBuyBtn.TextColor3       = Color3.fromRGB(140, 140, 140)
+		boostBuyBtn.Text             = "Owned"
+	end
 end)
