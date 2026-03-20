@@ -59,7 +59,18 @@ end
 
 -- ── Discover checkpoint Parts from all map folders ────────────────────────────
 local function discoverCheckpoints()
+	local selectedMapId = workspace:GetAttribute("SelectedMap")
+	if selectedMapId then
+		print("CheckpointHandler: limiting map discovery to selected map '" .. tostring(selectedMapId) .. "'")
+	else
+		print("CheckpointHandler: no SelectedMap attribute; discovering all configured maps")
+	end
+
 	for _, map in ipairs(MapData) do
+		if selectedMapId and map.Id ~= selectedMapId then
+			continue
+		end
+
 		local folder = workspace:FindFirstChild(map.FolderName)
 		if not folder then
 			warn("CheckpointHandler: map folder not found in Workspace:", map.FolderName)
@@ -74,6 +85,11 @@ local function discoverCheckpoints()
 					checkpoints[num] = part
 				end
 			end
+		end
+
+		if next(checkpoints) == nil then
+			warn("CheckpointHandler: no checkpoint parts found in map folder:", map.FolderName)
+			continue
 		end
 
 		-- Count numbered checkpoints excluding the finish line (99)

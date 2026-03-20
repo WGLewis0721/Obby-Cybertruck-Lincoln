@@ -1,4 +1,18 @@
-if not workspace:FindFirstChild("SkyscraperMap") then
+local SELECTED_MAP = workspace:GetAttribute("SelectedMap")
+if SELECTED_MAP ~= "skyscraper" then
+	if SELECTED_MAP then
+		print("GenerateCityMap: selected map '" .. tostring(SELECTED_MAP) .. "' not current; skipping generation.")
+	else
+		print("GenerateCityMap: no SelectedMap set; skipping generation.")
+	end
+	return
+end
+
+if workspace:FindFirstChild("SkyscraperMap") then
+	print("GenerateCityMap: SkyscraperMap already exists; skipping generation.")
+	return
+end
+
 local START_POS = Vector3.new(0, 0, 0)
 
 -- ============================================================

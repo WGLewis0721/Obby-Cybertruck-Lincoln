@@ -124,10 +124,21 @@ garageBtn.TextSize = 15
 garageBtn.TextColor3 = COLOR_TEXT
 garageBtn.AutoButtonColor = false
 garageBtn.Parent = screenGui
+garageBtn.Visible = false -- Reveal only after player spawns
 
 addCorner(garageBtn, 10)
 addStroke(garageBtn, COLOR_ACCENT, 1.5, 0.4)
 addHover(garageBtn, COLOR_BTN, COLOR_BTN_HOVER)
+
+player.CharacterAdded:Connect(function()
+	garageBtn.Visible = true
+end)
+
+player.CharacterRemoving:Connect(function()
+	garageBtn.Visible = false
+	overlay.Visible = false
+	garagePanel.Visible = false
+end)
 
 -- ── Full-screen overlay ───────────────────────────────────────────────────────
 local overlay = Instance.new("Frame")

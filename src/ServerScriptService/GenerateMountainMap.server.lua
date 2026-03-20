@@ -1,4 +1,18 @@
-if not workspace:FindFirstChild("BigFootMap") then
+local SELECTED_MAP = workspace:GetAttribute("SelectedMap")
+if SELECTED_MAP ~= "bigfoot" then
+	if SELECTED_MAP then
+		print("GenerateMountainMap: selected map '" .. tostring(SELECTED_MAP) .. "' not current; skipping generation.")
+	else
+		print("GenerateMountainMap: no SelectedMap set; skipping generation.")
+	end
+	return
+end
+
+if workspace:FindFirstChild("BigFootMap") then
+	print("GenerateMountainMap: BigFootMap already exists; skipping generation.")
+	return
+end
+
 local START_POS = Vector3.new(4000, 0, 0)
 
 -- ============================================================

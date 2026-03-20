@@ -112,6 +112,99 @@ coinLabel.TextColor3            = Color3.fromRGB(255, 220, 50)
 coinLabel.TextXAlignment        = Enum.TextXAlignment.Center
 coinLabel.Parent                = coinPanel
 
+-- ── Map button (shown only when character is spawned) ──────────────────────
+local mapButton = Instance.new("TextButton")
+mapButton.Name = "MapButton"
+mapButton.Size = UDim2.new(0, 100, 0, 32)
+mapButton.Position = UDim2.new(0.5, -50, 0, 24)
+mapButton.AnchorPoint = Vector2.new(0.5, 0)
+mapButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+mapButton.BorderSizePixel = 0
+mapButton.Text = "Map"
+mapButton.Font = Enum.Font.GothamBold
+mapButton.TextSize = 14
+mapButton.TextColor3 = Color3.new(1, 1, 1)
+mapButton.Visible = false
+mapButton.Parent = screenGui
+
+local mapMenu = Instance.new("Frame")
+mapMenu.Name = "MapMenu"
+mapMenu.Size = UDim2.new(0, 240, 0, 152)
+mapMenu.Position = UDim2.new(0.5, -120, 0.1, 0)
+mapMenu.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+mapMenu.BorderSizePixel = 0
+mapMenu.Visible = false
+mapMenu.Parent = screenGui
+
+local mapMenuCorner = Instance.new("UICorner")
+mapMenuCorner.CornerRadius = UDim.new(0, 10)
+mapMenuCorner.Parent = mapMenu
+
+local mapMenuTitle = Instance.new("TextLabel")
+mapMenuTitle.Name = "Title"
+mapMenuTitle.Size = UDim2.new(1, 0, 0, 32)
+mapMenuTitle.Position = UDim2.new(0, 0, 0, 0)
+mapMenuTitle.BackgroundTransparency = 1
+mapMenuTitle.Text = "Select Map"
+mapMenuTitle.Font = Enum.Font.GothamBold
+mapMenuTitle.TextSize = 16
+mapMenuTitle.TextColor3 = Color3.fromRGB(0.75, 0.9, 1)
+mapMenuTitle.Parent = mapMenu
+
+local function makeMapChoiceButton(label, mapId, offsetY)
+	local btn = Instance.new("TextButton")
+	btn.Name = label .. "Button"
+	btn.Size = UDim2.new(1, -24, 0, 34)
+	btn.Position = UDim2.new(0, 12, 0, 40 + offsetY)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+	btn.BorderSizePixel = 0
+	btn.Text = label
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Parent = mapMenu
+	btn.MouseButton1Click:Connect(function()
+		local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
+		local selectMap = eventsFolder and eventsFolder:FindFirstChild("SelectMap")
+		if selectMap then
+			selectMap:FireServer(mapId)
+		else
+			warn("MapSelector: SelectMap RemoteEvent is missing")
+		end
+		mapMenu.Visible = false
+	end)
+	return btn
+end
+
+makeMapChoiceButton("Skyscraper", "skyscraper", 0)
+makeMapChoiceButton("Big Foot", "bigfoot", 40)
+makeMapChoiceButton("High Speed", "highspeed", 80)
+
+-- Close map menu when clicking outside
+mapButton.MouseButton1Click:Connect(function()
+	mapMenu.Visible = not mapMenu.Visible
+end)
+
+local function updateMapControls()
+	if player.Character then
+		mapButton.Visible = true
+	else
+		mapButton.Visible = false
+	end
+end
+
+player.CharacterAdded:Connect(function()
+	updateMapControls()
+end)
+
+player.CharacterRemoving:Connect(function()
+	mapButton.Visible = false
+	mapMenu.Visible = false
+end)
+
+updateMapControls()
+
+
 -- ── Helper: format seconds as MM:SS.mmm ──────────────────────────────────────
 local function formatTime(secs)
 	local minutes = math.floor(secs / 60)

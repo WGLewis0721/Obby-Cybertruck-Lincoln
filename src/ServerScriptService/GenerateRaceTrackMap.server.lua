@@ -1,4 +1,18 @@
-if not workspace:FindFirstChild("HighSpeedMap") then
+local SELECTED_MAP = workspace:GetAttribute("SelectedMap")
+if SELECTED_MAP ~= "highspeed" then
+	if SELECTED_MAP then
+		print("GenerateRaceTrackMap: selected map '" .. tostring(SELECTED_MAP) .. "' not current; skipping generation.")
+	else
+		print("GenerateRaceTrackMap: no SelectedMap set; skipping generation.")
+	end
+	return
+end
+
+if workspace:FindFirstChild("HighSpeedMap") then
+	print("GenerateRaceTrackMap: HighSpeedMap already exists; skipping generation.")
+	return
+end
+
 local START_POS = Vector3.new(8000, 0, 0)
 
 -- ============================================================

@@ -85,10 +85,20 @@ shopToggleBtn.TextSize = 15
 shopToggleBtn.TextColor3 = COLOR_TEXT
 shopToggleBtn.AutoButtonColor = false
 shopToggleBtn.Parent = screenGui
+shopToggleBtn.Visible = false -- Reveal only after player spawns
 
 local tCorner = Instance.new("UICorner")
 tCorner.CornerRadius = UDim.new(0, 10)
 tCorner.Parent = shopToggleBtn
+
+player.CharacterAdded:Connect(function()
+	shopToggleBtn.Visible = true
+end)
+
+player.CharacterRemoving:Connect(function()
+	shopToggleBtn.Visible = false
+	frame.Visible = false
+end)
 
 local tStroke = Instance.new("UIStroke")
 tStroke.Color = COLOR_ACCENT

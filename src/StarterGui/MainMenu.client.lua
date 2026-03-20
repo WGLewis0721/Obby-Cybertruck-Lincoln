@@ -2,14 +2,28 @@
 -- Main menu shown on game launch before the player spawns.
 -- Camera orbits the Cybertruck; three buttons live in the bottom-left corner.
 
-local Players    = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Workspace  = game:GetService("Workspace")
+local Players          = game:GetService("Players")
+local RunService      = game:GetService("RunService")
+local TweenService    = game:GetService("TweenService")
+local Workspace       = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local player    = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local camera    = Workspace.CurrentCamera
+local player        = Players.LocalPlayer
+local playerGui     = player:WaitForChild("PlayerGui")
+local camera        = Workspace.CurrentCamera
+local openPaintShop = ReplicatedStorage:WaitForChild("OpenPaintShop", 10)
+local eventsFolder = ReplicatedStorage:WaitForChild("Events", 10)
+local equipVehicleEvent = eventsFolder and eventsFolder:FindFirstChild("EquipVehicle")
+
+if not openPaintShop then
+	warn("MainMenu: OpenPaintShop RemoteEvent not found")
+end
+if not eventsFolder then
+	warn("MainMenu: Events folder not found in ReplicatedStorage")
+end
+if not equipVehicleEvent then
+	warn("MainMenu: EquipVehicle RemoteEvent not found")
+end
 
 -- ── Camera: Scriptable mode ───────────────────────────────────────────────────
 -- Take full control of the camera immediately so the orbit starts right away.
@@ -172,17 +186,29 @@ playBtn.MouseButton1Click:Connect(function()
 		-- Spawn the character into the world.
 		player:LoadCharacter()
 
+		-- Ensure the local player gets the Cybertruck equipped as soon as possible.
+		-- Server-side GarageHandler will place it on VehicleSpawn / selected map spawn.
+		task.delay(0.3, function()
+			if equipVehicleEvent then
+				equipVehicleEvent:FireServer(1) -- 1 == Cybertruck
+			end
+		end)
+
 		-- Remove the menu entirely.
 		screenGui:Destroy()
 	end)
 end)
 
--- ── Shop button (placeholder) ─────────────────────────────────────────────────
+-- ── Shop button
 shopBtn.MouseButton1Click:Connect(function()
-	print("Open Shop")
+	if openPaintShop then
+		openPaintShop:FireServer()
+	else
+		warn("MainMenu: cannot open shop, OpenPaintShop missing")
+	end
 end)
 
--- ── Settings button (placeholder) ─────────────────────────────────────────────
+-- ── Settings button (placeholder)
 settingsBtn.MouseButton1Click:Connect(function()
 	print("Open Settings")
 end)

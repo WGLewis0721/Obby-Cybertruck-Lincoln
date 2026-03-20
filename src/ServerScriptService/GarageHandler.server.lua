@@ -31,6 +31,7 @@ end
 -- ── Shared data modules ───────────────────────────────────────────────────────
 local moduleFolder  = ReplicatedStorage:WaitForChild("Module", 10)
 local vehicleData   = require(moduleFolder:WaitForChild("VehicleData"))
+local MapData       = require(moduleFolder:WaitForChild("MapData"))
 local PlayerData    = require(moduleFolder:WaitForChild("PlayerData"))
 
 -- ── Helper: get vehicle definition by Id ──────────────────────────────────────
@@ -81,6 +82,20 @@ local playerDataCache = {}
 -- Populate cache when a player joins
 Players.PlayerAdded:Connect(function(player)
 	playerDataCache[player.UserId] = loadPlayerData(player.UserId)
+
+	player.CharacterAdded:Connect(function(character)
+		local data = playerDataCache[player.UserId]
+		if not data then
+			data = loadPlayerData(player.UserId)
+			playerDataCache[player.UserId] = data
+		end
+
+		local vehicleId = data.EquippedVehicle or 1
+		local vehicle = getVehicleById(vehicleId)
+		if vehicle then
+			spawnVehicle(player, vehicle)
+		end
+	end)
 end)
 
 -- Flush cache and save when a player leaves
@@ -120,28 +135,41 @@ local function spawnVehicle(player, vehicle)
 	newVehicle.Name = vehicleName
 
 	-- Determine spawn position:
-	-- 1. Prefer a Part named "VehicleSpawn" in Workspace so level designers can
-	--    control exactly where vehicles appear.
-	-- 2. Fall back to 10 studs in front of the player's character if no spawn
-	--    marker exists.
-	local spawnCFrame = CFrame.new(0, 5, 0)  -- absolute last-resort fallback (world origin)
+	-- 1. Prefer first VehicleSpawn part in workspace.
+	-- 2. Prefer selected map's spawn location (MapData.SpawnName).
+	-- 3. Fall back to 10 studs in front of the player's character.
+	-- 4. Fall back to world origin.
+	local spawnCFrame = CFrame.new(0, 5, 0)
 
 	local spawnMarker = workspace:FindFirstChild("VehicleSpawn")
 	if spawnMarker and spawnMarker:IsA("BasePart") then
-		-- Use the spawn marker's CFrame so the vehicle inherits its orientation too.
 		spawnCFrame = spawnMarker.CFrame
 	else
-		local character = player.Character
-		if character then
-			local rootPart = character:FindFirstChild("HumanoidRootPart")
-			if rootPart then
-				-- Place the vehicle 10 studs in front of the character using CFrame arithmetic
-				spawnCFrame = rootPart.CFrame * CFrame.new(0, 0, -10)
-			else
-				warn("GarageHandler: HumanoidRootPart not found for " .. player.Name .. " — spawning vehicle at world origin")
+		local selectedMap = workspace:GetAttribute("SelectedMap")
+		if selectedMap then
+			for _, mapInfo in ipairs(MapData) do
+				if mapInfo.Id == selectedMap and mapInfo.SpawnName then
+					local mapSpawn = workspace:FindFirstChild(mapInfo.SpawnName, true)
+					if mapSpawn and mapSpawn:IsA("BasePart") then
+						spawnCFrame = mapSpawn.CFrame
+						break
+					end
+				end
 			end
-		else
-			warn("GarageHandler: No character for " .. player.Name .. " — spawning vehicle at world origin")
+		end
+
+		if spawnCFrame == CFrame.new(0, 5, 0) then
+			local character = player.Character
+			if character then
+				local rootPart = character:FindFirstChild("HumanoidRootPart")
+				if rootPart then
+					spawnCFrame = rootPart.CFrame * CFrame.new(0, 0, -10)
+				else
+					warn("GarageHandler: HumanoidRootPart not found for " .. player.Name .. " — using default spawn location")
+				end
+			else
+				warn("GarageHandler: No character for " .. player.Name .. " — using default spawn location")
+			end
 		end
 	end
 
@@ -153,6 +181,22 @@ local function spawnVehicle(player, vehicle)
 	end
 
 	newVehicle.Parent = workspace
+
+	-- Sit player in the vehicle driver seat when possible.
+	local vehicleSeat = newVehicle:FindFirstChildWhichIsA("VehicleSeat", true)
+	if vehicleSeat and player.Character then
+		local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
+		if humanoid then
+			-- Small delay to avoid conflicts with spawn/respawn timing.
+			task.delay(0.1, function()
+				if vehicleSeat and vehicleSeat.Parent and humanoid.Parent then
+					if vehicleSeat:IsA("VehicleSeat") then
+						vehicleSeat:Sit(humanoid)
+					end
+				end
+			end)
+		end
+	end
 end
 
 -- ── EquipVehicle handler ──────────────────────────────────────────────────────
@@ -192,3 +236,21 @@ equipVehicleEvent.OnServerEvent:Connect(function(player, vehicleId)
 
 	print(string.format("GarageHandler: %s equipped '%s' (Id=%d)", player.Name, vehicle.Name, vehicleId))
 end)
+
+-- When the player selects a map, re-spawn their equipped vehicle at the selected map spawn.
+local selectMapEvent = eventsFolder:FindFirstChild("SelectMap")
+if selectMapEvent then
+	selectMapEvent.OnServerEvent:Connect(function(player, mapId)
+		local data = playerDataCache[player.UserId]
+		if not data then
+			data = loadPlayerData(player.UserId)
+			playerDataCache[player.UserId] = data
+		end
+
+		local vehicleId = data.EquippedVehicle or 1
+		local vehicle = getVehicleById(vehicleId)
+		if vehicle then
+			spawnVehicle(player, vehicle)
+		end
+	end)
+end
