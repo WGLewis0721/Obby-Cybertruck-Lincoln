@@ -1,26 +1,18 @@
 {
-  "name": "ObbyCybertruck",
+  "name": "Obby-Cybertruck-Lincoln",
   "tree": {
     "$className": "DataModel",
 
-    "ReplicatedStorage": {
-      "Shared": {
-        "$path": "src/shared"
-      }
+    "Workspace": {
+      "$className": "Workspace"
     },
 
     "ServerScriptService": {
-      "Server": {
-        "$path": "src/server"
-      }
+      "$path": "src/ServerScriptService"
     },
 
-    "StarterPlayer": {
-      "StarterPlayerScripts": {
-        "Client": {
-          "$path": "src/client"
-        }
-      }
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
     }
   }
 }
