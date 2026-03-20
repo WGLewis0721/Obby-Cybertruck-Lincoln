@@ -22,6 +22,12 @@
       "ApplyPaintJob": {
         "$className": "RemoteEvent"
       },
+      "ApplyBoost": {
+        "$className": "RemoteEvent"
+      },
+      "BundlePurchased": {
+        "$className": "RemoteEvent"
+      },
       "Events": {
         "$className": "Folder",
         "OpenGarage": {

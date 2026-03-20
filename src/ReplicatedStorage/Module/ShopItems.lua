@@ -27,6 +27,24 @@ local ShopItems = {
         Pic = "rbxassetid://0",
         Price = 50
     },
+    -- ── Upgrade items ─────────────────────────────────────────────────────────
+    {
+        Name = "Speed Boost",
+        Type = "Boost",
+        ProductId = 0, -- placeholder, replace later
+        Description = "Permanent top speed increase for your vehicle",
+        Price = 150,
+        Pic = "rbxassetid://0"
+    },
+    -- ── Bundle items ──────────────────────────────────────────────────────────
+    {
+        Name = "Ultimate Bundle",
+        Type = "Bundle",
+        ProductId = 0, -- placeholder, replace later
+        Description = "Unlock ALL vehicles and ALL paint jobs forever. Best value.",
+        Price = 1000,
+        Pic = "rbxassetid://0"
+    },
 }
 
 return ShopItems
