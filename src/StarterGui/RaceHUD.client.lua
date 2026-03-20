@@ -112,11 +112,11 @@ coinLabel.TextColor3            = Color3.fromRGB(255, 220, 50)
 coinLabel.TextXAlignment        = Enum.TextXAlignment.Center
 coinLabel.Parent                = coinPanel
 
--- ── Map button (shown only when character is spawned) ──────────────────────
+-- ── Map / Shop / Garage controls (visible when character exists) ──────────
 local mapButton = Instance.new("TextButton")
 mapButton.Name = "MapButton"
 mapButton.Size = UDim2.new(0, 100, 0, 32)
-mapButton.Position = UDim2.new(0.5, -50, 0, 24)
+mapButton.Position = UDim2.new(0.5, -170, 0, 24)
 mapButton.AnchorPoint = Vector2.new(0.5, 0)
 mapButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 mapButton.BorderSizePixel = 0
@@ -126,6 +126,34 @@ mapButton.TextSize = 14
 mapButton.TextColor3 = Color3.new(1, 1, 1)
 mapButton.Visible = false
 mapButton.Parent = screenGui
+
+local shopBtn = Instance.new("TextButton")
+shopBtn.Name = "ShopButton"
+shopBtn.Size = UDim2.new(0, 100, 0, 32)
+shopBtn.Position = UDim2.new(0.5, -50, 0, 24)
+shopBtn.AnchorPoint = Vector2.new(0.5, 0)
+shopBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+shopBtn.BorderSizePixel = 0
+shopBtn.Text = "Shop"
+shopBtn.Font = Enum.Font.GothamBold
+shopBtn.TextSize = 14
+shopBtn.TextColor3 = Color3.new(1, 1, 1)
+shopBtn.Visible = false
+shopBtn.Parent = screenGui
+
+local garageBtn = Instance.new("TextButton")
+garageBtn.Name = "GarageButton"
+garageBtn.Size = UDim2.new(0, 100, 0, 32)
+garageBtn.Position = UDim2.new(0.5, 70, 0, 24)
+garageBtn.AnchorPoint = Vector2.new(0.5, 0)
+garageBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+garageBtn.BorderSizePixel = 0
+garageBtn.Text = "Garage"
+garageBtn.Font = Enum.Font.GothamBold
+garageBtn.TextSize = 14
+garageBtn.TextColor3 = Color3.new(1, 1, 1)
+garageBtn.Visible = false
+garageBtn.Parent = screenGui
 
 local mapMenu = Instance.new("Frame")
 mapMenu.Name = "MapMenu"
@@ -185,12 +213,27 @@ mapButton.MouseButton1Click:Connect(function()
 	mapMenu.Visible = not mapMenu.Visible
 end)
 
-local function updateMapControls()
-	if player.Character then
-		mapButton.Visible = true
-	else
-		mapButton.Visible = false
+shopBtn.MouseButton1Click:Connect(function()
+	local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
+	local openShop = eventsFolder and eventsFolder:FindFirstChild("OpenPaintShop")
+	if openShop then
+		openShop:FireServer()
 	end
+end)
+
+garageBtn.MouseButton1Click:Connect(function()
+	local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
+	local openGarage = eventsFolder and eventsFolder:FindFirstChild("OpenGarage")
+	if openGarage then
+		openGarage:FireServer()
+	end
+end)
+
+local function updateMapControls()
+	local visible = player.Character ~= nil
+	mapButton.Visible = visible
+	shopBtn.Visible = visible
+	garageBtn.Visible = visible
 end
 
 player.CharacterAdded:Connect(function()

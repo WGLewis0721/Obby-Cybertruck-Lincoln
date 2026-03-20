@@ -9,7 +9,7 @@ if not shopGui then
 end
 
 local shopButton = shopGui:FindFirstChild("ShopButton")
-local shopMenu = shopGui:FindFirstChild("Main") -- The Main frame is the shop menu
+local shopMenu = shopGui:FindFirstChild("Main")
 
 if not shopButton then
 	warn("ShopButton not found in ShopGui_d")
@@ -22,7 +22,6 @@ if not shopMenu then
 end
 
 shopButton.MouseButton1Click:Connect(function()
-    shopMenu.Visible = true
-    shopButton.Visible = false
+	shopMenu.Visible = true
+	shopButton.Visible = false
 end)
-

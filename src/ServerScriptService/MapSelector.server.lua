@@ -38,15 +38,16 @@ local function clearMaps()
 end
 
 local function getGeneratorModule(name)
-	-- Prefer ModuleScript upper-priority.  (Script with same name may exist from legacy design.)
+	-- Prefer ModuleScript first. (Rojo .lua may map to ModuleScript or Script;
+	-- we include both to keep compatibility.)
 	local candidate = ServerScriptService:FindFirstChild(name)
-	if candidate and candidate:IsA("ModuleScript") then
+	if candidate and (candidate:IsA("ModuleScript") or candidate:IsA("Script")) then
 		return candidate
 	end
 
-	-- If there is a script prefab with same name, maybe modules are in a named subfolder.
+	-- Search recursively for module by name in nested folders.
 	local search = ServerScriptService:FindFirstChild(name, true)
-	if search and search:IsA("ModuleScript") then
+	if search and (search:IsA("ModuleScript") or search:IsA("Script")) then
 		return search
 	end
 
@@ -72,7 +73,13 @@ end
 local function generateMap(mapId)
 	local generator = generators[mapId]
 	if not generator then
-		warn("MapSelector: generator function unavailable for", mapId)
+		warn("MapSelector: generator function unavailable for", mapId, "(check whether the .lua is imported as ModuleScript)")
+		return false
+	end
+
+	local mapInfo = MAPS[mapId]
+	if not mapInfo then
+		warn("MapSelector: unknown map id while generating", mapId)
 		return false
 	end
 
@@ -101,8 +108,17 @@ end
 
 local function ensureMapSelected()
 	local active = chooseDefaultMap()
-	if workspace:GetAttribute("SelectedMap") == active and workspace:FindFirstChild(MAPS[active].FolderName) then
+	local current = workspace:GetAttribute("SelectedMap")
+	local hasFolder = MAPS[active] and workspace:FindFirstChild(MAPS[active].FolderName)
+
+	if current == active and hasFolder then
+		print("MapSelector: active map already selected and present:", active)
 		return
+	end
+
+	print("MapSelector: ensuring map selected; active=", active, "selected=", current, "hasFolder=", tostring(hasFolder))
+	if not hasFolder then
+		print("MapSelector: existing map folder missing, generating", active)
 	end
 	generateMap(active)
 end

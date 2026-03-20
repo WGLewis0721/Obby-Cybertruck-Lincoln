@@ -137,26 +137,27 @@ local playBtn     = makeButton("Play",     PLAY_BOTTOM)
 local shopBtn     = makeButton("Shop",     SHOP_BOTTOM)
 local settingsBtn = makeButton("Settings", SETTINGS_BOTTOM)
 
--- ── Orbit camera loop ─────────────────────────────────────────────────────────
--- RenderStepped fires before each frame render for the smoothest motion.
-local orbitAngle = 0
-local orbitConn  = RunService.RenderStepped:Connect(function(dt)
-	orbitAngle = orbitAngle + ORBIT_SPEED * dt
+-- ── Static camera setup (orbit disabled) ─────────────────────────────────
+-- Keep the camera at a fixed view above the Cybertruck to avoid motion issues.
+camera.CFrame = CFrame.lookAt(
+	truckCenter + Vector3.new(0, ORBIT_HEIGHT, ORBIT_RADIUS),
+	truckCenter,
+	Vector3.new(0, 1, 0)
+)
 
-	local camX = truckCenter.X + ORBIT_RADIUS * math.cos(orbitAngle)
-	local camY = truckCenter.Y + ORBIT_HEIGHT
-	local camZ = truckCenter.Z + ORBIT_RADIUS * math.sin(orbitAngle)
-
-	camera.CFrame = CFrame.lookAt(Vector3.new(camX, camY, camZ), truckCenter)
-end)
+-- No RenderStepped orbit connection to prevent panning motion:
+local orbitConn = nil
 
 -- ── Play button ───────────────────────────────────────────────────────────────
 playBtn.MouseButton1Click:Connect(function()
 	-- Disable to prevent double-firing.
 	playBtn.Active = false
 
-	-- Stop the camera orbit.
-	orbitConn:Disconnect()
+	-- Stop the camera orbit if it exists.
+	if orbitConn then
+		orbitConn:Disconnect()
+		orbitConn = nil
+	end
 
 	-- Fade music volume to 0 over 1 second, then destroy the Sound.
 	local musicFade = TweenService:Create(
@@ -185,6 +186,14 @@ playBtn.MouseButton1Click:Connect(function()
 
 		-- Spawn the character into the world.
 		player:LoadCharacter()
+
+		-- Reposition the spawned character near the Cybertruck for immediate race start.
+		player.CharacterAdded:Connect(function(character)
+			local root = character:WaitForChild("HumanoidRootPart", 5)
+			if root then
+				root.CFrame = CFrame.new(truckCenter + Vector3.new(10, 3, 0), truckCenter)
+			end
+		end)
 
 		-- Ensure the local player gets the Cybertruck equipped as soon as possible.
 		-- Server-side GarageHandler will place it on VehicleSpawn / selected map spawn.
