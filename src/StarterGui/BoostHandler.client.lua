@@ -17,8 +17,9 @@ local TweenService      = game:GetService("TweenService")
 local player = Players.LocalPlayer
 
 -- ── Remote events ──────────────────────────────────────────────────────────────
-local applyBoost      = ReplicatedStorage:WaitForChild("ApplyBoost")
-local bundlePurchased = ReplicatedStorage:WaitForChild("BundlePurchased")
+local remotesFolder   = ReplicatedStorage:WaitForChild("Remotes")
+local applyBoost      = remotesFolder:WaitForChild("ApplyBoost")
+local bundlePurchased = remotesFolder:WaitForChild("BundlePurchased")
 
 -- ── ScreenGui ──────────────────────────────────────────────────────────────────
 local screenGui = Instance.new("ScreenGui")

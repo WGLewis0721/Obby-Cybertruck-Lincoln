@@ -1,4 +1,3 @@
---[[ TEMPORARILY DISABLED
 -- GenerateMountainMap
 -- Procedurally generates the "Big Foot" mountain and forest map.
 -- Call Generate(parent, origin) from a server Script to build the map inside `parent`.
@@ -76,4 +75,3 @@ function GenerateMountainMap.Generate(parent, origin)
 end
 
 return GenerateMountainMap
---]]

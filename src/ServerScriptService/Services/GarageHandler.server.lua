@@ -16,23 +16,23 @@ local ServerStorage     = game:GetService("ServerStorage")
 local playerDataStore = DataStoreService:GetDataStore("PlayerData_v1")
 
 -- ── Remote events ─────────────────────────────────────────────────────────────
-local eventsFolder = ReplicatedStorage:WaitForChild("Events", 10)
-if not eventsFolder then
-	warn("GarageHandler: Events folder not found in ReplicatedStorage")
+local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+if not remotesFolder then
+	warn("GarageHandler: Remotes folder not found in ReplicatedStorage")
 	return
 end
 
-local equipVehicleEvent = eventsFolder:WaitForChild("EquipVehicle", 10)
+local equipVehicleEvent = remotesFolder:WaitForChild("EquipVehicle", 10)
 if not equipVehicleEvent then
 	warn("GarageHandler: EquipVehicle RemoteEvent not found")
 	return
 end
 
 -- ── Shared data modules ───────────────────────────────────────────────────────
-local moduleFolder  = ReplicatedStorage:WaitForChild("Module", 10)
-local vehicleData   = require(moduleFolder:WaitForChild("VehicleData"))
-local MapData       = require(moduleFolder:WaitForChild("MapData"))
-local PlayerData    = require(moduleFolder:WaitForChild("PlayerData"))
+local sharedFolder  = ReplicatedStorage:WaitForChild("Shared", 10)
+local vehicleData   = require(sharedFolder:WaitForChild("VehicleData"))
+local MapData       = require(sharedFolder:WaitForChild("MapData"))
+local PlayerData    = require(sharedFolder:WaitForChild("PlayerData"))
 
 -- ── Helper: get vehicle definition by Id ──────────────────────────────────────
 local function getVehicleById(vehicleId)
@@ -238,7 +238,7 @@ equipVehicleEvent.OnServerEvent:Connect(function(player, vehicleId)
 end)
 
 -- When the player selects a map, re-spawn their equipped vehicle at the selected map spawn.
-local selectMapEvent = eventsFolder:FindFirstChild("SelectMap")
+local selectMapEvent = remotesFolder:FindFirstChild("SelectMap")
 if selectMapEvent then
 	selectMapEvent.OnServerEvent:Connect(function(player, mapId)
 		local data = playerDataCache[player.UserId]

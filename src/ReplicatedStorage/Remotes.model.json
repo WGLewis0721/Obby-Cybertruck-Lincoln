@@ -1,0 +1,25 @@
+{
+  "ClassName": "Folder",
+  "Name": "Remotes",
+  "Children": [
+    { "Name": "OpenPaintShop",     "ClassName": "RemoteEvent" },
+    { "Name": "PurchaseSuccess",   "ClassName": "RemoteEvent" },
+    { "Name": "ApplyPaintJob",     "ClassName": "RemoteEvent" },
+    { "Name": "ApplyBoost",        "ClassName": "RemoteEvent" },
+    { "Name": "BundlePurchased",   "ClassName": "RemoteEvent" },
+    { "Name": "OwnedMapsSync",     "ClassName": "RemoteEvent" },
+    { "Name": "CheckpointReached", "ClassName": "RemoteEvent" },
+    { "Name": "RaceStarted",       "ClassName": "RemoteEvent" },
+    { "Name": "RaceFinished",      "ClassName": "RemoteEvent" },
+    { "Name": "UpdateTimer",       "ClassName": "RemoteEvent" },
+    { "Name": "CoinsAwarded",      "ClassName": "RemoteEvent" },
+    { "Name": "UpdateLeaderboard", "ClassName": "RemoteEvent" },
+    { "Name": "RaceAgain",         "ClassName": "RemoteEvent" },
+    { "Name": "GameStarted",       "ClassName": "RemoteEvent" },
+    { "Name": "MapPurchased",      "ClassName": "RemoteEvent" },
+    { "Name": "OpenGarage",        "ClassName": "RemoteEvent" },
+    { "Name": "EquipVehicle",      "ClassName": "RemoteEvent" },
+    { "Name": "OpenMapSelect",     "ClassName": "RemoteEvent" },
+    { "Name": "SelectMap",         "ClassName": "RemoteEvent" }
+  ]
+}

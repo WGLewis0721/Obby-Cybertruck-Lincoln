@@ -1,4 +1,4 @@
--- MapSelector.server.lua
+-- MapSelectHandler.server.lua
 -- Handles map selection from client and triggers exactly one map generator.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,20 +11,9 @@ local MAPS = {
 	highspeed  = {FolderName = "HighSpeedMap",    Generator = "GenerateRaceTrackMap"},
 }
 
--- Ensure Events folder + SelectMap RemoteEvent exist.
-local eventsFolder = ReplicatedStorage:FindFirstChild("Events")
-if not eventsFolder then
-	eventsFolder = Instance.new("Folder")
-	eventsFolder.Name = "Events"
-	eventsFolder.Parent = ReplicatedStorage
-end
-
-local selectMapEvent = eventsFolder:FindFirstChild("SelectMap")
-if not selectMapEvent then
-	selectMapEvent = Instance.new("RemoteEvent")
-	selectMapEvent.Name = "SelectMap"
-	selectMapEvent.Parent = eventsFolder
-end
+-- SelectMap RemoteEvent lives in the shared Remotes folder.
+local remotesFolder  = ReplicatedStorage:WaitForChild("Remotes", 10)
+local selectMapEvent = remotesFolder:WaitForChild("SelectMap", 10)
 
 -- Helper: remove all known map folders from Workspace.
 local function clearMaps()
@@ -32,7 +21,7 @@ local function clearMaps()
 		local existing = workspace:FindFirstChild(info.FolderName)
 		if existing then
 			existing:Destroy()
-			print("MapSelector: removed existing map folder", info.FolderName)
+			print("MapSelectHandler: removed existing map folder", info.FolderName)
 		end
 	end
 end
@@ -63,23 +52,23 @@ for id, info in pairs(MAPS) do
 		if ok and module and type(module.Generate) == "function" then
 			generators[id] = module.Generate
 		else
-			warn("MapSelector: failed to require generator module", info.Generator, "(module type:", module and type(module) or "nil", ")")
+			warn("MapSelectHandler: failed to require generator module", info.Generator, "(module type:", module and type(module) or "nil", ")")
 		end
 	else
-		warn("MapSelector: missing generator ModuleScript", info.Generator)
+		warn("MapSelectHandler: missing generator ModuleScript", info.Generator)
 	end
 end
 
 local function generateMap(mapId)
 	local generator = generators[mapId]
 	if not generator then
-		warn("MapSelector: generator function unavailable for", mapId, "(check whether the .lua is imported as ModuleScript)")
+		warn("MapSelectHandler: generator function unavailable for", mapId, "(check whether the .lua is imported as ModuleScript)")
 		return false
 	end
 
 	local mapInfo = MAPS[mapId]
 	if not mapInfo then
-		warn("MapSelector: unknown map id while generating", mapId)
+		warn("MapSelectHandler: unknown map id while generating", mapId)
 		return false
 	end
 
@@ -90,11 +79,11 @@ local function generateMap(mapId)
 		generator(workspace)
 	end)
 	if not success then
-		warn("MapSelector: map generator failed for", mapId, err)
+		warn("MapSelectHandler: map generator failed for", mapId, err)
 		return false
 	end
 
-	print("MapSelector: map generation complete for", mapId)
+	print("MapSelectHandler: map generation complete for", mapId)
 	return true
 end
 
@@ -112,31 +101,31 @@ local function ensureMapSelected()
 	local hasFolder = MAPS[active] and workspace:FindFirstChild(MAPS[active].FolderName)
 
 	if current == active and hasFolder then
-		print("MapSelector: active map already selected and present:", active)
+		print("MapSelectHandler: active map already selected and present:", active)
 		return
 	end
 
-	print("MapSelector: ensuring map selected; active=", active, "selected=", current, "hasFolder=", tostring(hasFolder))
+	print("MapSelectHandler: ensuring map selected; active=", active, "selected=", current, "hasFolder=", tostring(hasFolder))
 	if not hasFolder then
-		print("MapSelector: existing map folder missing, generating", active)
+		print("MapSelectHandler: existing map folder missing, generating", active)
 	end
 	generateMap(active)
 end
 
 selectMapEvent.OnServerEvent:Connect(function(player, mapId)
 	if type(mapId) ~= "string" then
-		warn("MapSelector: invalid mapId type from", player.Name)
+		warn("MapSelectHandler: invalid mapId type from", player.Name)
 		return
 	end
 
 	mapId = mapId:lower()
 	local info = MAPS[mapId]
 	if not info then
-		warn("MapSelector: unknown mapId from", player.Name, mapId)
+		warn("MapSelectHandler: unknown mapId from", player.Name, mapId)
 		return
 	end
 
-	print("MapSelector: player", player.Name, "selected map", mapId)
+	print("MapSelectHandler: player", player.Name, "selected map", mapId)
 	generateMap(mapId)
 end)
 

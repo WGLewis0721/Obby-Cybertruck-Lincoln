@@ -21,8 +21,8 @@ local ServerStorage     = game:GetService("ServerStorage")
 local playerDataStore = DataStoreService:GetDataStore("PlayerData_v1")
 
 -- ── Shared module ─────────────────────────────────────────────────────────────
-local moduleFolder = ReplicatedStorage:WaitForChild("Module", 10)
-local PlayerData   = require(moduleFolder:WaitForChild("PlayerData"))
+local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+local PlayerData   = require(sharedFolder:WaitForChild("PlayerData"))
 
 -- ── BindableFunction ──────────────────────────────────────────────────────────
 local raceHandlers    = ServerStorage:WaitForChild("RaceHandlers", 30)

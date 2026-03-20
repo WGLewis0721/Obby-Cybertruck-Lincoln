@@ -13,15 +13,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player        = Players.LocalPlayer
 local playerGui     = player:WaitForChild("PlayerGui")
 local camera        = Workspace.CurrentCamera
-local openPaintShop = ReplicatedStorage:WaitForChild("OpenPaintShop", 10)
-local eventsFolder  = ReplicatedStorage:WaitForChild("Events", 10)
-local equipVehicleEvent = eventsFolder and eventsFolder:FindFirstChild("EquipVehicle")
+local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+local openPaintShop = remotesFolder and remotesFolder:WaitForChild("OpenPaintShop", 10)
+local equipVehicleEvent = remotesFolder and remotesFolder:FindFirstChild("EquipVehicle")
 
 if not openPaintShop then
 	warn("MainMenu: OpenPaintShop RemoteEvent not found")
 end
-if not eventsFolder then
-	warn("MainMenu: Events folder not found in ReplicatedStorage")
+if not remotesFolder then
+	warn("MainMenu: Remotes folder not found in ReplicatedStorage")
 end
 if not equipVehicleEvent then
 	warn("MainMenu: EquipVehicle RemoteEvent not found")

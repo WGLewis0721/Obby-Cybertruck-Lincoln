@@ -16,15 +16,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
 
 -- ── Shared modules ────────────────────────────────────────────────────────────
-local moduleFolder = ReplicatedStorage:WaitForChild("Module", 10)
-local MapData      = require(moduleFolder:WaitForChild("MapData"))
+local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+local MapData      = require(sharedFolder:WaitForChild("MapData"))
 
--- ── Remote events (Race folder declared in default.project.json) ──────────────
-local raceFolder         = ReplicatedStorage:WaitForChild("Race", 10)
-local checkpointReached  = raceFolder:WaitForChild("CheckpointReached", 10)
-local raceStartedRemote  = raceFolder:WaitForChild("RaceStarted", 10)
-local raceFinishedRemote = raceFolder:WaitForChild("RaceFinished", 10)
-local raceAgainRemote    = raceFolder:WaitForChild("RaceAgain", 10)
+-- ── Remote events (Remotes folder declared via Remotes.model.json) ────────────
+local remotesFolder      = ReplicatedStorage:WaitForChild("Remotes", 10)
+local checkpointReached  = remotesFolder:WaitForChild("CheckpointReached", 10)
+local raceStartedRemote  = remotesFolder:WaitForChild("RaceStarted", 10)
+local raceFinishedRemote = remotesFolder:WaitForChild("RaceFinished", 10)
+local raceAgainRemote    = remotesFolder:WaitForChild("RaceAgain", 10)
 
 -- ── BindableFunctions (set up by TimerHandler / CoinHandler on server) ────────
 local raceHandlers     = ServerStorage:WaitForChild("RaceHandlers", 30)

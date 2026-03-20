@@ -15,3 +15,12 @@ fix*.lua
 *.md.server.lua
 *.md.lua
 src/Workspace/Export.gltf
+
+# Cleanup scripts
+cleanup*.js
+
+# Markdown files accidentally synced by Rojo
+*.md.client.lua
+
+# Rojo build output
+*.rbxl

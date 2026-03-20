@@ -3,23 +3,22 @@ local Players            = game:GetService("Players")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage  = game:GetService("ReplicatedStorage")
 
-local openPaintShop   = ReplicatedStorage:WaitForChild("OpenPaintShop")
-local applyBoost      = ReplicatedStorage:WaitForChild("ApplyBoost")
-local bundlePurchased = ReplicatedStorage:WaitForChild("BundlePurchased")
+local remotesFolder   = ReplicatedStorage:WaitForChild("Remotes")
+local openPaintShop   = remotesFolder:WaitForChild("OpenPaintShop")
+local applyBoost      = remotesFolder:WaitForChild("ApplyBoost")
+local bundlePurchased = remotesFolder:WaitForChild("BundlePurchased")
 -- Fires to the purchasing client when a map product purchase is confirmed
-local mapPurchased    = ReplicatedStorage:WaitForChild("MapPurchased")
+local mapPurchased    = remotesFolder:WaitForChild("MapPurchased")
 -- Fires to the client when the shop opens so it can initialise owned-map state
-local ownedMapsSync   = ReplicatedStorage:WaitForChild("OwnedMapsSync")
-
-local eventsFolder  = ReplicatedStorage:WaitForChild("Events")
-local openGarage    = eventsFolder:WaitForChild("OpenGarage")
+local ownedMapsSync   = remotesFolder:WaitForChild("OwnedMapsSync")
+local openGarage      = remotesFolder:WaitForChild("OpenGarage")
 
 -- ── Shared data modules ───────────────────────────────────────────────────────
-local moduleFolder = ReplicatedStorage:WaitForChild("Module")
-local VehicleData  = require(moduleFolder:WaitForChild("VehicleData"))
-local ShopItems    = require(moduleFolder:WaitForChild("ShopItems"))
+local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
+local VehicleData  = require(sharedFolder:WaitForChild("VehicleData"))
+local ShopItems    = require(sharedFolder:WaitForChild("ShopItems"))
 -- MapData provides the purchasable map definitions (ProductIds, prices, etc.)
-local MapData      = require(moduleFolder:WaitForChild("MapData"))
+local MapData      = require(sharedFolder:WaitForChild("MapData"))
 
 -- ── DataStore (same store as GarageHandler) ───────────────────────────────────
 local playerDataStore = DataStoreService:GetDataStore("PlayerData_v1")
