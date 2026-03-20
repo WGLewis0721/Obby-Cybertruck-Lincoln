@@ -1,6 +1,6 @@
 -- GameHUD.client.lua
 -- Main gameplay navigation buttons shown during play.
--- Hidden until the server fires GameStarted.
+-- Revealed when the player's character spawns.
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,7 +11,6 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remotes ───────────────────────────────────────────────────────────────────
 local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
-local gameStarted   = remotesFolder:WaitForChild("GameStarted")
 local openPaintShop = remotesFolder:WaitForChild("OpenPaintShop")
 local openGarage    = remotesFolder:WaitForChild("OpenGarage")
 
@@ -146,8 +145,8 @@ mapBtn.MouseButton1Click:Connect(function()
 	end)
 end)
 
--- ── GameStarted: reveal HUD with slide-in animation ───────────────────────────
-gameStarted.OnClientEvent:Connect(function()
+-- ── Reveal HUD when the character spawns ─────────────────────────────────────
+local function showHUD()
 	screenGui.Enabled = true
 	container.Position = UDim2.new(-0.2, 0, 0.5, 0)
 
@@ -156,4 +155,13 @@ gameStarted.OnClientEvent:Connect(function()
 		TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 		{ Position = UDim2.new(0, 12, 0.5, 0) }
 	):Play()
-end)
+end
+
+if player.Character then
+	showHUD()
+else
+	player.CharacterAdded:Connect(function()
+		task.wait(0.5) -- brief pause so the character fully loads before the HUD slides in
+		showHUD()
+	end)
+end
