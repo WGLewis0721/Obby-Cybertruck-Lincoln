@@ -23,10 +23,10 @@
     Last Updated: 2026
 
     Dependencies:
-        - ReplicatedStorage.Remotes.ApplyBoost (S→C, used for local boost apply)
+        - ReplicatedStorage.Remotes.ApplyBoost (C→S, fired when Boost button is tapped)
 
     Events Fired:
-        - None  (boost is applied locally, same as BoostHandler.client.lua)
+        - Remotes.ApplyBoost (C→S, on Boost button tap)
 
     Events Listened:
         - None
@@ -47,11 +47,12 @@ if not isMobile then return end
 -- ── Player reference ─────────────────────────────────────────────────────────
 local player = Players.LocalPlayer
 
+-- ── Logger ────────────────────────────────────────────────────────────────────
+local Logger = require(
+	ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+
 -- ── Remote events ─────────────────────────────────────────────────────────────
--- ApplyBoost is Server→Client; we expose the same local helper BoostHandler uses
--- so the mobile Boost button re-applies the speed multiplier without a server round-trip.
 local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
-remotesFolder:WaitForChild("ApplyBoost")  -- wait to confirm Remotes are ready
 
 -- ── Theme constants ────────────────────────────────────────────────────────────
 local COLOR_BG      = Color3.fromRGB(20, 20, 25)
@@ -70,27 +71,6 @@ local steerRightHeld = false
 local isActive       = false      -- true while player is in DriveSeat
 local currentSeat    = nil        -- VehicleSeat reference
 local renderConn     = nil        -- RenderStepped connection
-
--- ── Boost tracker (mirrors BoostHandler.client.lua logic) ─────────────────────
-local boostedVehicle = nil
-
-local function applyBoostToVehicle()
-	local vehicleModel = workspace:FindFirstChild("Vehicle_" .. player.UserId)
-	if not vehicleModel then return end
-	if boostedVehicle == vehicleModel then return end
-	local maxSpeedVal = vehicleModel:FindFirstChild("MaxSpeed", true)
-	if maxSpeedVal and maxSpeedVal:IsA("NumberValue") then
-		maxSpeedVal.Value = maxSpeedVal.Value * 1.3
-		boostedVehicle = vehicleModel
-	end
-end
-
--- Reset boost tracker when the player's vehicle model is replaced
-workspace.ChildAdded:Connect(function(child)
-	if child.Name == "Vehicle_" .. player.UserId then
-		boostedVehicle = nil
-	end
-end)
 
 -- ── Reset vehicle ─────────────────────────────────────────────────────────────
 local function resetVehicle()
@@ -215,10 +195,10 @@ local function styleCASFrame(frame, label)
 end
 
 -- ── Tap-only buttons (ScreenGui, not CAS) ─────────────────────────────────────
--- Left side, 3rd column: Reset ↺
+-- Left side, above steer left: Reset ↺
 local resetFrame, resetBtn = makeButton(
 	"Reset", "↺",
-	UDim2.new(0, PAD + (BTN_SIZE + PAD) * 2, 1, -(BTN_SIZE + PAD))
+	UDim2.new(0, PAD, 1, -(BTN_SIZE * 2 + PAD * 2))
 )
 resetBtn.MouseButton1Click:Connect(function()
 	setPressed(resetFrame, true)
@@ -235,7 +215,17 @@ local boostFrame, boostBtn = makeButton(
 )
 boostBtn.MouseButton1Click:Connect(function()
 	setPressed(boostFrame, true)
-	applyBoostToVehicle()
+	local remotes = ReplicatedStorage:WaitForChild("Remotes", 5)
+	if remotes then
+		local applyBoost = remotes:WaitForChild("ApplyBoost", 5)
+		if applyBoost then
+			applyBoost:FireServer()
+		else
+			Logger.Warn("MobileControls", "ApplyBoost RemoteEvent not found")
+		end
+	else
+		Logger.Warn("MobileControls", "Remotes folder not found")
+	end
 	task.delay(0.15, function()
 		setPressed(boostFrame, false)
 	end)
@@ -367,6 +357,7 @@ local function showControls(driveSeat)
 	screenGui.Enabled  = true
 	bindDriveControls()
 	startRenderLoop()
+	player:SetAttribute("IsDriving", true)
 end
 
 -- ── Hide controls ─────────────────────────────────────────────────────────────
@@ -377,6 +368,7 @@ local function hideControls()
 	resetInputs()
 	stopRenderLoop()
 	currentSeat = nil
+	player:SetAttribute("IsDriving", false)
 end
 
 -- ── Seat detection ────────────────────────────────────────────────────────────
