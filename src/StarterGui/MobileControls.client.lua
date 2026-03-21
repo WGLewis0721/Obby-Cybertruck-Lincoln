@@ -43,10 +43,14 @@ local player = Players.LocalPlayer
 local Logger = require(
 	ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
 
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes")
-local applyBoost    = remotesFolder:WaitForChild("ApplyBoost", 10)
+local remotesFolder  = ReplicatedStorage:WaitForChild("Remotes")
+local applyBoost     = remotesFolder:WaitForChild("ApplyBoost", 10)
+local mobileThrottle = remotesFolder:WaitForChild("MobileThrottle", 10)
 if not applyBoost then
 	Logger.Warn("MobileControls", "ApplyBoost RemoteEvent not found")
+end
+if not mobileThrottle then
+	Logger.Warn("MobileControls", "MobileThrottle RemoteEvent not found — server-side throttle disabled")
 end
 
 -- ── Responsive sizing ─────────────────────────────────────────────────────────
@@ -203,15 +207,28 @@ boostBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ── Accelerate button (CAS) ───────────────────────────────────────────────────
--- Bottom-right corner.  Returns Pass so A-Chassis's DealWithInput receives
--- the KeyCode.Up event through UserInputService.InputBegan.
+-- Bottom-right corner.
+-- Only Begin/End/Cancel update throttleHeld.  CAS also fires Change events
+-- (touch position jitter) which must be ignored — otherwise throttleHeld
+-- would reset to false mid-press and the vehicle would stop immediately.
+-- The MobileThrottle RemoteEvent tells the server to set VehicleSeat.Throttle
+-- directly, bypassing the native VehicleController which would otherwise
+-- reset Throttle = 0 every frame (it sees no keyboard/joystick input on mobile).
 local function bindDriveControls()
 	ContextActionService:BindAction(
 		"MC_Throttle",
 		function(_, inputState, _)
-			local pressed = inputState == Enum.UserInputState.Begin
-			throttleHeld = pressed
-			if accelFrame then setPressed(accelFrame, pressed) end
+			if inputState == Enum.UserInputState.Begin then
+				throttleHeld = true
+				if accelFrame then setPressed(accelFrame, true) end
+				if mobileThrottle then mobileThrottle:FireServer(1) end
+			elseif inputState == Enum.UserInputState.End
+				or inputState == Enum.UserInputState.Cancel then
+				throttleHeld = false
+				if accelFrame then setPressed(accelFrame, false) end
+				if mobileThrottle then mobileThrottle:FireServer(0) end
+			end
+			-- Ignore Change — CAS fires it for touch-position jitter while held.
 			return Enum.ContextActionResult.Pass
 		end,
 		true,               -- createTouchButton
@@ -267,6 +284,10 @@ end
 local function showControls(driveSeat)
 	currentSeat       = driveSeat
 	isActive          = true
+	-- Disable the native VehicleController so it stops resetting
+	-- VehicleSeat.Throttle = 0 every frame (it sees no keyboard / joystick input
+	-- on mobile, so it would immediately override our throttle writes).
+	currentSeat.Disabled = true
 	screenGui.Enabled = true
 	bindDriveControls()
 	startRenderLoop()
@@ -275,6 +296,11 @@ end
 
 local function hideControls()
 	isActive          = false
+	-- Re-enable the native VehicleController so desktop / gamepad players
+	-- can still drive if the seat is reused.
+	if currentSeat then
+		currentSeat.Disabled = false
+	end
 	screenGui.Enabled = false
 	unbindDriveControls()
 	resetInputs()
