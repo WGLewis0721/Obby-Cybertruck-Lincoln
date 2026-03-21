@@ -15,6 +15,7 @@ local Logger = require(sharedFolder:WaitForChild("Logger", 10))
 local TAG = "GenerateCityMap"
 local MAP_NAME = "SkyscraperMap"
 local SPAWN_NAME = "SkyscraperSpawn"
+local SPAWN_OFFSET = Vector3.new(-10, 3, 0)
 
 local ROAD_COLOR = Color3.fromRGB(54, 58, 66)
 local CURB_COLOR = Color3.fromRGB(120, 123, 132)
@@ -137,9 +138,37 @@ local function ensureSelectedMap()
     end
 end
 
+local function ensureVehicleSpawn(parent, origin)
+    local spawn = parent:FindFirstChild(SPAWN_NAME)
+    if spawn and not spawn:IsA("BasePart") then
+        spawn:Destroy()
+        spawn = nil
+    end
+
+    if not spawn then
+        spawn = Instance.new("Part")
+        spawn.Name = SPAWN_NAME
+        spawn.Size = Vector3.new(16, 1, 16)
+        spawn.Anchored = true
+        spawn.CanCollide = false
+        spawn.Transparency = 1
+        spawn.Material = Enum.Material.Metal
+        spawn.Color = ACCENT_COLOR
+        spawn.TopSurface = Enum.SurfaceType.Smooth
+        spawn.BottomSurface = Enum.SurfaceType.Smooth
+        spawn.Parent = parent
+    end
+
+    spawn.CFrame = CFrame.new(origin + SPAWN_OFFSET)
+    return spawn
+end
+
 local function buildMap()
-    if workspace:FindFirstChild(MAP_NAME) then
-        Logger.Info(TAG, "%s already exists in Workspace", MAP_NAME)
+    local origin = Vector3.new(0, 0, 0)
+    local existingMap = workspace:FindFirstChild(MAP_NAME)
+    if existingMap and existingMap:IsA("Model") then
+        ensureVehicleSpawn(existingMap, origin)
+        Logger.Info(TAG, "%s already exists in Workspace; updated %s", MAP_NAME, SPAWN_NAME)
         ensureSelectedMap()
         return
     end
@@ -147,8 +176,6 @@ local function buildMap()
     local mapModel = Instance.new("Model")
     mapModel.Name = MAP_NAME
     mapModel.Parent = workspace
-
-    local origin = Vector3.new(0, 0, 0)
 
     makePart(
         mapModel,
@@ -159,18 +186,7 @@ local function buildMap()
         Enum.Material.Concrete
     )
 
-    local spawn = Instance.new("Part")
-    spawn.Name = SPAWN_NAME
-    spawn.Size = Vector3.new(16, 1, 16)
-    spawn.CFrame = CFrame.new(origin + Vector3.new(-40, 3, 0))
-    spawn.Anchored = true
-    spawn.CanCollide = false
-    spawn.Transparency = 1
-    spawn.Material = Enum.Material.Metal
-    spawn.Color = ACCENT_COLOR
-    spawn.TopSurface = Enum.SurfaceType.Smooth
-    spawn.BottomSurface = Enum.SurfaceType.Smooth
-    spawn.Parent = mapModel
+    ensureVehicleSpawn(mapModel, origin)
 
     for segmentIndex = 0, SEGMENT_COUNT - 1 do
         local segmentPosition = origin + Vector3.new(segmentIndex * SEGMENT_STEP_X, segmentIndex * SEGMENT_RISE, 0)

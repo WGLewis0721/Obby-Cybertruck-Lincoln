@@ -33,6 +33,7 @@
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
+local Workspace         = game:GetService("Workspace")
 
 -- 2. Constants & shared modules
 local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
@@ -88,6 +89,62 @@ local function getDriverSeat(vehicle)
 	end
 
 	return vehicle:FindFirstChildWhichIsA("VehicleSeat", true)
+end
+
+local function removeLegacyWorkspaceTemplate(modelName)
+	local legacyModel = workspace:FindFirstChild(modelName)
+	if not legacyModel or not legacyModel:IsA("Model") then
+		return
+	end
+
+	legacyModel:Destroy()
+	Logger.Info(TAG, "Removed legacy Workspace template '%s' before spawning player vehicle", modelName)
+end
+
+local function getModelLowestOffset(model, referencePart)
+	local lowestOffset = 0
+
+	for _, descendant in ipairs(model:GetDescendants()) do
+		if descendant:IsA("BasePart") then
+			local halfSize = descendant.Size * 0.5
+			for xSign = -1, 1, 2 do
+				for ySign = -1, 1, 2 do
+					for zSign = -1, 1, 2 do
+						local corner = descendant.CFrame:PointToWorldSpace(Vector3.new(
+							halfSize.X * xSign,
+							halfSize.Y * ySign,
+							halfSize.Z * zSign
+						))
+						local offset = corner.Y - referencePart.Position.Y
+						if offset < lowestOffset then
+							lowestOffset = offset
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return lowestOffset
+end
+
+local function getSurfaceY(spawnPart, fallbackY)
+	if not spawnPart or not spawnPart:IsA("BasePart") then
+		return fallbackY
+	end
+
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+	raycastParams.FilterDescendantsInstances = { spawnPart }
+
+	local origin = spawnPart.Position + Vector3.new(0, 64, 0)
+	local direction = Vector3.new(0, -256, 0)
+	local result = Workspace:Raycast(origin, direction, raycastParams)
+	if result then
+		return result.Position.Y
+	end
+
+	return fallbackY
 end
 
 local function scheduleAutoSpawn(player, character)
@@ -162,6 +219,7 @@ end
 
 local function spawnVehicle(player, vehicle)
 	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
+	local chosenSpawnPart = nil
 
 	-- Remove old vehicle
 	local existing = workspace:FindFirstChild(vehicleName)
@@ -174,6 +232,8 @@ local function spawnVehicle(player, vehicle)
 		Logger.Warn(TAG, "Model '%s' not found in ServerStorage", vehicle.ModelName)
 		return
 	end
+
+	removeLegacyWorkspaceTemplate(vehicle.ModelName)
 
 	local newVehicle = modelTemplate:Clone()
 	newVehicle.Name = vehicleName
@@ -190,6 +250,7 @@ local function spawnVehicle(player, vehicle)
 	local spawnMarker = workspace:FindFirstChild("VehicleSpawn")
 	if spawnMarker and spawnMarker:IsA("BasePart") then
 		spawnCFrame = spawnMarker.CFrame
+		chosenSpawnPart = spawnMarker
 	else
 		local selectedMap = workspace:GetAttribute("SelectedMap")
 		if selectedMap then
@@ -198,6 +259,7 @@ local function spawnVehicle(player, vehicle)
 					local mapSpawn = workspace:FindFirstChild(mapInfo.SpawnName, true)
 					if mapSpawn and mapSpawn:IsA("BasePart") then
 						spawnCFrame = mapSpawn.CFrame
+						chosenSpawnPart = mapSpawn
 						break
 					end
 				end
@@ -220,7 +282,12 @@ local function spawnVehicle(player, vehicle)
 	end
 
 	if newVehicle.PrimaryPart then
-		newVehicle:SetPrimaryPartCFrame(spawnCFrame)
+		local lowestOffset = getModelLowestOffset(newVehicle, newVehicle.PrimaryPart)
+		local surfaceY = getSurfaceY(chosenSpawnPart, spawnCFrame.Position.Y)
+		local clearance = 0.25
+		local lift = math.max(0, surfaceY + clearance - (spawnCFrame.Position.Y + lowestOffset))
+
+		newVehicle:SetPrimaryPartCFrame(spawnCFrame + Vector3.new(0, lift, 0))
 	else
 		newVehicle:PivotTo(spawnCFrame)
 	end
