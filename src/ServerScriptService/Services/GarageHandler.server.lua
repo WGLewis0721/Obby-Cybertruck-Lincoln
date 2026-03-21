@@ -32,7 +32,6 @@
 -- 1. Services
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerStorage     = game:GetService("ServerStorage")
 local Workspace         = game:GetService("Workspace")
 
 -- 2. Constants & shared modules
@@ -46,6 +45,7 @@ local PlayerData   = require(sharedFolder:WaitForChild("PlayerData", 10))
 -- 3. Server-only dependencies
 local servicesFolder      = script.Parent
 local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInterface", 10))
+local VehicleTemplateFactory = require(servicesFolder:WaitForChild("VehicleTemplateFactory", 10))
 local EventBus            = require(sharedFolder:WaitForChild("EventBus", 10))
 
 local TAG = "GarageHandler"
@@ -305,7 +305,7 @@ local function spawnVehicle(player, vehicle)
 		Logger.Warn(TAG, "Removed %d stale vehicles for %s before spawning", destroyedCount, player.Name)
 	end
 
-	local modelTemplate = ServerStorage:FindFirstChild(vehicle.ModelName)
+	local modelTemplate = VehicleTemplateFactory.EnsureTemplate(vehicle.ModelName)
 	if not modelTemplate then
 		Logger.Warn(TAG, "Model '%s' not found in ServerStorage", vehicle.ModelName)
 		return
@@ -315,11 +315,10 @@ local function spawnVehicle(player, vehicle)
 
 	local newVehicle = modelTemplate:Clone()
 	newVehicle.Name = vehicleName
-	if not newVehicle.PrimaryPart then
-		local driverSeat = getDriverSeat(newVehicle)
-		if driverSeat then
-			newVehicle.PrimaryPart = driverSeat
-		end
+	local driveSeat = VehicleTemplateFactory.PrepareForSpawn(newVehicle)
+	if not driveSeat then
+		Logger.Warn(TAG, "Spawned clone for '%s' is missing a VehicleSeat", vehicle.ModelName)
+		return
 	end
 
 	-- Determine spawn CFrame (priority: VehicleSpawn > map spawn > HumanoidRootPart > origin)
@@ -493,4 +492,5 @@ if openGarageEvent then
 end
 
 -- 7. Initialization
+VehicleTemplateFactory.EnsureTemplate("Tesla Cybertruck")
 Logger.Info(TAG, "GarageHandler ready")

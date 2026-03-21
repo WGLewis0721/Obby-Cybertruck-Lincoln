@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ServerScriptService = game:GetService("ServerScriptService")
+local vehicleTemplateFactory = require(ServerScriptService:WaitForChild("Services"):WaitForChild("VehicleTemplateFactory"))
 
 -- Let Roblox handle the initial spawn normally. Forcing LoadCharacter here
 -- creates duplicate CharacterAdded flows and double vehicle spawns.
@@ -26,5 +27,7 @@ for _, scriptName in ipairs(legacyRootScriptNames) do
 		print(string.format("Removed legacy root script '%s' from ServerScriptService", scriptName))
 	end
 end
+
+vehicleTemplateFactory.EnsureTemplate("Tesla Cybertruck")
 
 print("CharacterAutoLoads enabled")
