@@ -20,6 +20,7 @@
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService      = game:GetService("TweenService")
+local UserInputService  = game:GetService("UserInputService")
 
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -196,3 +197,12 @@ else
 		showHUD()
 	end)
 end
+
+-- ── Mobile: hide HUD while driving to prevent overlap with MobileControls ─────
+player:GetAttributeChangedSignal("IsDriving"):Connect(function()
+	local isDriving = player:GetAttribute("IsDriving")
+	if UserInputService.TouchEnabled
+		and not UserInputService.KeyboardEnabled then
+		container.Visible = not isDriving
+	end
+end)
