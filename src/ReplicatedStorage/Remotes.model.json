@@ -18,6 +18,7 @@
     { "Name": "OpenGarage",        "ClassName": "RemoteEvent" },
     { "Name": "EquipVehicle",      "ClassName": "RemoteEvent" },
     { "Name": "OpenMapSelect",     "ClassName": "RemoteEvent" },
-    { "Name": "SelectMap",         "ClassName": "RemoteEvent" }
+    { "Name": "SelectMap",         "ClassName": "RemoteEvent" },
+    { "Name": "Horn",              "ClassName": "RemoteEvent" }
   ]
 }
