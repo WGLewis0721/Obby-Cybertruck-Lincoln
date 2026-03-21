@@ -199,10 +199,11 @@ else
 end
 
 -- ── Mobile: hide HUD while driving to prevent overlap with MobileControls ─────
-local isMobile = UserInputService.TouchEnabled
-	and not UserInputService.KeyboardEnabled
+-- Treat any touch-capable client as eligible so the HUD state stays correct
+-- in Studio's device emulator and on touch devices with keyboard support.
+local isTouchDevice = UserInputService.TouchEnabled
 
-if isMobile then
+if isTouchDevice then
 	player:GetAttributeChangedSignal("IsDriving"):Connect(function()
 		local isDriving = player:GetAttribute("IsDriving")
 		container.Visible = not isDriving

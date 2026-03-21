@@ -16,6 +16,7 @@ local TAG = "GenerateCityMap"
 local MAP_NAME = "SkyscraperMap"
 local SPAWN_NAME = "SkyscraperSpawn"
 local SPAWN_OFFSET = Vector3.new(-10, 3, 0)
+local OUT_OF_BOUNDS_ATTRIBUTE = "OutOfBoundsKill"
 
 local ROAD_COLOR = Color3.fromRGB(54, 58, 66)
 local CURB_COLOR = Color3.fromRGB(120, 123, 132)
@@ -31,6 +32,15 @@ local SEGMENT_LENGTH = 60
 local SEGMENT_STEP_X = 90
 local SEGMENT_RISE = 8
 local SEGMENT_COUNT = 6
+local STREET_GROUND_CENTER_OFFSET = Vector3.new(220, -2, 0)
+local STREET_GROUND_SIZE = Vector3.new(700, 2, 220)
+local OUT_OF_BOUNDS_FLOOR_OFFSET = Vector3.new(220, -45, 0)
+local OUT_OF_BOUNDS_FLOOR_SIZE = Vector3.new(900, 24, 360)
+local OUT_OF_BOUNDS_WALL_HALF_X = 380
+local OUT_OF_BOUNDS_WALL_HALF_Z = 150
+local OUT_OF_BOUNDS_WALL_HEIGHT = 180
+local OUT_OF_BOUNDS_WALL_THICKNESS = 16
+local OUT_OF_BOUNDS_WALL_Y = 40
 
 local function makePart(parent, name, size, cframe, color, material)
     local part = Instance.new("Part")
@@ -163,11 +173,77 @@ local function ensureVehicleSpawn(parent, origin)
     return spawn
 end
 
+local function ensureOutOfBoundsPart(parent, name, size, cframe)
+    local part = parent:FindFirstChild(name)
+    if part and not part:IsA("BasePart") then
+        part:Destroy()
+        part = nil
+    end
+
+    if not part then
+        part = Instance.new("Part")
+        part.Name = name
+        part.Anchored = true
+        part.CanCollide = false
+        part.Transparency = 1
+        part.CastShadow = false
+        part.Material = Enum.Material.ForceField
+        part.Color = ACCENT_COLOR
+        part.TopSurface = Enum.SurfaceType.Smooth
+        part.BottomSurface = Enum.SurfaceType.Smooth
+        part:SetAttribute(OUT_OF_BOUNDS_ATTRIBUTE, true)
+        part.Parent = parent
+    end
+
+    part.Size = size
+    part.CFrame = cframe
+    part:SetAttribute(OUT_OF_BOUNDS_ATTRIBUTE, true)
+    return part
+end
+
+local function ensureOutOfBoundsVolumes(parent, origin)
+    local center = origin + Vector3.new(STREET_GROUND_CENTER_OFFSET.X, OUT_OF_BOUNDS_WALL_Y, STREET_GROUND_CENTER_OFFSET.Z)
+    local xSpan = (OUT_OF_BOUNDS_WALL_HALF_X * 2) + OUT_OF_BOUNDS_WALL_THICKNESS
+    local zSpan = (OUT_OF_BOUNDS_WALL_HALF_Z * 2) + OUT_OF_BOUNDS_WALL_THICKNESS
+
+    ensureOutOfBoundsPart(
+        parent,
+        "OutOfBounds_Floor",
+        OUT_OF_BOUNDS_FLOOR_SIZE,
+        CFrame.new(origin + OUT_OF_BOUNDS_FLOOR_OFFSET)
+    )
+    ensureOutOfBoundsPart(
+        parent,
+        "OutOfBounds_West",
+        Vector3.new(OUT_OF_BOUNDS_WALL_THICKNESS, OUT_OF_BOUNDS_WALL_HEIGHT, zSpan),
+        CFrame.new(center + Vector3.new(-(OUT_OF_BOUNDS_WALL_HALF_X + OUT_OF_BOUNDS_WALL_THICKNESS * 0.5), 0, 0))
+    )
+    ensureOutOfBoundsPart(
+        parent,
+        "OutOfBounds_East",
+        Vector3.new(OUT_OF_BOUNDS_WALL_THICKNESS, OUT_OF_BOUNDS_WALL_HEIGHT, zSpan),
+        CFrame.new(center + Vector3.new(OUT_OF_BOUNDS_WALL_HALF_X + OUT_OF_BOUNDS_WALL_THICKNESS * 0.5, 0, 0))
+    )
+    ensureOutOfBoundsPart(
+        parent,
+        "OutOfBounds_North",
+        Vector3.new(xSpan, OUT_OF_BOUNDS_WALL_HEIGHT, OUT_OF_BOUNDS_WALL_THICKNESS),
+        CFrame.new(center + Vector3.new(0, 0, OUT_OF_BOUNDS_WALL_HALF_Z + OUT_OF_BOUNDS_WALL_THICKNESS * 0.5))
+    )
+    ensureOutOfBoundsPart(
+        parent,
+        "OutOfBounds_South",
+        Vector3.new(xSpan, OUT_OF_BOUNDS_WALL_HEIGHT, OUT_OF_BOUNDS_WALL_THICKNESS),
+        CFrame.new(center + Vector3.new(0, 0, -(OUT_OF_BOUNDS_WALL_HALF_Z + OUT_OF_BOUNDS_WALL_THICKNESS * 0.5)))
+    )
+end
+
 local function buildMap()
     local origin = Vector3.new(0, 0, 0)
     local existingMap = workspace:FindFirstChild(MAP_NAME)
     if existingMap and existingMap:IsA("Model") then
         ensureVehicleSpawn(existingMap, origin)
+        ensureOutOfBoundsVolumes(existingMap, origin)
         Logger.Info(TAG, "%s already exists in Workspace; updated %s", MAP_NAME, SPAWN_NAME)
         ensureSelectedMap()
         return
@@ -180,13 +256,14 @@ local function buildMap()
     makePart(
         mapModel,
         "StreetGround",
-        Vector3.new(700, 2, 220),
-        CFrame.new(origin + Vector3.new(220, -2, 0)),
+        STREET_GROUND_SIZE,
+        CFrame.new(origin + STREET_GROUND_CENTER_OFFSET),
         Color3.fromRGB(36, 38, 44),
         Enum.Material.Concrete
     )
 
     ensureVehicleSpawn(mapModel, origin)
+    ensureOutOfBoundsVolumes(mapModel, origin)
 
     for segmentIndex = 0, SEGMENT_COUNT - 1 do
         local segmentPosition = origin + Vector3.new(segmentIndex * SEGMENT_STEP_X, segmentIndex * SEGMENT_RISE, 0)

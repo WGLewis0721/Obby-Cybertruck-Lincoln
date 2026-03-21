@@ -532,33 +532,43 @@ s2:Stop()</ProtectedString>
 				</Item>
 				<Item class="LocalScript" referent="RBX18B180847E854325A05535629E49BD3C">
 					<Properties>
-						<ProtectedString name="Source">local car = script.Parent.Car.Value
+						<ProtectedString name="Source">local car = script.Parent:WaitForChild("Car").Value
 local rs = game:GetService("RunService")
-local WheelModel = car:WaitForChild("Wheels")
+local wheelModel = car:WaitForChild("Wheels")
 local handler = car:WaitForChild("DustEvent")
-local touchingparts = {}
+local touchingParts = {}
 
-for i,v in pairs(WheelModel:GetChildren()) do
-	v.Touched:connect(function(part)
-		touchingparts[i] = part
+for index, wheel in pairs(wheelModel:GetChildren()) do
+	wheel.Touched:Connect(function(part)
+		touchingParts[index] = part
 	end)
 end
 
 rs.Heartbeat:Connect(function()
-	for i,v in pairs(WheelModel:GetChildren()) do
-		local speed = v.Velocity.magnitude
-		if speed &gt; 20 then
-			if (touchingparts[i].Material == Enum.Material.Grass or touchingparts[i].Material == Enum.Material.Pebble) then
-				handler:FireServer('updateRate', v.DustEffect, 26/100 * speed * 10)
-				handler:FireServer('updateColor', v.DustEffect, Color3.fromRGB(86, 66, 54))
-			elseif (touchingparts[i].Material == Enum.Material.Sand or touchingparts[i]:IsA("Terrain")) then
-				handler:FireServer('updateRate', v.DustEffect, 26/100 * speed * 10)
-				handler:FireServer('updateColor', v.DustEffect, touchingparts[i].Color)
-			else
-				handler:FireServer('updateRate', v.DustEffect, 0)
-			end
+	for index, wheel in pairs(wheelModel:GetChildren()) do
+		local dustEffect = wheel:FindFirstChild("DustEffect")
+		if not dustEffect then
+			continue
+		end
+
+		local speed = wheel.Velocity.Magnitude
+		local touchedPart = touchingParts[index]
+		if speed &lt;= 20 or not touchedPart or not touchedPart.Parent then
+			handler:FireServer("updateRate", dustEffect, 0)
+			continue
+		end
+
+		if touchedPart:IsA("Terrain") then
+			handler:FireServer("updateRate", dustEffect, 26 / 100 * speed * 10)
+			handler:FireServer("updateColor", dustEffect, Color3.fromRGB(194, 178, 128))
+		elseif touchedPart.Material == Enum.Material.Grass or touchedPart.Material == Enum.Material.Pebble then
+			handler:FireServer("updateRate", dustEffect, 26 / 100 * speed * 10)
+			handler:FireServer("updateColor", dustEffect, Color3.fromRGB(86, 66, 54))
+		elseif touchedPart.Material == Enum.Material.Sand then
+			handler:FireServer("updateRate", dustEffect, 26 / 100 * speed * 10)
+			handler:FireServer("updateColor", dustEffect, touchedPart.Color)
 		else
-			handler:FireServer('updateRate', v.DustEffect, 0)
+			handler:FireServer("updateRate", dustEffect, 0)
 		end
 	end
 end)</ProtectedString>

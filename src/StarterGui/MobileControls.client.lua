@@ -40,9 +40,10 @@ local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage    = game:GetService("ReplicatedStorage")
 
 -- ── Mobile guard ──────────────────────────────────────────────────────────────
-local isMobile = UserInputService.TouchEnabled
-	and not UserInputService.KeyboardEnabled
-if not isMobile then return end
+-- Treat any touch-capable client as eligible so this appears in Studio's
+-- device emulator and on touch devices with keyboard support.
+local isTouchDevice = UserInputService.TouchEnabled
+if not isTouchDevice then return end
 
 -- ── Player reference ─────────────────────────────────────────────────────────
 local player = Players.LocalPlayer
