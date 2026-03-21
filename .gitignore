@@ -22,6 +22,9 @@ cleanup*.js
 # Markdown files accidentally synced by Rojo
 *.md.client.lua
 
+# Source-owned Roblox model assets used by Rojo
+!src/**/*.rbxmx
+
 # Rojo build output
 *.rbxl
 
