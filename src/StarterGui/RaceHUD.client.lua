@@ -243,10 +243,10 @@ garageBtn.MouseButton1Click:Connect(function()
 end)
 
 local function updateMapControls()
-	local visible = player.Character ~= nil
-	mapButton.Visible = visible
-	shopBtn.Visible = visible
-	garageBtn.Visible = visible
+	mapButton.Visible = false
+	shopBtn.Visible = false
+	garageBtn.Visible = false
+	mapMenu.Visible = false
 end
 
 player.CharacterAdded:Connect(function()
@@ -255,6 +255,8 @@ end)
 
 player.CharacterRemoving:Connect(function()
 	mapButton.Visible = false
+	shopBtn.Visible = false
+	garageBtn.Visible = false
 	mapMenu.Visible = false
 end)
 

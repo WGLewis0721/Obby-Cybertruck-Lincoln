@@ -78,6 +78,7 @@ end
 
 -- Discover checkpoint Parts from all configured map folders
 local function discoverCheckpoints()
+	local discoveredMaps = 0
 	local selectedMapId = workspace:GetAttribute("SelectedMap")
 	if selectedMapId then
 		Logger.Info(TAG, "Limiting discovery to selected map '%s'", tostring(selectedMapId))
@@ -119,8 +120,11 @@ local function discoverCheckpoints()
 		end
 
 		mapCheckpoints[map.Id] = checkpoints
+		discoveredMaps = discoveredMaps + 1
 		Logger.Info(TAG, "%-20s -> %d checkpoint(s) + finish", map.FolderName, total)
 	end
+
+	return discoveredMaps
 end
 
 -- Wire Touched events for every discovered checkpoint
@@ -152,7 +156,7 @@ local function wireCheckpoints()
 
 					-- Anti-cheat: reject suspiciously fast completions
 					if elapsed < Constants.MIN_RACE_TIME then
-						Logger.Warn(TAG, "ANTI-CHEAT: %s finished '%s' in %.2fs (min=%ds) — rejected",
+						Logger.Warn(TAG, "ANTI-CHEAT: %s finished '%s' in %.2fs (min=%ds) - rejected",
 							player.Name, capturedMapId, elapsed, Constants.MIN_RACE_TIME)
 						return
 					end
@@ -207,7 +211,7 @@ local function wireCheckpoints()
 
 						EventBus:Fire("RaceStarted", player, capturedMapId)
 						raceStartedRemote:FireClient(player, { mapId = capturedMapId })
-						Logger.Info(TAG, "Race started — %s on '%s'", player.Name, capturedMapId)
+						Logger.Info(TAG, "Race started - %s on '%s'", player.Name, capturedMapId)
 					end
 
 					if race.mapId ~= capturedMapId then return end
@@ -246,6 +250,9 @@ end)
 -- Wait for map generators (synchronous scripts) to finish placing checkpoint Parts.
 local CHECKPOINT_DISCOVERY_DELAY = 5
 task.wait(CHECKPOINT_DISCOVERY_DELAY)
-discoverCheckpoints()
+local discoveredMaps = discoverCheckpoints()
 wireCheckpoints()
-Logger.Info(TAG, "Ready — monitoring %d map(s)", #MapData)
+Logger.Info(TAG, "Ready - monitoring %d map(s)", discoveredMaps)
+if discoveredMaps == 0 then
+	Logger.Warn(TAG, "No checkpoint-enabled maps were discovered")
+end

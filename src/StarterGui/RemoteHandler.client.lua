@@ -29,7 +29,30 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── ClientState ───────────────────────────────────────────────────────────────
 -- ClientState is a ModuleScript in StarterGui; require it from PlayerGui after spawn.
-local ClientState = require(playerGui:WaitForChild("ClientState", 10))
+local clientStateModule = playerGui:FindFirstChild("ClientState") or game:GetService("StarterGui"):FindFirstChild("ClientState")
+if not clientStateModule then
+	clientStateModule = playerGui:WaitForChild("ClientState", 10)
+end
+
+local ClientState
+if clientStateModule and clientStateModule:IsA("ModuleScript") then
+	local ok, module = pcall(require, clientStateModule)
+	if ok and module then
+		ClientState = module
+	else
+		warn("RemoteHandler: failed to require ClientState module:", module)
+	end
+else
+	warn("RemoteHandler: ClientState module not found or invalid; using stub ClientState")
+end
+
+if not ClientState then
+	ClientState = {
+		Get = function() return nil end,
+		Set = function() end,
+		OnChange = function() end,
+	}
+end
 
 -- ── Remotes ───────────────────────────────────────────────────────────────────
 local remotesFolder     = ReplicatedStorage:WaitForChild("Remotes", 10)

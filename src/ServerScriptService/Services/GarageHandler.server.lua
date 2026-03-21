@@ -65,6 +65,9 @@ if not equipVehicleEvent then
 	return
 end
 
+local characterSpawnConnections = {}
+local autoSpawnCharacter = {}
+
 -- 5. Private functions
 
 local function getVehicleById(vehicleId)
@@ -74,6 +77,87 @@ local function getVehicleById(vehicleId)
 		end
 	end
 	return nil
+end
+
+local spawnEquippedVehicle
+
+local function getDriverSeat(vehicle)
+	local driveSeat = vehicle:FindFirstChild("DriveSeat", true)
+	if driveSeat and driveSeat:IsA("VehicleSeat") then
+		return driveSeat
+	end
+
+	return vehicle:FindFirstChildWhichIsA("VehicleSeat", true)
+end
+
+local function scheduleAutoSpawn(player, character)
+	if not character then
+		return
+	end
+
+	autoSpawnCharacter[player.UserId] = character
+
+	task.spawn(function()
+		local humanoid = character:WaitForChild("Humanoid", 10)
+		local rootPart = character:WaitForChild("HumanoidRootPart", 10)
+		if player.Character ~= character then
+			return
+		end
+		if not humanoid or not rootPart or humanoid.Health <= 0 then
+			return
+		end
+
+		task.wait(0.25)
+		if player.Character ~= character or humanoid.Health <= 0 then
+			return
+		end
+
+		spawnEquippedVehicle(player)
+	end)
+end
+
+local function seatPlayerInVehicle(player, vehicle)
+	local vehicleSeat = getDriverSeat(vehicle)
+	if not vehicleSeat then
+		return
+	end
+
+	task.spawn(function()
+		for _ = 1, 30 do
+			if not vehicleSeat.Parent then
+				return
+			end
+			if vehicleSeat.Anchored then
+				task.wait(0.1)
+				continue
+			end
+
+			local character = player.Character
+			local humanoid = character and character:FindFirstChildWhichIsA("Humanoid")
+			local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+			if not humanoid or not rootPart or humanoid.Health <= 0 then
+				task.wait(0.2)
+				continue
+			end
+			if vehicleSeat.Occupant == humanoid then
+				return
+			end
+			if not humanoid.Parent or not rootPart.Parent or not vehicleSeat.Parent then
+				return
+			end
+
+			rootPart.CFrame = vehicleSeat.CFrame * CFrame.new(0, 3, 0)
+			local ok = pcall(function()
+				vehicleSeat:Sit(humanoid)
+			end)
+			if ok and vehicleSeat.Occupant == humanoid then
+				return
+			end
+			task.wait(0.15)
+		end
+
+		Logger.Warn(TAG, "Failed to seat %s in '%s'", player.Name, vehicle.Name)
+	end)
 end
 
 local function spawnVehicle(player, vehicle)
@@ -136,25 +220,13 @@ local function spawnVehicle(player, vehicle)
 	end
 
 	newVehicle.Parent = workspace
-
-	-- Seat the player in VehicleSeat if present
-	local vehicleSeat = newVehicle:FindFirstChildWhichIsA("VehicleSeat", true)
-	if vehicleSeat and player.Character then
-		local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
-		if humanoid then
-			task.delay(0.1, function()
-				if vehicleSeat and vehicleSeat.Parent and humanoid.Parent then
-					vehicleSeat:Sit(humanoid)
-				end
-			end)
-		end
-	end
+	seatPlayerInVehicle(player, newVehicle)
 
 	EventBus:Fire("VehicleSpawned", player, vehicle.Id)
 	Logger.Info(TAG, "Spawned '%s' (Id=%d) for %s", vehicle.Name, vehicle.Id, player.Name)
 end
 
-local function spawnEquippedVehicle(player)
+spawnEquippedVehicle = function(player)
 	local data = PlayerDataInterface.GetData(player.UserId)
 	if not data then return end
 	local vehicleId = data.EquippedVehicle or Constants.DEFAULT_VEHICLE_ID
@@ -171,13 +243,18 @@ end
 -- Spawn vehicle once player data is ready, and wire CharacterAdded for respawns.
 -- Using EventBus("PlayerDataLoaded") ensures data is in cache before spawning.
 EventBus:On("PlayerDataLoaded", function(player)
+	if characterSpawnConnections[player] then
+		characterSpawnConnections[player]:Disconnect()
+	end
+
 	-- Wire CharacterAdded for all future spawns (respawns after death)
-	player.CharacterAdded:Connect(function()
-		spawnEquippedVehicle(player)
+	characterSpawnConnections[player] = player.CharacterAdded:Connect(function(character)
+		scheduleAutoSpawn(player, character)
 	end)
+
 	-- Spawn immediately if the character was already loaded when data arrived
-	if player.Character then
-		spawnEquippedVehicle(player)
+	if player.Character and autoSpawnCharacter[player.UserId] ~= player.Character then
+		scheduleAutoSpawn(player, player.Character)
 	end
 end)
 
@@ -188,6 +265,11 @@ Players.PlayerRemoving:Connect(function(player)
 	if existing then
 		existing:Destroy()
 	end
+	if characterSpawnConnections[player] then
+		characterSpawnConnections[player]:Disconnect()
+		characterSpawnConnections[player] = nil
+	end
+	autoSpawnCharacter[player.UserId] = nil
 end)
 
 -- EquipVehicle: validate, check ownership, and equip
