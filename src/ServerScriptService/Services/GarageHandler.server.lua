@@ -49,6 +49,10 @@ local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInter
 local EventBus            = require(sharedFolder:WaitForChild("EventBus", 10))
 
 local TAG = "GarageHandler"
+local SPAWN_LANE_OFFSETS = { 0, -14, 14, -28, 28 }
+local SPAWN_ROW_SPACING = 28
+local SPAWN_SLOT_CLEARANCE = 20
+local SPAWN_MAX_ROWS = 6
 
 -- 4. Remote events
 local remotesFolder = ReplicatedStorage:WaitForChild(Constants.REMOTES_PATH, 10)
@@ -67,7 +71,9 @@ if not equipVehicleEvent then
 end
 
 local characterSpawnConnections = {}
+local characterRemovingConnections = {}
 local autoSpawnCharacter = {}
+local scheduledSpawnTokens = {}
 
 -- 5. Private functions
 
@@ -89,6 +95,69 @@ local function getDriverSeat(vehicle)
 	end
 
 	return vehicle:FindFirstChildWhichIsA("VehicleSeat", true)
+end
+
+local function bumpSpawnToken(userId)
+	scheduledSpawnTokens[userId] = (scheduledSpawnTokens[userId] or 0) + 1
+	return scheduledSpawnTokens[userId]
+end
+
+local function destroyPlayerVehicles(userId)
+	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, userId)
+	local destroyedCount = 0
+
+	for _, child in ipairs(Workspace:GetChildren()) do
+		if child:IsA("Model") and child.Name == vehicleName then
+			child:Destroy()
+			destroyedCount += 1
+		end
+	end
+
+	return destroyedCount
+end
+
+local function getVehiclePosition(vehicle)
+	if vehicle.PrimaryPart then
+		return vehicle.PrimaryPart.Position
+	end
+
+	return vehicle:GetPivot().Position
+end
+
+local function isSpawnSlotOccupied(candidatePosition, userId)
+	for _, child in ipairs(Workspace:GetChildren()) do
+		if child:IsA("Model") then
+			local otherUserId = tonumber(child.Name:match("^Vehicle_(%d+)$"))
+			if otherUserId and otherUserId ~= userId then
+				local offset = getVehiclePosition(child) - candidatePosition
+				local horizontalDistance = Vector2.new(offset.X, offset.Z).Magnitude
+				if horizontalDistance < SPAWN_SLOT_CLEARANCE then
+					return true
+				end
+			end
+		end
+	end
+
+	return false
+end
+
+local function resolveSpawnSlotCFrame(player, baseSpawnCFrame)
+	for rowIndex = 0, SPAWN_MAX_ROWS do
+		for _, laneOffset in ipairs(SPAWN_LANE_OFFSETS) do
+			local candidateCFrame = baseSpawnCFrame * CFrame.new(laneOffset, 0, rowIndex * SPAWN_ROW_SPACING)
+			if not isSpawnSlotOccupied(candidateCFrame.Position, player.UserId) then
+				return candidateCFrame
+			end
+		end
+	end
+
+	local fallbackLaneIndex = (player.UserId % #SPAWN_LANE_OFFSETS) + 1
+	local fallbackRowIndex = math.floor(player.UserId / #SPAWN_LANE_OFFSETS) % (SPAWN_MAX_ROWS + 1)
+	return baseSpawnCFrame * CFrame.new(
+		SPAWN_LANE_OFFSETS[fallbackLaneIndex],
+		0,
+		fallbackRowIndex * SPAWN_ROW_SPACING
+	)
 end
 
 local function removeLegacyWorkspaceTemplate(modelName)
@@ -152,12 +221,17 @@ local function scheduleAutoSpawn(player, character)
 		return
 	end
 
-	autoSpawnCharacter[player.UserId] = character
+	local userId = player.UserId
+	autoSpawnCharacter[userId] = character
+	local spawnToken = bumpSpawnToken(userId)
 
 	task.spawn(function()
 		local humanoid = character:WaitForChild("Humanoid", 10)
 		local rootPart = character:WaitForChild("HumanoidRootPart", 10)
 		if player.Character ~= character then
+			return
+		end
+		if scheduledSpawnTokens[userId] ~= spawnToken then
 			return
 		end
 		if not humanoid or not rootPart or humanoid.Health <= 0 then
@@ -166,6 +240,9 @@ local function scheduleAutoSpawn(player, character)
 
 		task.wait(0.25)
 		if player.Character ~= character or humanoid.Health <= 0 then
+			return
+		end
+		if scheduledSpawnTokens[userId] ~= spawnToken then
 			return
 		end
 
@@ -221,10 +298,11 @@ local function spawnVehicle(player, vehicle)
 	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
 	local chosenSpawnPart = nil
 
-	-- Remove old vehicle
-	local existing = workspace:FindFirstChild(vehicleName)
-	if existing then
-		existing:Destroy()
+	-- Remove every previously-spawned vehicle for this user so stale duplicates
+	-- from earlier bugs or legacy scripts cannot accumulate.
+	local destroyedCount = destroyPlayerVehicles(player.UserId)
+	if destroyedCount > 1 then
+		Logger.Warn(TAG, "Removed %d stale vehicles for %s before spawning", destroyedCount, player.Name)
 	end
 
 	local modelTemplate = ServerStorage:FindFirstChild(vehicle.ModelName)
@@ -281,6 +359,8 @@ local function spawnVehicle(player, vehicle)
 		end
 	end
 
+	spawnCFrame = resolveSpawnSlotCFrame(player, spawnCFrame)
+
 	if newVehicle.PrimaryPart then
 		local lowestOffset = getModelLowestOffset(newVehicle, newVehicle.PrimaryPart)
 		local surfaceY = getSurfaceY(chosenSpawnPart, spawnCFrame.Position.Y)
@@ -292,6 +372,7 @@ local function spawnVehicle(player, vehicle)
 		newVehicle:PivotTo(spawnCFrame)
 	end
 
+	newVehicle:SetAttribute("OwnerUserId", player.UserId)
 	newVehicle.Parent = workspace
 	seatPlayerInVehicle(player, newVehicle)
 
@@ -319,10 +400,20 @@ EventBus:On("PlayerDataLoaded", function(player)
 	if characterSpawnConnections[player] then
 		characterSpawnConnections[player]:Disconnect()
 	end
+	if characterRemovingConnections[player] then
+		characterRemovingConnections[player]:Disconnect()
+	end
 
 	-- Wire CharacterAdded for all future spawns (respawns after death)
 	characterSpawnConnections[player] = player.CharacterAdded:Connect(function(character)
 		scheduleAutoSpawn(player, character)
+	end)
+	characterRemovingConnections[player] = player.CharacterRemoving:Connect(function(character)
+		if autoSpawnCharacter[player.UserId] == character then
+			autoSpawnCharacter[player.UserId] = nil
+		end
+		bumpSpawnToken(player.UserId)
+		destroyPlayerVehicles(player.UserId)
 	end)
 
 	-- Spawn immediately if the character was already loaded when data arrived
@@ -333,16 +424,17 @@ end)
 
 -- Remove vehicle when player leaves
 Players.PlayerRemoving:Connect(function(player)
-	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
-	local existing    = workspace:FindFirstChild(vehicleName)
-	if existing then
-		existing:Destroy()
-	end
+	destroyPlayerVehicles(player.UserId)
 	if characterSpawnConnections[player] then
 		characterSpawnConnections[player]:Disconnect()
 		characterSpawnConnections[player] = nil
 	end
+	if characterRemovingConnections[player] then
+		characterRemovingConnections[player]:Disconnect()
+		characterRemovingConnections[player] = nil
+	end
 	autoSpawnCharacter[player.UserId] = nil
+	scheduledSpawnTokens[player.UserId] = nil
 end)
 
 -- EquipVehicle: validate, check ownership, and equip
