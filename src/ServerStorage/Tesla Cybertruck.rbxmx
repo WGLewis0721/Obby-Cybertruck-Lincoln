@@ -28,7 +28,6 @@
 			<bool name="NeedsPivotMigration">false</bool>
 			<Ref name="PrimaryPart">null</Ref>
 			<float name="ScaleFactor">1.28685939</float>
-			<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 			<OptionalCoordinateFrame name="WorldPivotData">
 				<CFrame>
 					<X>1.87179565</X>
@@ -168,7 +167,7 @@ local Tune = {}
 	--Rear Suspension
 	Tune.RSusDamping	= 500		-- Spring Dampening
 	Tune.RSusStiffness	= 9000		-- Spring Force
-	Tune.FAntiRoll 		= 50		-- Anti-Roll (Gyro Dampening)
+	Tune.RAntiRoll 		= 50		-- Anti-Roll (Gyro Dampening)
 
 	Tune.RSusLength		= 2			-- Suspension length (in studs)
 	Tune.RPreCompress	= .4		-- Pre-compression adds resting length force
@@ -355,8 +354,7 @@ local Tune = {}
 	Tune.WeightScaling = 1/50	--Default = 1/50 (1 cubic stud = 50 lbs)
 	Tune.LegacyScaling = 1/10	--Default = 1/10 (1 cubic stud = 10 lbs) [PGS OFF]
 	
-return Tune
-</ProtectedString>
+return Tune</ProtectedString>
 				<string name="ScriptGuid">{9E76A080-12CF-4161-950C-8246865D1C79}</string>
 				<BinaryString name="AttributesSerialize" />
 				<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
@@ -389,10 +387,11 @@ return Tune
 ]]
 
 local car = script.Parent.Car.Value
+local driveSeat = car:WaitForChild("DriveSeat")
 local cam = workspace.CurrentCamera
 local RS = game:GetService("RunService")
 
-car.DriveSeat.ChildRemoved:connect(function(child)
+driveSeat.ChildRemoved:connect(function(child)
 	if child.Name=="SeatWeld" then
 		RS:UnbindFromRenderStep("MCam")
 		cam.CameraType = Enum.CameraType.Custom
@@ -403,9 +402,9 @@ script.Parent.Values.MouseSteerOn.Changed:connect(function(property)
 	if script.Parent.Values.MouseSteerOn.Value then
 		RS:BindToRenderStep("MCam",Enum.RenderPriority.Camera.Value,function()	
 			cam.CameraType = Enum.CameraType.Scriptable
-			local pspeed = math.min(1,car.DriveSeat.Velocity.Magnitude/500)
-			local cc = car.DriveSeat.Position+Vector3.new(0,8+(pspeed*2),0)-(car.DriveSeat.CFrame.lookVector*17)+(car.DriveSeat.Velocity.Unit*-7*pspeed)
-			cam.CoordinateFrame = CFrame.new(cc,car.DriveSeat.Position)
+			local pspeed = math.min(1,driveSeat.Velocity.Magnitude/500)
+			local cc = driveSeat.Position+Vector3.new(0,8+(pspeed*2),0)-(driveSeat.CFrame.lookVector*17)+(driveSeat.Velocity.Unit*-7*pspeed)
+			cam.CoordinateFrame = CFrame.new(cc,driveSeat.Position)
 		end)
 	else
 		RS:UnbindFromRenderStep("MCam")
@@ -431,11 +430,12 @@ end)</ProtectedString>
 				<Item class="LocalScript" referent="RBXDBFC8C2D89004D9AAD95F5A92FE314A6">
 					<Properties>
 						<ProtectedString name="Source">local car = script.Parent.Car.Value
+local driveSeat = car:WaitForChild("DriveSeat")
 
 script:WaitForChild("Start1")
 script:WaitForChild("Start2")
 
-for i,v in pairs(car.DriveSeat:GetChildren()) do
+for i,v in pairs(driveSeat:GetChildren()) do
 	for _,a in pairs(script:GetChildren()) do
 		if v.Name==a.Name then v:Stop() wait() v:Destroy() end
 	end
@@ -444,8 +444,8 @@ end
 local s1=script.Start1
 local s2=script.Start2
 
-s1.Parent=car.DriveSeat
-s2.Parent=car.DriveSeat
+s1.Parent=driveSeat
+s2.Parent=driveSeat
 wait()
 s1:Play()
 wait(7.3)
@@ -2003,7 +2003,8 @@ local player=game.Players.LocalPlayer
 local mouse=player:GetMouse()
 
 local car = script.Parent.Parent.Car.Value
-car.DriveSeat.HeadsUpDisplay = false
+local driveSeat = car:WaitForChild("DriveSeat")
+driveSeat.HeadsUpDisplay = false
 
 local _Tune = require(car["A-Chassis Tune"])
 
@@ -2936,6 +2937,7 @@ PBrake()
 ]]
 local FE = workspace.FilteringEnabled
 local car = script.Parent.Car.Value
+local driveSeat = car:WaitForChild("DriveSeat")
 local handler = car:WaitForChild("AC6_FE_Sounds")
 local _Tune = require(car["A-Chassis Tune"])
 local on = 0
@@ -2957,15 +2959,15 @@ script.Parent.Values.Gear.Changed:connect(function()
 	end
 end)
 
-for i,v in pairs(car.DriveSeat:GetChildren()) do
+for i,v in pairs(driveSeat:GetChildren()) do
 	for _,a in pairs(script:GetChildren()) do
 		if v.Name==a.Name then v:Stop() wait() v:Destroy() end
 	end
 end
 
-handler:FireServer("newSound","Rev",car.DriveSeat,script.Rev.SoundId,0,script.Rev.Volume,true)
+handler:FireServer("newSound","Rev",driveSeat,script.Rev.SoundId,0,script.Rev.Volume,true)
 handler:FireServer("playSound","Rev")
-car.DriveSeat:WaitForChild("Rev")
+driveSeat:WaitForChild("Rev")
 
 while wait() do
 	mult=math.max(0,mult-.1)
@@ -2992,8 +2994,8 @@ while wait() do
 	if FE then
 		handler:FireServer("updateSound","Rev",script.Rev.SoundId,Pitch,Volume)
 	else
-		car.DriveSeat.Rev.Volume = Volume
-		car.DriveSeat.Rev.Pitch = Pitch
+		driveSeat.Rev.Volume = Volume
+		driveSeat.Rev.Pitch = Pitch
 	end
 end
 </ProtectedString>
@@ -3026,6 +3028,7 @@ end
 						<Item class="Script" referent="RBX8C2F67083BC74E928338B0196C4CDBD5">
 							<Properties>
 								<ProtectedString name="Source">local car = script.Parent.Parent
+local driveSeat = car:WaitForChild("DriveSeat")
 local Sounds = {}
 local F = {}
 
@@ -3080,7 +3083,7 @@ script.Parent.OnServerEvent:connect(function(pl,Fnc,...)
 	F[Fnc](...)
 end)
 
-car.DriveSeat.ChildRemoved:connect(function(child)
+driveSeat.ChildRemoved:connect(function(child)
 	if child.Name=="SeatWeld" then
 		F.removeSound("Rev")
 		F.removeSound("Elec")
@@ -4415,6 +4418,7 @@ return "6.52S2"</ProtectedString>
 	local mouse = player:GetMouse()
 	local UserInputService = game:GetService("UserInputService")
 	local car = script.Parent.Car.Value
+local driveSeat = car:WaitForChild("DriveSeat")
 	local _Tune = require(car["A-Chassis Tune"])
 
 
@@ -4471,7 +4475,7 @@ return "6.52S2"</ProtectedString>
 
 --[[Shutdown]]
 
-	car.DriveSeat.ChildRemoved:connect(function(child)
+	driveSeat.ChildRemoved:connect(function(child)
 		if child.Name=="SeatWeld" and child:IsA("Weld") then
 			script.Parent:Destroy()
 		end
@@ -4541,7 +4545,7 @@ return "6.52S2"</ProtectedString>
 				if input.UserInputState == Enum.UserInputState.Begin then
 					_PBrake = not _PBrake
 				elseif input.UserInputState == Enum.UserInputState.End then
-					if car.DriveSeat.Velocity.Magnitude&gt;5 then
+					if driveSeat.Velocity.Magnitude&gt;5 then
 						_PBrake = false
 					end
 				end
@@ -4739,7 +4743,7 @@ return "6.52S2"</ProtectedString>
 		end
 		
 		--Steer Decay Multiplier
-		local sDecay = (1-math.min(car.DriveSeat.Velocity.Magnitude/_Tune.SteerDecay,1-(_Tune.MinSteer/100)))
+		local sDecay = (1-math.min(driveSeat.Velocity.Magnitude/_Tune.SteerDecay,1-(_Tune.MinSteer/100)))
 		
 		--Apply Steering
 		for i,v in pairs(car.Wheels:GetChildren()) do
@@ -4875,7 +4879,7 @@ return "6.52S2"</ProtectedString>
 				_HP,_OutTorque = GetCurve(_RPM,_CGear)
 				
 			end
-			local iComp =(car.DriveSeat.CFrame.lookVector.y)*cGrav
+			local iComp =(driveSeat.CFrame.lookVector.y)*cGrav
 			if _CGear==-1 then iComp=-iComp end
 			_OutTorque = _OutTorque*math.max(1,(1+iComp))
 		else
@@ -4887,7 +4891,7 @@ return "6.52S2"</ProtectedString>
 			_ClutchOn = true
 			if _CGear == 0 then _CGear = 1 end
 			if _CGear &gt;= 1 then
-				if _CGear==1 and _GBrake &gt; 0  and car.DriveSeat.Velocity.Magnitude &lt; 20 then
+				if _CGear==1 and _GBrake &gt; 0  and driveSeat.Velocity.Magnitude &lt; 20 then
 					_CGear = -1
 				else
 					if _Tune.AutoShiftMode == "RPM" then
@@ -4897,15 +4901,15 @@ return "6.52S2"</ProtectedString>
 							_CGear=math.max(_CGear-1,1)
 						end
 					else
-						if car.DriveSeat.Velocity.Magnitude &gt; math.ceil(wDRatio*(_Tune.PeakRPM+_Tune.AutoUpThresh)/_Tune.Ratios[_CGear+2]/fFD) then
+						if driveSeat.Velocity.Magnitude &gt; math.ceil(wDRatio*(_Tune.PeakRPM+_Tune.AutoUpThresh)/_Tune.Ratios[_CGear+2]/fFD) then
 							_CGear=math.min(_CGear+1,#_Tune.Ratios-2)
-						elseif car.DriveSeat.Velocity.Magnitude &lt; math.ceil(wDRatio*(_Tune.PeakRPM-_Tune.AutoDownThresh)/_Tune.Ratios[_CGear+1]/fFD) then
+						elseif driveSeat.Velocity.Magnitude &lt; math.ceil(wDRatio*(_Tune.PeakRPM-_Tune.AutoDownThresh)/_Tune.Ratios[_CGear+1]/fFD) then
 							_CGear=math.max(_CGear-1,1)
 						end
 					end
 				end
 			else
-				if _GThrot-(_Tune.IdleThrottle/100) &gt; 0 and car.DriveSeat.Velocity.Magnitude &lt; 20 then
+				if _GThrot-(_Tune.IdleThrottle/100) &gt; 0 and driveSeat.Velocity.Magnitude &lt; 20 then
 					_CGear = 1
 				end
 			end
@@ -4957,7 +4961,7 @@ return "6.52S2"</ProtectedString>
 			_TCSActive = false
 			_ABSActive = false
 			--Output
-			if _PBrake and ((_Tune.Config ~= "FWD" and (((v.Name=="FL" or v.Name=="FR") and car.DriveSeat.Velocity.Magnitude&lt;20) or ((v.Name=="RR" or v.Name=="RL") and car.DriveSeat.Velocity.Magnitude&gt;=20))) or (_Tune.Config == "FWD" and (v.Name=="RR" or v.Name=="RL"))) then
+			if _PBrake and ((_Tune.Config ~= "FWD" and (((v.Name=="FL" or v.Name=="FR") and driveSeat.Velocity.Magnitude&lt;20) or ((v.Name=="RR" or v.Name=="RL") and driveSeat.Velocity.Magnitude&gt;=20))) or (_Tune.Config == "FWD" and (v.Name=="RR" or v.Name=="RL"))) then
 				--PBrake
 				v["#AV"].maxTorque=Vector3.new(math.abs(Ref.x),math.abs(Ref.y),math.abs(Ref.z))*PBrakeForce
 				v["#AV"].angularvelocity=Vector3.new()
@@ -5023,14 +5027,14 @@ return "6.52S2"</ProtectedString>
 
 	function Flip()
 		--Detect Orientation
-		if (car.DriveSeat.CFrame*CFrame.Angles(math.pi/2,0,0)).lookVector.y &gt; .1 or FlipDB then
+		if (driveSeat.CFrame*CFrame.Angles(math.pi/2,0,0)).lookVector.y &gt; .1 or FlipDB then
 			FlipWait=tick()
 			
 		--Apply Flip
 		else
 			if tick()-FlipWait&gt;=3 then
 				FlipDB=true
-				local gyro = car.DriveSeat.Flip
+				local gyro = driveSeat.Flip
 				gyro.maxTorque = Vector3.new(10000,0,10000)
 				gyro.P=3000
 				gyro.D=500
@@ -5071,7 +5075,7 @@ return "6.52S2"</ProtectedString>
 		script.Parent.Values.TransmissionMode.Value = _TMode
 		script.Parent.Values.Throttle.Value = _GThrot
 		script.Parent.Values.Brake.Value = _GBrake
-		script.Parent.Values.SteerC.Value = _GSteerC*(1-math.min(car.DriveSeat.Velocity.Magnitude/_Tune.SteerDecay,1-(_Tune.MinSteer/100)))
+		script.Parent.Values.SteerC.Value = _GSteerC*(1-math.min(driveSeat.Velocity.Magnitude/_Tune.SteerDecay,1-(_Tune.MinSteer/100)))
 		script.Parent.Values.SteerT.Value = _GSteerT
 		script.Parent.Values.PBrake.Value = _PBrake
 		script.Parent.Values.TCS.Value = _TCS
@@ -5079,7 +5083,7 @@ return "6.52S2"</ProtectedString>
 		script.Parent.Values.ABS.Value = _ABS
 		script.Parent.Values.ABSActive.Value = _ABSActive
 		script.Parent.Values.MouseSteerOn.Value = _MSteer
-		script.Parent.Values.Velocity.Value = car.DriveSeat.Velocity
+		script.Parent.Values.Velocity.Value = driveSeat.Velocity
 	end)
 	
 	-- ~15 c/s
@@ -5136,7 +5140,6 @@ return "6.52S2"</ProtectedString>
 				<bool name="NeedsPivotMigration">false</bool>
 				<Ref name="PrimaryPart">null</Ref>
 				<float name="ScaleFactor">1.28685939</float>
-				<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 				<OptionalCoordinateFrame name="WorldPivotData">
 					<CFrame>
 						<X>123.023277</X>
@@ -5189,7 +5192,6 @@ return "6.52S2"</ProtectedString>
 				<bool name="NeedsPivotMigration">false</bool>
 				<Ref name="PrimaryPart">null</Ref>
 				<float name="ScaleFactor">1.28685939</float>
-				<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 				<OptionalCoordinateFrame name="WorldPivotData">
 					<CFrame>
 						<X>1.87831473</X>
@@ -5347,7 +5349,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.48022068</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>46.1883316</X>
@@ -5430,7 +5431,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.28685939</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>6.26976967</X>
@@ -5910,7 +5910,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.48022068</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>-42.4316597</X>
@@ -5993,7 +5992,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.28685939</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>-2.5131402</X>
@@ -6473,7 +6471,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.48022068</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>46.1883316</X>
@@ -6556,7 +6553,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.28685939</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>6.26976967</X>
@@ -7036,7 +7032,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.48022068</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>-42.4316597</X>
@@ -7119,7 +7114,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.28685939</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>-2.5131402</X>
@@ -7494,7 +7488,6 @@ return "6.52S2"</ProtectedString>
 				<bool name="NeedsPivotMigration">false</bool>
 				<Ref name="PrimaryPart">null</Ref>
 				<float name="ScaleFactor">1.28685939</float>
-				<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 				<OptionalCoordinateFrame name="WorldPivotData">
 					<CFrame>
 						<X>1.88569784</X>
@@ -7546,7 +7539,6 @@ return "6.52S2"</ProtectedString>
 					<bool name="NeedsPivotMigration">false</bool>
 					<Ref name="PrimaryPart">null</Ref>
 					<float name="ScaleFactor">1.28685939</float>
-					<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 					<OptionalCoordinateFrame name="WorldPivotData">
 						<CFrame>
 							<X>1.86724007</X>
@@ -13228,7 +13220,6 @@ return "6.52S2"</ProtectedString>
 					<bool name="NeedsPivotMigration">false</bool>
 					<Ref name="PrimaryPart">null</Ref>
 					<float name="ScaleFactor">1.28685939</float>
-					<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 					<OptionalCoordinateFrame name="WorldPivotData">
 						<CFrame>
 							<X>1.87289524</X>
@@ -13280,7 +13271,6 @@ return "6.52S2"</ProtectedString>
 						<bool name="NeedsPivotMigration">false</bool>
 						<Ref name="PrimaryPart">null</Ref>
 						<float name="ScaleFactor">1.28685939</float>
-						<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 						<OptionalCoordinateFrame name="WorldPivotData">
 							<CFrame>
 								<X>1.87289524</X>
@@ -19126,7 +19116,6 @@ return "6.52S2"</ProtectedString>
 					<bool name="NeedsPivotMigration">false</bool>
 					<Ref name="PrimaryPart">null</Ref>
 					<float name="ScaleFactor">1.28685939</float>
-					<SharedString name="SlimHash">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
 					<OptionalCoordinateFrame name="WorldPivotData">
 						<CFrame>
 							<X>1.8668474</X>
@@ -36946,7 +36935,10 @@ end</ProtectedString>
 							<Properties>
 								<ProtectedString name="Source">local mouse=game.Players.LocalPlayer:GetMouse()
 script.Parent:WaitForChild("src")
-src=script.Parent.src.Value
+local src = script.Parent.src.Value
+if not src then
+	return
+end
 mouse.KeyDown:connect(function(key)
 	if key=="h" then 
 		src:Play()
