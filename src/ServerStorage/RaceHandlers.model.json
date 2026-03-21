@@ -1,0 +1,13 @@
+{
+  "ClassName": "Folder",
+  "Children": [
+    {
+      "ClassName": "BindableFunction",
+      "Name": "ProcessRaceCoins"
+    },
+    {
+      "ClassName": "BindableFunction",
+      "Name": "ProcessRaceTime"
+    }
+  ]
+}

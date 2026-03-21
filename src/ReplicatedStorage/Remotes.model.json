@@ -1,6 +1,5 @@
 {
   "ClassName": "Folder",
-  "Name": "Remotes",
   "Children": [
     { "Name": "OpenPaintShop",     "ClassName": "RemoteEvent" },
     { "Name": "PurchaseSuccess",   "ClassName": "RemoteEvent" },

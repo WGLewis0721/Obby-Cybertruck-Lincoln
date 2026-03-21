@@ -100,7 +100,6 @@ if false then -- replaced by GameHUD
 
 	player.CharacterRemoving:Connect(function()
 		shopToggleBtn.Visible = false
-		frame.Visible = false
 	end)
 
 	local tStroke = Instance.new("UIStroke")

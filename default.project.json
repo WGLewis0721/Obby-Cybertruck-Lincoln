@@ -4,6 +4,7 @@
     "$className": "DataModel",
     "Workspace": {
       "$className": "Workspace",
+      "$path": "src/Workspace",
       "$ignoreUnknownInstances": true
     },
     "ServerScriptService": {
@@ -12,6 +13,7 @@
     },
     "ServerStorage": {
       "$className": "ServerStorage",
+      "$path": "src/ServerStorage",
       "$ignoreUnknownInstances": true
     },
     "ReplicatedStorage": {

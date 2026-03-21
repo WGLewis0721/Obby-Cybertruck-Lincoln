@@ -90,6 +90,18 @@ local function getDriverSeat(vehicle)
 	return vehicle:FindFirstChildWhichIsA("VehicleSeat", true)
 end
 
+local function removeLegacyWorkspaceVehicleModels()
+	for _, vehicleInfo in ipairs(VehicleData) do
+		local template = ServerStorage:FindFirstChild(vehicleInfo.ModelName)
+		local legacyModel = workspace:FindFirstChild(vehicleInfo.ModelName)
+
+		if template and legacyModel and legacyModel ~= template then
+			legacyModel:Destroy()
+			Logger.Info(TAG, "Removed legacy Workspace vehicle model '%s'", vehicleInfo.ModelName)
+		end
+	end
+end
+
 local function scheduleAutoSpawn(player, character)
 	if not character then
 		return
@@ -162,6 +174,7 @@ end
 
 local function spawnVehicle(player, vehicle)
 	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
+	removeLegacyWorkspaceVehicleModels()
 
 	-- Remove old vehicle
 	local existing = workspace:FindFirstChild(vehicleName)
@@ -328,4 +341,5 @@ if openGarageEvent then
 end
 
 -- 7. Initialization
+removeLegacyWorkspaceVehicleModels()
 Logger.Info(TAG, "GarageHandler ready")

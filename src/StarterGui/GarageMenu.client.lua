@@ -131,6 +131,9 @@ player.CharacterAdded:Connect(function()
 	garageBtn.Visible = true
 end)
 
+local overlay    -- assigned below after ScreenGui is created
+local garagePanel -- assigned below after ScreenGui is created
+
 player.CharacterRemoving:Connect(function()
 	garageBtn.Visible = false
 	if overlay then
@@ -142,7 +145,7 @@ player.CharacterRemoving:Connect(function()
 end)
 
 -- ── Full-screen overlay ───────────────────────────────────────────────────────
-local overlay = Instance.new("Frame")
+overlay = Instance.new("Frame")
 overlay.Name = "GarageOverlay"
 overlay.Size = UDim2.new(1, 0, 1, 0)
 overlay.BackgroundColor3 = COLOR_BG
@@ -152,7 +155,7 @@ overlay.Visible = false
 overlay.Parent = screenGui
 
 -- ── Main garage panel ─────────────────────────────────────────────────────────
-local garagePanel = Instance.new("Frame")
+garagePanel = Instance.new("Frame")
 garagePanel.Name = "GaragePanel"
 garagePanel.AnchorPoint = Vector2.new(0.5, 0.5)
 garagePanel.Size = UDim2.new(0.88, 0, 0.88, 0)
