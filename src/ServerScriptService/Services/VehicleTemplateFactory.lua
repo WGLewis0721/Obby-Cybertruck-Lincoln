@@ -28,25 +28,24 @@ local function configureDriveSeat(seat)
 	seat.TurnSpeed = 1
 	seat.HeadsUpDisplay = false
 	seat.Disabled = false
-	seat.Anchored = false
 end
 
-local function unanchorModel(model)
+local function anchorModel(model)
 	for _, descendant in ipairs(model:GetDescendants()) do
 		if descendant:IsA("BasePart") then
-			descendant.Anchored = false
+			descendant.Anchored = true
 		end
 	end
 end
 
-local function enableInitializeScript(model)
+local function setInitializeScriptDisabled(model, isDisabled)
 	local initializeScript = model:FindFirstChild("Initialize", true)
 	if initializeScript and initializeScript:IsA("Script") then
-		initializeScript.Disabled = false
+		initializeScript.Disabled = isDisabled
 	end
 end
 
-local function sanitizeVehicleModel(model)
+local function validateVehicleModel(model)
 	if not model or not model:IsA("Model") then
 		return nil
 	end
@@ -56,11 +55,6 @@ local function sanitizeVehicleModel(model)
 		Logger.Warn(TAG, "Vehicle template '%s' is missing a VehicleSeat", model.Name)
 		return nil
 	end
-
-	configureDriveSeat(driveSeat)
-	model.PrimaryPart = driveSeat
-	unanchorModel(model)
-	enableInitializeScript(model)
 
 	return driveSeat
 end
@@ -73,15 +67,29 @@ function VehicleTemplateFactory.EnsureTemplate(modelName)
 		return nil
 	end
 
-	sanitizeVehicleModel(modelTemplate)
+	local driveSeat = validateVehicleModel(modelTemplate)
+	if not driveSeat then
+		return nil
+	end
+
+	configureDriveSeat(driveSeat)
+	modelTemplate.PrimaryPart = driveSeat
+	anchorModel(modelTemplate)
+	setInitializeScriptDisabled(modelTemplate, true)
+
 	return modelTemplate
 end
 
 function VehicleTemplateFactory.PrepareForSpawn(model)
-	local driveSeat = sanitizeVehicleModel(model)
+	local driveSeat = validateVehicleModel(model)
 	if not driveSeat then
 		return nil, nil
 	end
+
+	configureDriveSeat(driveSeat)
+	model.PrimaryPart = driveSeat
+	anchorModel(model)
+	setInitializeScriptDisabled(model, false)
 
 	return driveSeat, model.PrimaryPart
 end

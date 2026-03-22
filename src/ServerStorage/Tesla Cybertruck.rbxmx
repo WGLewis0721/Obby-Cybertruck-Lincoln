@@ -391,14 +391,14 @@ local driveSeat = car:WaitForChild("DriveSeat")
 local cam = workspace.CurrentCamera
 local RS = game:GetService("RunService")
 
-driveSeat.ChildRemoved:connect(function(child)
+driveSeat.ChildRemoved:Connect(function(child)
 	if child.Name=="SeatWeld" then
 		RS:UnbindFromRenderStep("MCam")
 		cam.CameraType = Enum.CameraType.Custom
 	end
 end)
 
-script.Parent.Values.MouseSteerOn.Changed:connect(function(property)
+script.Parent.Values.MouseSteerOn.Changed:Connect(function(property)
 	if script.Parent.Values.MouseSteerOn.Value then
 		RS:BindToRenderStep("MCam",Enum.RenderPriority.Camera.Value,function()	
 			cam.CameraType = Enum.CameraType.Scriptable
@@ -958,7 +958,7 @@ local function getYAngleBetween(x1, z1, x2, z2)
 	return(ATAN2(x2 * z1 - z2 * x1, x2 * x1 + z2 * z1))
 end
 
-UserInputService.InputBegan:connect(function(inputObject, inputProcessed)
+UserInputService.InputBegan:Connect(function(inputObject, inputProcessed)
 	if (inputObject.UserInputType == Enum.UserInputType.MouseButton2) then 
 		tpvRotationTarget = tpvRotation
 		local newMousePosition = UserInputService:GetMouseLocation()
@@ -978,7 +978,7 @@ UserInputService.InputBegan:connect(function(inputObject, inputProcessed)
 	end
 end)
 
-UserInputService.InputEnded:connect(function(inputObject, inputProcessed)
+UserInputService.InputEnded:Connect(function(inputObject, inputProcessed)
 	if (inputObject.UserInputType == Enum.UserInputType.MouseButton2) then 
 		rotatingManually = false
 		fpvRotationYTarget = PI / 2
@@ -986,7 +986,7 @@ UserInputService.InputEnded:connect(function(inputObject, inputProcessed)
 	end
 end)
 
-UserInputService.InputChanged:connect(function(inputObject, inputProcessed)
+UserInputService.InputChanged:Connect(function(inputObject, inputProcessed)
 	if (inputObject.UserInputType == Enum.UserInputType.MouseMovement) then 
 		if (rotatingManually) then 
 			local newMousePosition = UserInputService:GetMouseLocation()
@@ -2138,17 +2138,17 @@ if 	script.Parent.Parent.IsOn.Value then
 	script.Parent:TweenPosition(UDim2.new(0, 0, 0, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Quad,1,true)
 end
 
-script.Parent.Parent.IsOn.Changed:connect(function()
+script.Parent.Parent.IsOn.Changed:Connect(function()
 	if script.Parent.Parent.IsOn.Value then
 		script.Parent:TweenPosition(UDim2.new(0, 0, 0, 0),Enum.EasingDirection.InOut,Enum.EasingStyle.Quad,1,true)
 	end
 end)
 
-script.Parent.Parent.Values.RPM.Changed:connect(function()
+script.Parent.Parent.Values.RPM.Changed:Connect(function()
 	script.Parent.Tach.Needle.Rotation = 45 + 225 * math.min(1,script.Parent.Parent.Values.RPM.Value / (revEnd*1000))
 end)
 
-script.Parent.Parent.Values.Gear.Changed:connect(function()
+script.Parent.Parent.Values.Gear.Changed:Connect(function()
 	local gearText = script.Parent.Parent.Values.Gear.Value
 	if gearText == 0 then gearText = "N"
 	elseif gearText == -1 then gearText = "R"
@@ -2156,7 +2156,7 @@ script.Parent.Parent.Values.Gear.Changed:connect(function()
 	script.Parent.Gear.Text = gearText
 end)
 
-script.Parent.Parent.Values.TCS.Changed:connect(function()
+script.Parent.Parent.Values.TCS.Changed:Connect(function()
 	if _Tune.TCSEnabled then
 		if script.Parent.Parent.Values.TCS.Value then
 			script.Parent.TCS.TextColor3 = Color3.new(1,170/255,0)
@@ -2178,7 +2178,7 @@ script.Parent.Parent.Values.TCS.Changed:connect(function()
 	end
 end)
 
-script.Parent.Parent.Values.TCSActive.Changed:connect(function()
+script.Parent.Parent.Values.TCSActive.Changed:Connect(function()
 	if _Tune.TCSEnabled then
 		if script.Parent.Parent.Values.TCSActive.Value and script.Parent.Parent.Values.TCS.Value then
 			wait()
@@ -2195,7 +2195,7 @@ script.Parent.Parent.Values.TCSActive.Changed:connect(function()
 	end
 end)
 
-script.Parent.TCS.Changed:connect(function()
+script.Parent.TCS.Changed:Connect(function()
 	if _Tune.TCSEnabled then
 		if script.Parent.Parent.Values.TCSActive.Value and script.Parent.Parent.Values.TCS.Value then
 			wait()
@@ -2211,7 +2211,7 @@ script.Parent.TCS.Changed:connect(function()
 	end
 end)
 
-script.Parent.Parent.Values.ABS.Changed:connect(function()
+script.Parent.Parent.Values.ABS.Changed:Connect(function()
 	if _Tune.ABSEnabled then
 		if script.Parent.Parent.Values.ABS.Value then
 			script.Parent.ABS.TextColor3 = Color3.new(1,170/255,0)
@@ -2233,7 +2233,7 @@ script.Parent.Parent.Values.ABS.Changed:connect(function()
 	end
 end)
 
-script.Parent.Parent.Values.ABSActive.Changed:connect(function()
+script.Parent.Parent.Values.ABSActive.Changed:Connect(function()
 	if _Tune.ABSEnabled then
 		if script.Parent.Parent.Values.ABSActive.Value and script.Parent.Parent.Values.ABS.Value then
 			wait()
@@ -2250,7 +2250,7 @@ script.Parent.Parent.Values.ABSActive.Changed:connect(function()
 	end
 end)
 
-script.Parent.ABS.Changed:connect(function()
+script.Parent.ABS.Changed:Connect(function()
 	if _Tune.ABSEnabled then
 		if script.Parent.Parent.Values.ABSActive.Value and script.Parent.Parent.Values.ABS.Value then
 			wait()
@@ -2270,7 +2270,7 @@ end)
 function PBrake()
 	script.Parent.PBrake.Visible = script.Parent.Parent.Values.PBrake.Value
 end
-script.Parent.Parent.Values.PBrake.Changed:connect(PBrake)
+script.Parent.Parent.Values.PBrake.Changed:Connect(PBrake)
 
 function Gear()
 	if script.Parent.Parent.Values.TransmissionMode.Value == "Auto" then
@@ -2284,14 +2284,14 @@ function Gear()
 		script.Parent.TMode.BackgroundColor3 = Color3.new(1,85/255,.5)
 	end
 end
-script.Parent.Parent.Values.TransmissionMode.Changed:connect(Gear)
+script.Parent.Parent.Values.TransmissionMode.Changed:Connect(Gear)
 
-script.Parent.Parent.Values.Velocity.Changed:connect(function(property)
+script.Parent.Parent.Values.Velocity.Changed:Connect(function(property)
 	script.Parent.Speedo.Needle.Rotation = 70 + 130 * math.min(1,UNITS[currentUnits].scaling*script.Parent.Parent.Values.Velocity.Value.Magnitude/UNITS[currentUnits].maxSpeed)
 	script.Parent.Speed.Text = math.floor(UNITS[currentUnits].scaling*script.Parent.Parent.Values.Velocity.Value.Magnitude) .. " "..UNITS[currentUnits].units
 end)
 
-script.Parent.Speed.MouseButton1Click:connect(function()
+script.Parent.Speed.MouseButton1Click:Connect(function()
 	if currentUnits==#UNITS then
 		currentUnits = 1
 	else
@@ -2968,7 +2968,7 @@ local shift=0
 
 script:WaitForChild("Rev")
 
-script.Parent.Values.Gear.Changed:connect(function()
+script.Parent.Values.Gear.Changed:Connect(function()
 	mult=1
 	if script.Parent.Values.RPM.Value&gt;5000 then
 		shift=.2
@@ -3221,17 +3221,20 @@ end)</ProtectedString>
 	
 	function MakeWeld(x,y,type,s) 
 		if type==nil then type="Weld" end
-		local W=Instance.new(type) 
-		W.Part0=x W.Part1=y 
-		W.Parent=x
-		W.C0=x.CFrame:inverse()*x.CFrame 
-		W.C1=y.CFrame:inverse()*x.CFrame 
+
+		local W = Instance.new(type)
+		W.Part0 = x
+		W.Part1 = y
+		W.C0 = x.CFrame:inverse()*x.CFrame
+		W.C1 = y.CFrame:inverse()*x.CFrame
+		W.Parent = x
+
 		if type=="Motor" and s~=nil then 
 			W.MaxVelocity=s 
 		end 
+
 		return W	
-	end
-	
+	end	
 	function ModelWeld(a,b) 
 		if a:IsA("BasePart") then 
 			MakeWeld(b,a,"Weld") 
@@ -3250,12 +3253,41 @@ end)</ProtectedString>
 	
 --[[Initialize]]
 
+	local DriveSeat = car:FindFirstChild("DriveSeat") 
+	or car:FindFirstChildWhichIsA("VehicleSeat", true)
+
+	if not DriveSeat then
+		error("No VehicleSeat/DriveSeat found in vehicle model")
+	end
+
 	script.Parent:WaitForChild("A-Chassis Interface")
 	script.Parent:WaitForChild("Plugins")
 	script.Parent:WaitForChild("README")
 	
-	local car=script.Parent.Parent
-	local _Tune=require(script.Parent)
+	local car = script:FindFirstAncestorWhichIsA("Model")
+	local _Tune = require(script.Parent)
+
+	-- 🔥 SAFE DEFAULTS (PREVENT NIL CRASHES)
+	local function safeNumber(v, d)
+		if typeof(v) ~= "number" then
+			return d
+		end
+		return v
+	end
+
+	-- Ensure all critical values exist
+	_Tune.FWsBoneLen = safeNumber(_Tune.FWsBoneLen, 5)
+	_Tune.FWsBoneAngle = safeNumber(_Tune.FWsBoneAngle, 0)
+	_Tune.RWsBoneLen = safeNumber(_Tune.RWsBoneLen, 5)
+	_Tune.RWsBoneAngle = safeNumber(_Tune.RWsBoneAngle, 0)
+
+	_Tune.FSusLength = safeNumber(_Tune.FSusLength, 3)
+	_Tune.FSusAngle = safeNumber(_Tune.FSusAngle, 0)
+	_Tune.RSusLength = safeNumber(_Tune.RSusLength, 3)
+	_Tune.RSusAngle = safeNumber(_Tune.RSusAngle, 0)
+
+	_Tune.FWheelDensity = safeNumber(_Tune.FWheelDensity, 1)
+	_Tune.RWheelDensity = safeNumber(_Tune.RWheelDensity, 1)
 	
 	wait(_Tune.LoadDelay)
 	
@@ -3316,16 +3348,17 @@ end)</ProtectedString>
 		rDensity = _Tune.RWLgcyDensity
 	end
 	
-	local fDistX=_Tune.FWsBoneLen*math.cos(math.rad(_Tune.FWsBoneAngle))
-	local fDistY=_Tune.FWsBoneLen*math.sin(math.rad(_Tune.FWsBoneAngle))
-	local rDistX=_Tune.RWsBoneLen*math.cos(math.rad(_Tune.RWsBoneAngle))
-	local rDistY=_Tune.RWsBoneLen*math.sin(math.rad(_Tune.RWsBoneAngle))
-	
-	local fSLX=_Tune.FSusLength*math.cos(math.rad(_Tune.FSusAngle))
-	local fSLY=_Tune.FSusLength*math.sin(math.rad(_Tune.FSusAngle))
-	local rSLX=_Tune.RSusLength*math.cos(math.rad(_Tune.RSusAngle))
-	local rSLY=_Tune.RSusLength*math.sin(math.rad(_Tune.RSusAngle))
-	
+	local fDistX = _Tune.FWsBoneLen * math.cos(math.rad(_Tune.FWsBoneAngle))
+	local fDistY = _Tune.FWsBoneLen * math.sin(math.rad(_Tune.FWsBoneAngle))
+
+	local rDistX = _Tune.RWsBoneLen * math.cos(math.rad(_Tune.RWsBoneAngle))
+	local rDistY = _Tune.RWsBoneLen * math.sin(math.rad(_Tune.RWsBoneAngle))
+
+	local fSLX = _Tune.FSusLength * math.cos(math.rad(_Tune.FSusAngle))
+	local fSLY = _Tune.FSusLength * math.sin(math.rad(_Tune.FSusAngle))
+
+	local rSLX = _Tune.RSusLength * math.cos(math.rad(_Tune.RSusAngle))
+	local rSLY = _Tune.RSusLength * math.sin(math.rad(_Tune.RSusAngle))	
 	for _,v in pairs(Drive) do
 		--Apply Wheel Density
 		if v.Name=="FL" or v.Name=="FR" or v.Name=="F" then
@@ -3360,11 +3393,11 @@ end)</ProtectedString>
 		--Store Axle-Anchored/Suspension-Anchored Part Orientation
 		local WParts = {}
 		
-		local tPos = v.Position-car.DriveSeat.Position
+		local tPos = v.Position-DriveSeat.Position
 		if v.Name=="FL" or v.Name=="RL" then
-			v.CFrame = car.DriveSeat.CFrame*CFrame.Angles(math.rad(90),0,math.rad(90))
+			v.CFrame = DriveSeat.CFrame*CFrame.Angles(math.rad(90),0,math.rad(90))
 		else
-			v.CFrame = car.DriveSeat.CFrame*CFrame.Angles(math.rad(90),0,math.rad(-90))
+			v.CFrame = DriveSeat.CFrame*CFrame.Angles(math.rad(90),0,math.rad(-90))
 		end
 		v.CFrame = v.CFrame+tPos
 		
@@ -3506,10 +3539,10 @@ end)</ProtectedString>
 				sp.MinLength = _Tune.RSusLength-_Tune.RCompressLim
 			end
 			
-			MakeWeld(car.DriveSeat,sa)
+			MakeWeld(DriveSeat,sa)
 			MakeWeld(sb,base)
 		else
-			MakeWeld(car.DriveSeat,base)
+			MakeWeld(DriveSeat,base)
 		end
 		
 		--Lock Rear Steering Axle
@@ -3519,7 +3552,7 @@ end)</ProtectedString>
 		
 		--Weld Assembly
 		if v.Parent.Name == "RL" or v.Parent.Name == "RR" or v.Name=="R" then
-			MakeWeld(car.DriveSeat,arm)
+			MakeWeld(DriveSeat,arm)
 		end
 		
 		MakeWeld(arm,axle)
@@ -3529,7 +3562,7 @@ end)</ProtectedString>
 	
 		--Weld Miscelaneous Parts
 		if v:FindFirstChild("SuspensionFixed")~=nil then
-			ModelWeld(v.SuspensionFixed,car.DriveSeat)
+			ModelWeld(v.SuspensionFixed,DriveSeat)
 		end
 		if v:FindFirstChild("WheelFixed")~=nil then
 			ModelWeld(v.WheelFixed,axle)
@@ -3628,7 +3661,7 @@ end)</ProtectedString>
 		end
 		weightB.Size = Vector3.new(_Tune.WeightBSize[1],_Tune.WeightBSize[2],_Tune.WeightBSize[3])
 		weightB.CustomPhysicalProperties = PhysicalProperties.new(((_Tune.Weight*weightScaling)-mass)/(weightB.Size.x*weightB.Size.y*weightB.Size.z),0,0,0,0)
-		weightB.CFrame=(car.DriveSeat.CFrame-car.DriveSeat.Position+center)*CFrame.new(0,_Tune.CGHeight,0)
+		weightB.CFrame=(DriveSeat.CFrame-DriveSeat.Position+center)*CFrame.new(0,_Tune.CGHeight,0)
 	else
 		--Existing Weight Is Too Massive
 		warn( "\n\t [AC".._BuildVersion.."]: Mass too high for specified weight."
@@ -3637,7 +3670,7 @@ end)</ProtectedString>
 			.."\n\t Reduce part size or axle density to achieve desired weight.")
 	end
 	
-	local flipG = Instance.new("BodyGyro",car.DriveSeat)
+	local flipG = Instance.new("BodyGyro",DriveSeat)
 	flipG.Name = "Flip"
 	flipG.D = 0
 	flipG.MaxTorque = Vector3.new(0,0,0)
@@ -3656,7 +3689,7 @@ end)</ProtectedString>
 	
 	--Weld Body
 	wait()
-	ModelWeld(car.Body,car.DriveSeat)
+	ModelWeld(car.Body,DriveSeat)
 	
 	--Unanchor
 	wait()	
@@ -3717,7 +3750,7 @@ end)</ProtectedString>
 	--Apply Seat Handler
 	for i,v in pairs(Seats) do
 		--Sit Handler
-		v.Seat.ChildAdded:connect(function(child)
+		v.Seat.ChildAdded:Connect(function(child)
 			if child.Name=="SeatWeld" and child:IsA("Weld") and child.Part1~=nil and child.Part1.Parent ~= workspace and not child.Part1.Parent:IsDescendantOf(car) then
 				v.Parts = {}
 				getPProperties(child.Part1.Parent,v.Parts)
@@ -3725,7 +3758,7 @@ end)</ProtectedString>
 		end)
 		
 		--Leave Handler
-		v.Seat.ChildRemoved:connect(function(child)
+		v.Seat.ChildRemoved:Connect(function(child)
 			if child.Name=="SeatWeld" and child:IsA("Weld") then
 				for i,v in pairs(v.Parts) do
 					if v[1]~=nil and v[2]~=nil and v[1]:IsDescendantOf(workspace) then
@@ -3742,22 +3775,22 @@ end)</ProtectedString>
 --[[Driver Handling]]
 
 	--Driver Sit	
-	car.DriveSeat.ChildAdded:connect(function(child)
+	DriveSeat.ChildAdded:Connect(function(child)
 		if child.Name=="SeatWeld" and child:IsA("Weld") and game.Players:GetPlayerFromCharacter(child.Part1.Parent)~=nil then
 			--Distribute Client Interface
 			local p=game.Players:GetPlayerFromCharacter(child.Part1.Parent)
-			car.DriveSeat:SetNetworkOwner(p)
+			DriveSeat:SetNetworkOwner(p)
 			local g=script.Parent["A-Chassis Interface"]:Clone()
 			g.Parent=p.PlayerGui
 		end
 	end)
 	
 	--Driver Leave
-	car.DriveSeat.ChildRemoved:connect(function(child)
+	DriveSeat.ChildRemoved:Connect(function(child)
 		if child.Name=="SeatWeld" and child:IsA("Weld") then
 			--Remove Flip Force
-			if car.DriveSeat:FindFirstChild("Flip")~=nil then
-				car.DriveSeat.Flip.MaxTorque = Vector3.new()
+			if DriveSeat:FindFirstChild("Flip")~=nil then
+				DriveSeat.Flip.MaxTorque = Vector3.new()
 			end
 			
 			--Remove Wheel Force
@@ -3829,21 +3862,21 @@ misc = car:WaitForChild("Misc")
 
 ---------------------------
 --[[
-	--Main anchor point is the DriveSeat &lt;car.DriveSeat&gt;	
+	--Main anchor point is the DriveSeat &lt;DriveSeat&gt;	
 	
 	Usage:
 		MakeWeld(Part1,Part2,WeldType*,MotorVelocity**) *default is "Weld"  **Applies to Motor welds only
 		ModelWeld(Model,MainPart)
 	Example:
-		MakeWeld(car.DriveSeat,misc.PassengerSeat)
-		MakeWeld(car.DriveSeat,misc.SteeringWheel,"Motor",.2)
-		ModelWeld(car.DriveSeat,misc.Door)
+		MakeWeld(DriveSeat,misc.PassengerSeat)
+		MakeWeld(DriveSeat,misc.SteeringWheel,"Motor",.2)
+		ModelWeld(DriveSeat,misc.Door)
 ]]
 
 --Weld stuff here
 
 
-car.DriveSeat.ChildAdded:connect(function(child)
+DriveSeat.ChildAdded:Connect(function(child)
 	if child.Name=="SeatWeld" and child:IsA("Weld") and game.Players:GetPlayerFromCharacter(child.Part1.Parent)~=nil then
 		child.C0=CFrame.new(0,-.5,0)*CFrame.fromEulerAnglesXYZ(-(math.pi/2),0,0)*CFrame.Angles(math.rad(13),0,0)
 	end
@@ -4498,7 +4531,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 
 --[[Shutdown]]
 
-	driveSeat.ChildRemoved:connect(function(child)
+	driveSeat.ChildRemoved:Connect(function(child)
 		if child.Name=="SeatWeld" and child:IsA("Weld") then
 			script.Parent:Destroy()
 		end
@@ -4515,7 +4548,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 		local a=Instance.new("StringValue",Controls)
 		a.Name=i
 		a.Value=v.Name
-		a.Changed:connect(function()
+		a.Changed:Connect(function()
 			if i=="MouseThrottle" or i=="MouseBrake" then
 				if a.Value == "MouseButton1" or a.Value == "MouseButton2" then
 					_CTRL[i]=Enum.UserInputType[a.Value]
@@ -4534,7 +4567,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 		local a = Instance.new("IntValue",Controls)
 		a.Name = i
 		a.Value = v
-		a.Changed:connect(function() 
+		a.Changed:Connect(function() 
 			a.Value=math.min(100,math.max(0,a.Value))
 			_PPH[i] = a.Value
 		end)
@@ -4686,9 +4719,9 @@ local driveSeat = car:WaitForChild("DriveSeat")
 			if _CGear~=0 then _ClutchOn = true end
 		end
 	end
-	UserInputService.InputBegan:connect(DealWithInput)
-	UserInputService.InputChanged:connect(DealWithInput)
-	UserInputService.InputEnded:connect(DealWithInput)
+	UserInputService.InputBegan:Connect(DealWithInput)
+	UserInputService.InputChanged:Connect(DealWithInput)
+	UserInputService.InputEnded:Connect(DealWithInput)
 
 
 
@@ -5081,7 +5114,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 	--Runtime Loops
 	
 	-- ~60 c/s
-	game["Run Service"].Stepped:connect(function()
+	game["Run Service"].Stepped:Connect(function()
 		--Steering
 		Steering()
 		
@@ -36903,7 +36936,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 				<Item class="Script" referent="RBX80D62F98040744389523CF886C117439">
 					<Properties>
 						<ProtectedString name="Source">if script.Parent.Parent:IsA("VehicleSeat") then
-	script.Parent.Parent.ChildAdded:connect(function(child)
+	script.Parent.Parent.ChildAdded:Connect(function(child)
 		if child:IsA("Weld") and game.Players:GetPlayerFromCharacter(child.Part1.Parent)~=nil then
 			local p=game.Players:GetPlayerFromCharacter(child.Part1.Parent)
 			local g=script.G:Clone()
@@ -36962,17 +36995,17 @@ local src = script.Parent.src.Value
 if not src then
 	return
 end
-mouse.KeyDown:connect(function(key)
+mouse.KeyDown:Connect(function(key)
 	if key=="h" then 
 		src:Play()
 	end
 end)
-mouse.KeyUp:connect(function(key)
+mouse.KeyUp:Connect(function(key)
 	if key=="h" then 
 		src:Stop()
 	end
 end)
-src.Parent.ChildRemoved:connect(function(child)
+src.Parent.ChildRemoved:Connect(function(child)
 	if child.Name=="SeatWeld" then 
 		src:Stop()
 		script.Parent:Destroy()
