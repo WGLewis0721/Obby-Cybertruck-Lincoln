@@ -1,3 +1,5 @@
+print("MOBILE CONTROLS RUNNING")
+
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
