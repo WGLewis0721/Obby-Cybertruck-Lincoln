@@ -600,7 +600,11 @@ end)</ProtectedString>
 						</Properties>
 						<Item class="Script" referent="RBX0893C10D72C7410BBA83D335E75490E2">
 							<Properties>
-								<ProtectedString name="Source">local F = {}
+								<ProtectedString name="Source">local remote = script.Parent
+local car = remote:FindFirstAncestorWhichIsA("Model")
+assert(car, "DustEvent handler could not resolve vehicle model")
+local wheels = car:WaitForChild("Wheels")
+local F = {}
 
 F.updateRate = function(v, rate)
 	v.Rate = rate
@@ -610,16 +614,18 @@ F.updateColor = function(v, color)
 	v.Color = ColorSequence.new(color)
 end
 
-script.Parent.OnServerEvent:connect(function(pl,Fnc,...)
-	F[Fnc](...)
-end)
+remote.OnServerEvent:Connect(function(pl,Fnc,...)
+	local fn = F[Fnc]
+	if not fn then
+		return
+	end
 
-local car = script.Parent.Parent
-local wheels = car.Wheels
+	fn(...)
+end)
 
 for i, v in pairs(wheels:GetChildren()) do
 	if v.Name == "FL" or v.Name == "FR" or v.Name == "RL" or v.Name == "RR" then
-		local a = script.Parent.DustEffect:Clone()
+		local a = remote.DustEffect:Clone()
 		a.Parent = v
 	end
 end</ProtectedString>
@@ -3037,7 +3043,9 @@ end
 						</Properties>
 						<Item class="Script" referent="RBX8C2F67083BC74E928338B0196C4CDBD5">
 							<Properties>
-								<ProtectedString name="Source">local car = script.Parent.Parent
+								<ProtectedString name="Source">local remote = script.Parent
+local car = remote:FindFirstAncestorWhichIsA("Model")
+assert(car, "AC6_FE_Sounds handler could not resolve vehicle model")
 local driveSeat = car:WaitForChild("DriveSeat")
 local Sounds = {}
 local F = {}
@@ -3089,11 +3097,16 @@ F.removeSound = function(sound)
 	Sounds[sound]=nil
 end
 
-script.Parent.OnServerEvent:connect(function(pl,Fnc,...)
-	F[Fnc](...)
+remote.OnServerEvent:Connect(function(pl,Fnc,...)
+	local fn = F[Fnc]
+	if not fn then
+		return
+	end
+
+	fn(...)
 end)
 
-driveSeat.ChildRemoved:connect(function(child)
+driveSeat.ChildRemoved:Connect(function(child)
 	if child.Name=="SeatWeld" then
 		F.removeSound("Rev")
 		F.removeSound("Elec")
