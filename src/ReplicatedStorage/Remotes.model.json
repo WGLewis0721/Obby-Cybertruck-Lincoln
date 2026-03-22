@@ -19,7 +19,7 @@
     { "Name": "EquipVehicle",      "ClassName": "RemoteEvent" },
     { "Name": "OpenMapSelect",     "ClassName": "RemoteEvent" },
     { "Name": "SelectMap",         "ClassName": "RemoteEvent" },
-    { "Name": "Horn",              "ClassName": "RemoteEvent" }
-    { "Name": "MobileThrottle",   "ClassName": "RemoteEvent" }
+    { "Name": "Horn",              "ClassName": "RemoteEvent" },
+    { "Name": "MobileThrottle",  "ClassName": "RemoteEvent" }
   ]
 }

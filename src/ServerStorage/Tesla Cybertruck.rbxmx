@@ -26,7 +26,7 @@
 			</Vector3>
 			<token name="ModelStreamingMode">0</token>
 			<bool name="NeedsPivotMigration">false</bool>
-			<Ref name="PrimaryPart">null</Ref>
+			<Ref name="PrimaryPart">RBXC2F9D515D97444FCA1AFF39ECFE17D66</Ref>
 			<float name="ScaleFactor">1.28685939</float>
 			<OptionalCoordinateFrame name="WorldPivotData">
 				<CFrame>
@@ -5231,7 +5231,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 				<Properties>
 					<token name="shape">0</token>
 					<token name="formFactorRaw">0</token>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -5508,7 +5508,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-80147.7188</Z>
 							</Vector3>
 							<float name="UnscaledVolume">1559877.75</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -5689,7 +5689,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>8390614</Z>
 							</Vector3>
 							<float name="UnscaledVolume">11473513</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -5792,7 +5792,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 				<Properties>
 					<token name="shape">0</token>
 					<token name="formFactorRaw">0</token>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -6069,7 +6069,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-80147.7188</Z>
 							</Vector3>
 							<float name="UnscaledVolume">1559877.75</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -6250,7 +6250,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>8390614</Z>
 							</Vector3>
 							<float name="UnscaledVolume">11473513</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -6353,7 +6353,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 				<Properties>
 					<token name="shape">0</token>
 					<token name="formFactorRaw">0</token>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -6630,7 +6630,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-80147.7188</Z>
 							</Vector3>
 							<float name="UnscaledVolume">1559877.75</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -6811,7 +6811,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>8390614</Z>
 							</Vector3>
 							<float name="UnscaledVolume">11473513</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -6914,7 +6914,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 				<Properties>
 					<token name="shape">0</token>
 					<token name="formFactorRaw">0</token>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -7191,7 +7191,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-80147.7188</Z>
 							</Vector3>
 							<float name="UnscaledVolume">1559877.75</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -7372,7 +7372,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>8390614</Z>
 							</Vector3>
 							<float name="UnscaledVolume">11473513</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -7616,7 +7616,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>10106295</Z>
 						</Vector3>
 						<float name="UnscaledVolume">757663.375</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -8049,7 +8049,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>117621792</Z>
 						</Vector3>
 						<float name="UnscaledVolume">151996.922</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -8482,7 +8482,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>68634872</Z>
 						</Vector3>
 						<float name="UnscaledVolume">152830.969</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -8915,7 +8915,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>157403616</Z>
 						</Vector3>
 						<float name="UnscaledVolume">176365.859</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -9348,7 +9348,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-7.35792486e+09</Z>
 						</Vector3>
 						<float name="UnscaledVolume">10178699</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -9781,7 +9781,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-6.47755694e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">5694673</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -10214,7 +10214,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-44628408</Z>
 						</Vector3>
 						<float name="UnscaledVolume">102041.438</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -10647,7 +10647,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-44628388</Z>
 						</Vector3>
 						<float name="UnscaledVolume">102041.438</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -11080,7 +11080,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>12932080</Z>
 						</Vector3>
 						<float name="UnscaledVolume">136207.297</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -11513,7 +11513,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>93463816</Z>
 						</Vector3>
 						<float name="UnscaledVolume">329745</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -11946,7 +11946,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>29385116</Z>
 						</Vector3>
 						<float name="UnscaledVolume">635755.938</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -12379,7 +12379,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-4016050.25</Z>
 						</Vector3>
 						<float name="UnscaledVolume">42686.0469</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -12812,7 +12812,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-4016048.25</Z>
 						</Vector3>
 						<float name="UnscaledVolume">42686.0352</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -13348,7 +13348,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-2.30376182e+10</Z>
 							</Vector3>
 							<float name="UnscaledVolume">5578314.5</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -13529,7 +13529,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>3.8112471e+09</Z>
 							</Vector3>
 							<float name="UnscaledVolume">590.230957</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -13710,7 +13710,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>3.78781573e+10</Z>
 							</Vector3>
 							<float name="UnscaledVolume">5095.9248</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -13891,7 +13891,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>6.81290916e+10</Z>
 							</Vector3>
 							<float name="UnscaledVolume">21023178</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -14072,7 +14072,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>2.29522596e+10</Z>
 							</Vector3>
 							<float name="UnscaledVolume">4253790.5</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -14253,7 +14253,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>352356512</Z>
 							</Vector3>
 							<float name="UnscaledVolume">354115.938</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -14434,7 +14434,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>2.5060713e+09</Z>
 							</Vector3>
 							<float name="UnscaledVolume">6690500</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -14615,7 +14615,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-2556953.5</Z>
 							</Vector3>
 							<float name="UnscaledVolume">196767.891</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -14796,7 +14796,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>292473888</Z>
 							</Vector3>
 							<float name="UnscaledVolume">7578989</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -14977,7 +14977,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-273246944</Z>
 							</Vector3>
 							<float name="UnscaledVolume">358800.812</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -15158,7 +15158,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>8.75781734e+10</Z>
 							</Vector3>
 							<float name="UnscaledVolume">41943396</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -15339,7 +15339,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>7090034.5</Z>
 							</Vector3>
 							<float name="UnscaledVolume">316878.281</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -15520,7 +15520,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>1.10048077e+09</Z>
 							</Vector3>
 							<float name="UnscaledVolume">5600.24658</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -15701,7 +15701,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>2.92047514e+09</Z>
 							</Vector3>
 							<float name="UnscaledVolume">262198.562</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -15882,7 +15882,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>-1.40229048e+10</Z>
 							</Vector3>
 							<float name="UnscaledVolume">63550440</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -16063,7 +16063,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 								<Z>18362472</Z>
 							</Vector3>
 							<float name="UnscaledVolume">486460.844</float>
-							<bool name="Anchored">true</bool>
+							<bool name="Anchored">false</bool>
 							<bool name="AudioCanCollide">true</bool>
 							<float name="BackParamA">-0.5</float>
 							<float name="BackParamB">0.5</float>
@@ -16245,7 +16245,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>292473888</Z>
 						</Vector3>
 						<float name="UnscaledVolume">7578989</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -16426,7 +16426,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-1.40229048e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">63550440</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -16607,7 +16607,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-273246944</Z>
 						</Vector3>
 						<float name="UnscaledVolume">358800.812</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -16788,7 +16788,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>2.5060713e+09</Z>
 						</Vector3>
 						<float name="UnscaledVolume">6690500</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -16969,7 +16969,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>7090034.5</Z>
 						</Vector3>
 						<float name="UnscaledVolume">316878.281</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -17150,7 +17150,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>2.92047514e+09</Z>
 						</Vector3>
 						<float name="UnscaledVolume">262198.562</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -17331,7 +17331,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>8.75781734e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">41943396</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -17512,7 +17512,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>352356512</Z>
 						</Vector3>
 						<float name="UnscaledVolume">354115.938</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -17693,7 +17693,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>18362472</Z>
 						</Vector3>
 						<float name="UnscaledVolume">486460.844</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -17874,7 +17874,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>3.78781573e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">5095.9248</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -18055,7 +18055,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-2556953.5</Z>
 						</Vector3>
 						<float name="UnscaledVolume">196767.891</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -18236,7 +18236,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>2.29522596e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">4253790.5</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -18417,7 +18417,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>1.10048077e+09</Z>
 						</Vector3>
 						<float name="UnscaledVolume">5600.24658</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -18598,7 +18598,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-2.30376182e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">5578314.5</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -18779,7 +18779,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>6.81290916e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">21023178</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -18960,7 +18960,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>3.8112471e+09</Z>
 						</Vector3>
 						<float name="UnscaledVolume">590.230957</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -19193,7 +19193,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>27205554</Z>
 						</Vector3>
 						<float name="UnscaledVolume">149862.719</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -19332,7 +19332,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>46448124</Z>
 						</Vector3>
 						<float name="UnscaledVolume">215900.625</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -19471,7 +19471,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>17369682</Z>
 						</Vector3>
 						<float name="UnscaledVolume">242314.578</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -19610,7 +19610,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>363664640</Z>
 						</Vector3>
 						<float name="UnscaledVolume">33696.9062</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -19749,7 +19749,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>27314708</Z>
 						</Vector3>
 						<float name="UnscaledVolume">149863.016</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -19888,7 +19888,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>363664384</Z>
 						</Vector3>
 						<float name="UnscaledVolume">33696.9258</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -20027,7 +20027,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-273646400</Z>
 						</Vector3>
 						<float name="UnscaledVolume">132411.688</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -20166,7 +20166,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>-273646592</Z>
 						</Vector3>
 						<float name="UnscaledVolume">132411.688</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -20305,7 +20305,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>46447148</Z>
 						</Vector3>
 						<float name="UnscaledVolume">215900.078</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -20444,7 +20444,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 							<Z>1.801472e+10</Z>
 						</Vector3>
 						<float name="UnscaledVolume">1077989.75</float>
-						<bool name="Anchored">true</bool>
+						<bool name="Anchored">false</bool>
 						<bool name="AudioCanCollide">true</bool>
 						<float name="BackParamA">-0.5</float>
 						<float name="BackParamB">0.5</float>
@@ -20584,7 +20584,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>452932032</Z>
 					</Vector3>
 					<float name="UnscaledVolume">12070.3223</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -20765,7 +20765,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-779318.188</Z>
 					</Vector3>
 					<float name="UnscaledVolume">77174.2812</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -20904,7 +20904,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.99907136e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">3169623</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -21043,7 +21043,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-103.529762</Z>
 					</Vector3>
 					<float name="UnscaledVolume">66.392128</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -21182,7 +21182,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>1.44953958e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">383005.781</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -21321,7 +21321,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>1.13569638e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">78727.8984</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -21460,7 +21460,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>6.07463373e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">2013892.25</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -21599,7 +21599,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>96610312</Z>
 					</Vector3>
 					<float name="UnscaledVolume">9659.98828</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -21738,7 +21738,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>14.6152868</Z>
 					</Vector3>
 					<float name="UnscaledVolume">57.4834251</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -21877,7 +21877,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>7796350</Z>
 					</Vector3>
 					<float name="UnscaledVolume">201.483337</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22016,7 +22016,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>28001.166</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1350.91492</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22155,7 +22155,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-6.31489638e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1995682.88</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22294,7 +22294,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-6.31489638e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1995682.88</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22433,7 +22433,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-51241224</Z>
 					</Vector3>
 					<float name="UnscaledVolume">726665.562</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22572,7 +22572,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-2710.21997</Z>
 					</Vector3>
 					<float name="UnscaledVolume">627.483826</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22711,7 +22711,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-5325.66309</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1.13770843</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22850,7 +22850,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-51241200</Z>
 					</Vector3>
 					<float name="UnscaledVolume">726665.5</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -22989,7 +22989,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-5325.72656</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1.13769376</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -23128,7 +23128,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-2710.22388</Z>
 					</Vector3>
 					<float name="UnscaledVolume">627.483582</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -23267,7 +23267,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>6377809.5</Z>
 					</Vector3>
 					<float name="UnscaledVolume">598144.812</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -23406,7 +23406,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>6377771.5</Z>
 					</Vector3>
 					<float name="UnscaledVolume">598144.812</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -23545,7 +23545,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-4.87379476e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">0.399895251</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -23684,7 +23684,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>11249147</Z>
 					</Vector3>
 					<float name="UnscaledVolume">94978.3594</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -23823,7 +23823,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>3.15188871e+11</Z>
 					</Vector3>
 					<float name="UnscaledVolume">0.622669578</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -23962,7 +23962,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>66048.2969</Z>
 					</Vector3>
 					<float name="UnscaledVolume">120155.211</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -24101,7 +24101,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.63076321e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">0.0325807296</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -24240,7 +24240,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-31268.2363</Z>
 					</Vector3>
 					<float name="UnscaledVolume">120133.852</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -24379,7 +24379,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-7.0209065e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">0.0625237375</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -24518,7 +24518,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-3955.0835</Z>
 					</Vector3>
 					<float name="UnscaledVolume">426.704193</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -24657,7 +24657,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-4694302.5</Z>
 					</Vector3>
 					<float name="UnscaledVolume">455683.562</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -24796,7 +24796,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-22837.4727</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1006.95972</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -24935,7 +24935,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>142244.078</Z>
 					</Vector3>
 					<float name="UnscaledVolume">75607.25</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -25074,7 +25074,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>1.24307059e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">2303791.75</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -25213,7 +25213,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>571.639038</Z>
 					</Vector3>
 					<float name="UnscaledVolume">10326.0635</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -25352,7 +25352,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-4784350.5</Z>
 					</Vector3>
 					<float name="UnscaledVolume">272717.312</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -25491,7 +25491,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>111953.344</Z>
 					</Vector3>
 					<float name="UnscaledVolume">107528.352</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -25630,7 +25630,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-6232.26807</Z>
 					</Vector3>
 					<float name="UnscaledVolume">0.417450994</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -25769,7 +25769,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>294590368</Z>
 					</Vector3>
 					<float name="UnscaledVolume">352075.844</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -25908,7 +25908,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>12851.0469</Z>
 					</Vector3>
 					<float name="UnscaledVolume">297074.844</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -26047,7 +26047,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-23763438</Z>
 					</Vector3>
 					<float name="UnscaledVolume">6578.77832</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -26186,7 +26186,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-554556544</Z>
 					</Vector3>
 					<float name="UnscaledVolume">600070.125</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -26325,7 +26325,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>380346880</Z>
 					</Vector3>
 					<float name="UnscaledVolume">23.0999126</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -26464,7 +26464,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.01919703e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">11830518</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -26603,7 +26603,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.16921805e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">130377.578</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -26742,7 +26742,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>87665.9141</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1734.55835</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -26881,7 +26881,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-3.97855973</Z>
 					</Vector3>
 					<float name="UnscaledVolume">14.8766651</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27020,7 +27020,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>2101013.5</Z>
 					</Vector3>
 					<float name="UnscaledVolume">9298.37793</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27159,7 +27159,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-259982.453</Z>
 					</Vector3>
 					<float name="UnscaledVolume">59725.0898</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27298,7 +27298,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>9840.95801</Z>
 					</Vector3>
 					<float name="UnscaledVolume">862.093323</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27437,7 +27437,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.48288819e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">8522016</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27576,7 +27576,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.30587218e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">11678775</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27715,7 +27715,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.4418115e+11</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1916428.75</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27854,7 +27854,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.23818522e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">361303.781</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -27993,7 +27993,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>211095376</Z>
 					</Vector3>
 					<float name="UnscaledVolume">0.0127035314</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -28132,7 +28132,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>69692552</Z>
 					</Vector3>
 					<float name="UnscaledVolume">7331.86621</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -28271,7 +28271,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>1.87719885e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">2768917</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -28410,7 +28410,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1653.39307</Z>
 					</Vector3>
 					<float name="UnscaledVolume">477.351746</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -28549,7 +28549,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>157396656</Z>
 					</Vector3>
 					<float name="UnscaledVolume">176366.516</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -28688,7 +28688,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-154563616</Z>
 					</Vector3>
 					<float name="UnscaledVolume">706103.188</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -28827,7 +28827,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>75242704</Z>
 					</Vector3>
 					<float name="UnscaledVolume">236645.891</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -28966,7 +28966,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-21924714</Z>
 					</Vector3>
 					<float name="UnscaledVolume">31380.1582</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -29105,7 +29105,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>564787.188</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1144.34167</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -29244,7 +29244,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-3002329</Z>
 					</Vector3>
 					<float name="UnscaledVolume">7786.0957</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -29383,7 +29383,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>29708528</Z>
 					</Vector3>
 					<float name="UnscaledVolume">22781.8242</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -29522,7 +29522,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>3992.5835</Z>
 					</Vector3>
 					<float name="UnscaledVolume">749.659851</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -29661,7 +29661,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>1.77283136e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">827286</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -29800,7 +29800,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>139935168</Z>
 					</Vector3>
 					<float name="UnscaledVolume">87686.0078</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -29939,7 +29939,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-13187598</Z>
 					</Vector3>
 					<float name="UnscaledVolume">86872.7891</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -30078,7 +30078,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1568634</Z>
 					</Vector3>
 					<float name="UnscaledVolume">528.007874</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -30217,7 +30217,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1652.74402</Z>
 					</Vector3>
 					<float name="UnscaledVolume">477.35022</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -30356,7 +30356,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-154566656</Z>
 					</Vector3>
 					<float name="UnscaledVolume">706101.875</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -30495,7 +30495,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>75242928</Z>
 					</Vector3>
 					<float name="UnscaledVolume">236645.188</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -30634,7 +30634,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-21923734</Z>
 					</Vector3>
 					<float name="UnscaledVolume">31379.623</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -30773,7 +30773,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>564791.5</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1144.33508</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -30912,7 +30912,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-3002319.5</Z>
 					</Vector3>
 					<float name="UnscaledVolume">7786.06885</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -31051,7 +31051,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>28703502</Z>
 					</Vector3>
 					<float name="UnscaledVolume">22781.8281</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -31190,7 +31190,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1649.10278</Z>
 					</Vector3>
 					<float name="UnscaledVolume">749.736206</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -31329,7 +31329,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>1.72980698e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">827286.125</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -31468,7 +31468,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>140133088</Z>
 					</Vector3>
 					<float name="UnscaledVolume">87685.9141</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -31607,7 +31607,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-10570389</Z>
 					</Vector3>
 					<float name="UnscaledVolume">86872.2734</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -31746,7 +31746,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>756412.688</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1274.83936</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -31885,7 +31885,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-18224014</Z>
 					</Vector3>
 					<float name="UnscaledVolume">400021.031</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32024,7 +32024,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-64437804</Z>
 					</Vector3>
 					<float name="UnscaledVolume">477281.5</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32163,7 +32163,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-51706.2734</Z>
 					</Vector3>
 					<float name="UnscaledVolume">8383.58105</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32302,7 +32302,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>26097030</Z>
 					</Vector3>
 					<float name="UnscaledVolume">49731.1016</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32441,7 +32441,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-24110714</Z>
 					</Vector3>
 					<float name="UnscaledVolume">46704.293</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32580,7 +32580,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-123378424</Z>
 					</Vector3>
 					<float name="UnscaledVolume">60707.957</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32719,7 +32719,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-11144.0059</Z>
 					</Vector3>
 					<float name="UnscaledVolume">9434.64062</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32858,7 +32858,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-11636.0967</Z>
 					</Vector3>
 					<float name="UnscaledVolume">17782.2852</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -32997,7 +32997,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>2.23610286e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">5264992</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -33136,7 +33136,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-35.4489822</Z>
 					</Vector3>
 					<float name="UnscaledVolume">461.034729</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -33275,7 +33275,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-207.718384</Z>
 					</Vector3>
 					<float name="UnscaledVolume">493.027161</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -33414,7 +33414,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-2353482</Z>
 					</Vector3>
 					<float name="UnscaledVolume">5856.40674</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -33553,7 +33553,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-82698.1016</Z>
 					</Vector3>
 					<float name="UnscaledVolume">0.0427828394</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -33692,7 +33692,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>58996.043</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1397.89185</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -33831,7 +33831,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>1694512.62</Z>
 					</Vector3>
 					<float name="UnscaledVolume">5056.21436</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -33970,7 +33970,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>52312.6797</Z>
 					</Vector3>
 					<float name="UnscaledVolume">10980.8896</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -34109,7 +34109,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>341025.969</Z>
 					</Vector3>
 					<float name="UnscaledVolume">90931.8203</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -34248,7 +34248,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>11283570</Z>
 					</Vector3>
 					<float name="UnscaledVolume">31653.0312</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -34387,7 +34387,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>8552519</Z>
 					</Vector3>
 					<float name="UnscaledVolume">917924.25</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -34526,7 +34526,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-2.42699858e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">12846740</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -34665,7 +34665,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>32.3722534</Z>
 					</Vector3>
 					<float name="UnscaledVolume">27.8273125</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -34804,7 +34804,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>7.67743232e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">4611915</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -34943,7 +34943,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-28336176</Z>
 					</Vector3>
 					<float name="UnscaledVolume">15437.666</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -35082,7 +35082,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>22.5729885</Z>
 					</Vector3>
 					<float name="UnscaledVolume">3295.53662</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -35221,7 +35221,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.4659293e+12</Z>
 					</Vector3>
 					<float name="UnscaledVolume">26702508</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -35360,7 +35360,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>30515278</Z>
 					</Vector3>
 					<float name="UnscaledVolume">221564.953</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -35499,7 +35499,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-861356672</Z>
 					</Vector3>
 					<float name="UnscaledVolume">2369.62817</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -35638,7 +35638,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-275412160</Z>
 					</Vector3>
 					<float name="UnscaledVolume">43478.6406</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -35777,7 +35777,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>6.7599575e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1571356.62</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -35916,7 +35916,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>3.0887381e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">4333087</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -36055,7 +36055,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-3.99874171e+10</Z>
 					</Vector3>
 					<float name="UnscaledVolume">5259478.5</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -36194,7 +36194,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-2638.7019</Z>
 					</Vector3>
 					<float name="UnscaledVolume">820.17981</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -36333,7 +36333,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-1.94724024e+12</Z>
 					</Vector3>
 					<float name="UnscaledVolume">10097395</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -36472,7 +36472,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>704199168</Z>
 					</Vector3>
 					<float name="UnscaledVolume">1377109.5</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -36611,7 +36611,7 @@ local driveSeat = car:WaitForChild("DriveSeat")
 						<Z>-9.62397491e+09</Z>
 					</Vector3>
 					<float name="UnscaledVolume">6814775.5</float>
-					<bool name="Anchored">true</bool>
+					<bool name="Anchored">false</bool>
 					<bool name="AudioCanCollide">true</bool>
 					<float name="BackParamA">-0.5</float>
 					<float name="BackParamB">0.5</float>
@@ -36754,15 +36754,15 @@ local driveSeat = car:WaitForChild("DriveSeat")
 		<Item class="VehicleSeat" referent="RBXC2F9D515D97444FCA1AFF39ECFE17D66">
 			<Properties>
 				<bool name="Disabled">false</bool>
-				<bool name="HeadsUpDisplay">true</bool>
-				<float name="MaxSpeed">0</float>
+				<bool name="HeadsUpDisplay">false</bool>
+				<float name="MaxSpeed">60</float>
 				<int name="Steer">0</int>
 				<float name="SteerFloat">0</float>
 				<int name="Throttle">0</int>
 				<float name="ThrottleFloat">0</float>
-				<float name="Torque">0</float>
-				<float name="TurnSpeed">0</float>
-				<bool name="Anchored">true</bool>
+				<float name="Torque">20</float>
+				<float name="TurnSpeed">1</float>
+				<bool name="Anchored">false</bool>
 				<bool name="AudioCanCollide">true</bool>
 				<float name="BackParamA">-0.5</float>
 				<float name="BackParamB">0.5</float>

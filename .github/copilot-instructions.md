@@ -88,3 +88,25 @@ The game has a **Cyberpunk / Tesla Cybertruck** aesthetic:
 - Do not use `wait()` — use `task.wait()` instead.
 - Do not use `spawn()` — use `task.spawn()` instead.
 - Do not hard-code player UserIds or asset IDs without a comment explaining them.
+
+You are working in a Roblox Luau project.
+
+System architecture:
+- UIBuilder handles UI
+- InputHandler handles button input
+- SteeringController handles joystick
+- VehicleController simulates A-Chassis key input
+- NitroSystem manages boost resource
+- CooldownSystem prevents boost spam
+
+Rules:
+- Do not create new systems
+- Do not rename variables
+- Only expand TODO blocks
+- Maintain ControlState structure
+
+Vehicle uses A-Chassis:
+- W = accelerate
+- S = brake
+- A/D = steering
+- Shift = boost

@@ -28,6 +28,15 @@ for _, scriptName in ipairs(legacyRootScriptNames) do
 	end
 end
 
+local servicesFolder = ServerScriptService:FindFirstChild("Services")
+if servicesFolder then
+	local legacyVehicleDriveService = servicesFolder:FindFirstChild("VehicleDriveService")
+	if legacyVehicleDriveService then
+		legacyVehicleDriveService:Destroy()
+		print("Removed legacy VehicleDriveService from Services")
+	end
+end
+
 vehicleTemplateFactory.EnsureTemplate("Tesla Cybertruck")
 
 print("CharacterAutoLoads enabled")

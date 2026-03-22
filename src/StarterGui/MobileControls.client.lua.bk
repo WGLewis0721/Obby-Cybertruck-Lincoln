@@ -62,18 +62,13 @@ local openPaintShop = remotesFolder:WaitForChild("OpenPaintShop", 10)
 local openGarage    = remotesFolder:WaitForChild("OpenGarage",    10)
 local openMapSelect = remotesFolder:WaitForChild("OpenMapSelect", 10)
 local hornRemote    = remotesFolder:WaitForChild("Horn",          10)
+local mobileThrottle = remotesFolder:WaitForChild("MobileThrottle", 10)
 
 if not applyBoost    then Logger.Warn("MobileControls", "ApplyBoost remote not found")    end
 if not openPaintShop then Logger.Warn("MobileControls", "OpenPaintShop remote not found") end
 if not openGarage    then Logger.Warn("MobileControls", "OpenGarage remote not found")    end
 if not openMapSelect then Logger.Warn("MobileControls", "OpenMapSelect remote not found") end
 if not hornRemote    then Logger.Warn("MobileControls", "Horn remote not found")           end
-local remotesFolder  = ReplicatedStorage:WaitForChild("Remotes")
-local applyBoost     = remotesFolder:WaitForChild("ApplyBoost", 10)
-local mobileThrottle = remotesFolder:WaitForChild("MobileThrottle", 10)
-if not applyBoost then
-	Logger.Warn("MobileControls", "ApplyBoost RemoteEvent not found")
-end
 if not mobileThrottle then
 	Logger.Warn("MobileControls", "MobileThrottle RemoteEvent not found — server-side throttle disabled")
 end
@@ -366,17 +361,14 @@ local function bindDriveControls()
 	ContextActionService:BindAction(
 		"MC_Gas",
 		function(_, inputState, _)
-			local pressed = inputState == Enum.UserInputState.Begin
-			throttleHeld = pressed
-			if gasFrame then setPressed(gasFrame, pressed) end
 			if inputState == Enum.UserInputState.Begin then
 				throttleHeld = true
-				if accelFrame then setPressed(accelFrame, true) end
+				if gasFrame then setPressed(gasFrame, true) end
 				if mobileThrottle then mobileThrottle:FireServer(1) end
 			elseif inputState == Enum.UserInputState.End
 				or inputState == Enum.UserInputState.Cancel then
 				throttleHeld = false
-				if accelFrame then setPressed(accelFrame, false) end
+				if gasFrame then setPressed(gasFrame, false) end
 				if mobileThrottle then mobileThrottle:FireServer(0) end
 			end
 			-- Ignore Change — CAS fires it for touch-position jitter while held.
@@ -392,9 +384,14 @@ local function bindDriveControls()
 	ContextActionService:BindAction(
 		"MC_Brake",
 		function(_, inputState, _)
-			local pressed = inputState == Enum.UserInputState.Begin
-			brakeHeld = pressed
-			if brakeFrame then setPressed(brakeFrame, pressed) end
+			if inputState == Enum.UserInputState.Begin then
+				brakeHeld = true
+				if brakeFrame then setPressed(brakeFrame, true) end
+			elseif inputState == Enum.UserInputState.End
+				or inputState == Enum.UserInputState.Cancel then
+				brakeHeld = false
+				if brakeFrame then setPressed(brakeFrame, false) end
+			end
 			return Enum.ContextActionResult.Pass
 		end,
 		true, Enum.KeyCode.Down
@@ -407,9 +404,14 @@ local function bindDriveControls()
 	ContextActionService:BindAction(
 		"MC_SteerLeft",
 		function(_, inputState, _)
-			local pressed = inputState == Enum.UserInputState.Begin
-			steerLeftHeld = pressed
-			if steerLeftFrame then setPressed(steerLeftFrame, pressed) end
+			if inputState == Enum.UserInputState.Begin then
+				steerLeftHeld = true
+				if steerLeftFrame then setPressed(steerLeftFrame, true) end
+			elseif inputState == Enum.UserInputState.End
+				or inputState == Enum.UserInputState.Cancel then
+				steerLeftHeld = false
+				if steerLeftFrame then setPressed(steerLeftFrame, false) end
+			end
 			return Enum.ContextActionResult.Pass
 		end,
 		true, Enum.KeyCode.Left
@@ -422,9 +424,14 @@ local function bindDriveControls()
 	ContextActionService:BindAction(
 		"MC_SteerRight",
 		function(_, inputState, _)
-			local pressed = inputState == Enum.UserInputState.Begin
-			steerRightHeld = pressed
-			if steerRightFrame then setPressed(steerRightFrame, pressed) end
+			if inputState == Enum.UserInputState.Begin then
+				steerRightHeld = true
+				if steerRightFrame then setPressed(steerRightFrame, true) end
+			elseif inputState == Enum.UserInputState.End
+				or inputState == Enum.UserInputState.Cancel then
+				steerRightHeld = false
+				if steerRightFrame then setPressed(steerRightFrame, false) end
+			end
 			return Enum.ContextActionResult.Pass
 		end,
 		true, Enum.KeyCode.Right
