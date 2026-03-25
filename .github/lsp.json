@@ -1,0 +1,12 @@
+{
+  "lspServers": {
+    "luau": {
+      "command": "luau-lsp",
+      "args": ["lsp"],
+      "fileExtensions": {
+        ".lua": "luau",
+        ".luau": "luau"
+      }
+    }
+  }
+}

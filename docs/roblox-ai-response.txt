@@ -1,0 +1,366 @@
+--!strict
+--[[
+================================================================================
+                    DRIVING SIMULATOR - STRUCTURE AUDIT REPORT v2
+================================================================================
+
+Project: Place1 (Driving Simulator)
+Generated: AI Assistant Audit
+Purpose: High-level folder structure map for developer handoff
+
+================================================================================
+                          OVERALL HEALTH: YELLOW
+================================================================================
+
+Summary: The core driving simulator systems are well-organized with proper
+client-server separation. ServerScriptService has clear service handlers,
+ReplicatedStorage has RemoteEvents and shared modules, and StarterGui has
+UI scripts. However, 200+ environmental scripts are scattered in Workspace
+(doors, lights, appliances), deprecated BodyGyro is used extensively, and
+there are duplicate RemoteEvents and ModuleScripts that need consolidation.
+
+================================================================================
+                    HIGH-LEVEL FOLDER STRUCTURE MAP
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              WORKSPACE                                       │
+│  (World geometry, vehicles, environment - scripts should move to SSS)       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ├── SpawnLocation "RespawnLocation"                                        │
+│  ├── Model "Rig" (character rig with Animate LocalScript)                  │
+│  ├── Model "Tesla Cybertruck" (active vehicle in world)                     │
+│  │   ├── ModuleScript "A-Chassis Tune" (vehicle configuration)             │
+│  │   ├── Model "Wheels" (FR, FL, RR, RL)                                   │
+│  │   ├── Model "Body" (Paint, Leather, Interior)                           │
+│  │   └── VehicleSeat "DriveSeat" (with ProximityPrompt)                    │
+│  ├── Model "School" ⚠️ (contains 50+ embedded scripts)                     │
+│  │   ├── Folder "Classroom Setup" (desks, lamps, whiteboards)              │
+│  │   ├── Folder "Doors" (door scripts using BodyGyro)                       │
+│  │   ├── Folder "Lights" (light switch scripts)                            │
+│  │   └── ... (bathrooms, library, principal's office)                       │
+│  ├── Model "Urban House" ⚠️ (contains 100+ embedded scripts)                │
+│  │   ├── Folder "Kitchen and Dining Room"                                  │
+│  │   ├── Folder "Living Room"                                              │
+│  │   ├── Folder "Master Bedroom"                                           │
+│  │   └── ... (bathrooms, garage, office)                                   │
+│  ├── Folder "Playground" (MerryGoRound, SwingSet, PlayStructure)           │
+│  ├── Folder "RoadSections" (intersections, roads, boulevards)              │
+│  ├── Folder "Trees" (PineTree models)                                      │
+│  ├── Folder "GasStationArea"                                              │
+│  ├── Model "Billboard"                                                     │
+│  ├── Part "Baseplate"                                                      │
+│  ├── Part "VehicleSpawn"                                                   │
+│  └── Part "MenuCameraAnchor"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          SERVERSCRIPTSERVICE                                  │
+│  (Server-side game logic - WELL ORGANIZED)                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ├── Script "script" ⚠️ (generic name - rename to MainGameLoop)              │
+│  ├── Folder "Services" ✓                                                    │
+│  │   ├── Script "CheckpointHandler"                                        │
+│  │   ├── Script "CoinHandler"                                              │
+│  │   ├── Script "GarageHandler"                                            │
+│  │   ├── Script "MapSelectHandler"                                         │
+│  │   ├── Script "PaintShopHandler"                                         │
+│  │   ├── Script "TimerHandler"                                             │
+│  │   ├── Script "PlayerDataService"                                       │
+│  │   ├── ModuleScript "PlayerDataInterface"                                │
+│  │   ├── Script "OutOfBoundsHandler"                                       │
+│  │   └── ModuleScript "VehicleTemplateFactory"                             │
+│  └── Folder "Setup" ✓                                                       │
+│      ├── Script "GenerateCityMap"                                          │
+│      ├── Script "GenerateMountainMap"                                     │
+│      └── Script "GenerateRaceTrackMap"                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            SERVERSTORAGE                                      │
+│  (Vehicle templates and race handlers)                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ├── Script "fixesv2" ⚠️ (unclear purpose)                                  │
+│  ├── Folder "RaceHandlers"                                                  │
+│  │   ├── BindableFunction "ProcessRaceCoins"                               │
+│  │   └── BindableFunction "ProcessRaceTime"                                 │
+│  └── Model "Tesla Cybertruck" (x2) ✓                                        │
+│      ├── ModuleScript "A-Chassis Tune"                                      │
+│      ├── Model "Wheels"                                                     │
+│      ├── Model "Body"                                                       │
+│      ├── Model "Misc"                                                       │
+│      └── VehicleSeat "DriveSeat"                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          REPLICATEDSTORAGE                                    │
+│  (Shared modules and RemoteEvents - NEEDS CONSOLIDATION)                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ├── Folder "Module" ⚠️ (duplicate - remove, use Shared/)                   │
+│  │   ├── ModuleScript "ShopItems"                                          │
+│  │   ├── ModuleScript "PlayerData"                                         │
+│  │   ├── ModuleScript "MapData"                                            │
+│  │   └── ModuleScript "VehicleData"                                        │
+│  ├── Folder "Shared" ✓ (authoritative shared modules)                      │
+│  │   ├── ModuleScript "MapData"                                             │
+│  │   ├── ModuleScript "PlayerData"                                         │
+│  │   ├── ModuleScript "ShopItems"                                          │
+│  │   ├── ModuleScript "VehicleData"                                        │
+│  │   ├── ModuleScript "Constants"                                          │
+│  │   ├── ModuleScript "EventBus"                                            │
+│  │   └── ModuleScript "Logger"                                              │
+│  ├── Folder "Remotes" ✓ (authoritative RemoteEvents)                       │
+│  │   ├── RemoteEvent "OpenPaintShop"                                        │
+│  │   ├── RemoteEvent "PurchaseSuccess"                                     │
+│  │   ├── RemoteEvent "ApplyPaintJob"                                       │
+│  │   ├── RemoteEvent "ApplyBoost"                                          │
+│  │   ├── RemoteEvent "BundlePurchased"                                      │
+│  │   ├── RemoteEvent "CheckpointReached"                                   │
+│  │   ├── RemoteEvent "RaceStarted"                                         │
+│  │   ├── RemoteEvent "RaceFinished"                                        │
+│  │   ├── RemoteEvent "RaceAgain"                                           │
+│  │   ├── RemoteEvent "OpenGarage"                                          │
+│  │   ├── RemoteEvent "EquipVehicle"                                        │
+│  │   ├── RemoteEvent "OpenMapSelect"                                       │
+│  │   ├── RemoteEvent "SelectMap"                                            │
+│  │   ├── RemoteEvent "MobileThrottle"                                      │
+│  │   └── RemoteEvent "Horn"                                                 │
+│  ├── Folder "Race" ⚠️ (duplicate - consolidate into Remotes/)               │
+│  ├── Folder "Events" ⚠️ (duplicate - consolidate into Remotes/)              │
+│  └── [loose RemoteEvents] ⚠️ (duplicate - consolidate into Remotes/)        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              STARTERGUI                                       │
+│  (Client UI scripts - WELL ORGANIZED)                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ├── LocalScript "PaintShopButton" ✓                                        │
+│  ├── LocalScript "GarageMenu" ✓                                            │
+│  ├── LocalScript "RaceHUD" ✓                                               │
+│  ├── LocalScript "BoostHandler" ✓                                          │
+│  ├── LocalScript "ResultsScreen" ✓                                         │
+│  ├── LocalScript "MainMenu" ✓                                              │
+│  ├── LocalScript "GameHUD" ✓                                               │
+│  ├── LocalScript "RemoteHandler" ✓                                         │
+│  ├── LocalScript "MobileControls" ✓                                        │
+│  └── ModuleScript "ClientState" ✓                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            STARTERPLAYER                                      │
+│  (Player-specific scripts)                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ├── StarterPlayerScripts                                                    │
+│  │   ├── LocalScript "MainMenu"                                            │
+│  │   └── LocalScript "CameraSetup"                                         │
+│  └── Folder "StarterPlayerScripts"/"Client"                                │
+│      ├── LocalScript "ShopButtonHandler"                                    │
+│      └── LocalScript "ShopMenuScript"                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+                           ISSUES FOUND
+================================================================================
+
+--------------------------------------------------------------------------------
+❌ ISSUE: Scripts Embedded in Workspace Objects
+--------------------------------------------------------------------------------
+LOCATION: Workspace (School, Urban House, Playground, RoadSections)
+SEVERITY: Warning
+PROBLEM:
+	Over 200 scripts are embedded directly in world objects (doors, lights,
+	appliances, traffic lights, etc.). This violates Roblox best practices.
+	
+	Examples:
+	- Workspace.School.Doors.Door.Script
+	- Workspace.Urban House.Body.Doors.*.InsideDoor.Script
+	- Workspace.School.Lights.*.LightSwitchScript
+	- Workspace.RoadSections.*.TrafficLightScript
+
+FIX:
+	Option A (Recommended): Move to ServerScriptService/WorldHandlers/
+	- Use CollectionService tags to identify interactive objects
+	- Single script handles all doors, all lights, etc.
+	
+	Option B: Keep in Workspace but organize:
+	- Workspace/WorldScripts/Doors/
+	- Workspace/WorldScripts/Lights/
+
+--------------------------------------------------------------------------------
+❌ ISSUE: Deprecated BodyGyro Usage
+--------------------------------------------------------------------------------
+LOCATION: Multiple (A-Chassis, all door scripts)
+SEVERITY: Warning
+PROBLEM:
+	BodyGyro is deprecated. Should use AngularVelocity constraint.
+	
+	Found in:
+	- Workspace.Tesla Cybertruck.A-Chassis Tune.Initialize
+	- ServerStorage.Tesla Cybertruck.A-Chassis Tune.Initialize
+	- All door scripts in School and Urban House
+
+FIX:
+	Replace BodyGyro with AngularVelocity constraint.
+	This is especially important for vehicle physics.
+
+--------------------------------------------------------------------------------
+❌ ISSUE: Duplicate RemoteEvents
+--------------------------------------------------------------------------------
+LOCATION: ReplicatedStorage
+SEVERITY: Warning
+PROBLEM:
+	Same RemoteEvents exist in multiple locations:
+	- ReplicatedStorage/ (loose)
+	- ReplicatedStorage/Race/
+	- ReplicatedStorage/Events/
+	- ReplicatedStorage/Remotes/
+
+FIX:
+	Consolidate all RemoteEvents into ReplicatedStorage/Remotes/
+	Delete the Race/, Events/, and loose RemoteEvents.
+
+--------------------------------------------------------------------------------
+❌ ISSUE: Duplicate ModuleScripts
+--------------------------------------------------------------------------------
+LOCATION: ReplicatedStorage/Module and ReplicatedStorage/Shared
+SEVERITY: Warning
+PROBLEM:
+	Same modules in two places:
+	- ReplicatedStorage/Module/ (ShopItems, PlayerData, MapData, VehicleData)
+	- ReplicatedStorage/Shared/ (ShopItems, PlayerData, MapData, VehicleData)
+
+FIX:
+	Delete ReplicatedStorage/Module/ folder.
+	Use ReplicatedStorage/Shared/ as the single source.
+
+--------------------------------------------------------------------------------
+❌ ISSUE: Generic Script Names
+--------------------------------------------------------------------------------
+LOCATION: ServerScriptService, ServerStorage
+SEVERITY: Suggestion
+PROBLEM:
+	- ServerScriptService.script (Script) - unclear purpose
+	- ServerStorage.fixesv2 (Script) - unclear purpose
+
+FIX:
+	Rename to descriptive names or delete if unused.
+
+--------------------------------------------------------------------------------
+❌ ISSUE: Missing --!strict
+--------------------------------------------------------------------------------
+LOCATION: All scripts
+SEVERITY: Suggestion
+PROBLEM:
+	No scripts have --!strict type annotation.
+
+FIX:
+	Add --!strict to top of all scripts incrementally.
+
+================================================================================
+                          MISSING SYSTEMS
+================================================================================
+
+Driving Simulator Architecture Checklist:
+
+□ VehicleManager — PARTIALLY PRESENT
+	GarageHandler handles spawning, but no dedicated VehicleManager.
+	Recommend: ServerScriptService/Services/VehicleManager
+
+□ VehiclePhysics — PRESENT (A-Chassis)
+	Uses deprecated BodyGyro, needs update.
+
+□ InputProcessor — MISSING
+	No server-side input validation.
+	Recommend: ReplicatedStorage/Shared/InputProcessor
+
+□ VehicleController — PARTIALLY PRESENT
+	LocalScripts in vehicle model, but no centralized handler.
+	Recommend: StarterPlayerScripts/VehicleController
+
+□ VehicleConfig — PRESENT
+	ReplicatedStorage/Shared/VehicleData ✓
+
+□ CameraController — PARTIALLY PRESENT
+	StarterPlayerScripts/CameraSetup exists.
+
+□ HUDController — PRESENT
+	StarterGui/GameHUD, RaceHUD, BoostHandler ✓
+
+□ RemoteEvents — MOSTLY PRESENT
+	Missing: VehicleInput, HUDUpdate, VehicleSpawned
+	Present: EquipVehicle, OpenGarage, CheckpointReached, etc. ✓
+
+================================================================================
+                        WHAT IS ALREADY GOOD
+================================================================================
+
+1. **ServerScriptService Organization** ✓
+	Clear Services folder with single-responsibility handlers.
+	Setup folder for map generation scripts.
+
+2. **ReplicatedStorage RemoteEvents** ✓
+	Comprehensive set of RemoteEvents for all game systems.
+	Remotes folder is well-organized.
+
+3. **StarterGui UI Scripts** ✓
+	All UI scripts properly placed.
+	Clear separation: GameHUD, RaceHUD, MainMenu, GarageMenu.
+
+4. **Shared Modules** ✓
+	ReplicatedStorage/Shared has utilities (Constants, EventBus, Logger)
+	and game data modules.
+
+5. **Vehicle Templates** ✓
+	Vehicles stored securely in ServerStorage for spawning.
+
+================================================================================
+                      RECOMMENDED NEXT ACTIONS
+================================================================================
+
+Priority 1 (Critical - Data Integrity):
+1. Consolidate RemoteEvents into ReplicatedStorage/Remotes/
+   Delete duplicate folders (Race/, Events/, loose events)
+
+2. Consolidate ModuleScripts into ReplicatedStorage/Shared/
+   Delete ReplicatedStorage/Module/ folder
+
+Priority 2 (Warnings - Architecture):
+3. Create InputProcessor module for server-side input validation
+   Location: ReplicatedStorage/Shared/InputProcessor
+
+4. Plan Workspace script migration:
+   - Create ServerScriptService/WorldHandlers/
+   - Use CollectionService tags for interactive objects
+   - Start with high-impact: doors, lights, traffic
+
+5. Update A-Chassis to use AngularVelocity:
+   - Replace BodyGyro in Initialize script
+   - Test thoroughly before deploying
+
+Priority 3 (Suggestions - Quality):
+6. Add --!strict to all scripts (incremental)
+
+7. Rename generic scripts:
+   - ServerScriptService.script → MainGameLoop
+   - ServerStorage.fixesv2 → delete or rename
+
+8. Create VehicleManager service:
+   Location: ServerScriptService/Services/VehicleManager
+
+9. Create VehicleController LocalScript:
+   Location: StarterPlayerScripts/VehicleController
+
+10. Add missing RemoteEvents:
+    - VehicleInput (for input handling)
+    - HUDUpdate (for HUD state sync)
+    - VehicleSpawned (for spawn notifications)
+
+================================================================================
+                         END OF REPORT
+================================================================================
+--]]
+
+-- This script contains no executable code, only documentation.
+-- The audit report above is for reference and planning purposes.
+
+return "Audit complete. See script contents for full report."
