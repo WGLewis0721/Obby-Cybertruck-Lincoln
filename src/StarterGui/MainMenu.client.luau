@@ -15,7 +15,7 @@ local playerGui     = player:WaitForChild("PlayerGui")
 local camera        = Workspace.CurrentCamera
 local remotesFolder = ReplicatedStorage:WaitForChild("Events", 10)
 local openPaintShop = remotesFolder and remotesFolder:WaitForChild("OpenPaintShop", 10)
-local equipVehicleEvent = remotesFolder and remotesFolder:FindFirstChild("EquipVehicle")
+local equipVehicleEvent = remotesFolder and remotesFolder:WaitForChild("EquipVehicle", 10)
 
 if not openPaintShop then
 	warn("MainMenu: OpenPaintShop RemoteEvent not found")

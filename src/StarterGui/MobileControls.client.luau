@@ -527,10 +527,10 @@ end
 local function showControls(driveSeat)
 	currentSeat       = driveSeat
 	isActive          = true
-	-- Disable the native VehicleController so it stops resetting
-	-- VehicleSeat.Throttle = 0 every frame (it sees no keyboard / joystick input
-	-- on mobile, so it would immediately override our throttle writes).
-	currentSeat.Disabled = true
+	-- NOTE: Do NOT set currentSeat.Disabled = true here.
+	-- A-Chassis's Interface LocalScript checks Disabled to decide whether to
+	-- render the driving HUD — disabling the seat silences it entirely.
+	-- Server-authoritative throttle is handled via MobileInputHandler instead.
 	screenGui.Enabled = true
 	bindDriveControls()
 	startRenderLoop()
@@ -539,11 +539,6 @@ end
 
 local function hideControls()
 	isActive          = false
-	-- Re-enable the native VehicleController so desktop / gamepad players
-	-- can still drive if the seat is reused.
-	if currentSeat then
-		currentSeat.Disabled = false
-	end
 	screenGui.Enabled = false
 	unbindDriveControls()
 	resetInputs()

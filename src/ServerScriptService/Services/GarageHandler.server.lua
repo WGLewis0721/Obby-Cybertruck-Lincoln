@@ -258,18 +258,6 @@ local function seatPlayerInVehicle(player, vehicle)
 	end
 
 	task.spawn(function()
-		-- A-Chassis creates the Flip gyro just before welding the body to the
-		-- DriveSeat, so wait for that signal and a few extra frames before seating.
-		local flip = vehicleSeat:FindFirstChild("Flip") or vehicleSeat:WaitForChild("Flip", 3)
-		if not vehicleSeat.Parent then
-			return
-		end
-		if flip then
-			task.wait(0.1)
-			task.wait(0.1)
-			task.wait(0.1)
-		end
-
 		for _ = 1, 30 do
 			if not vehicleSeat.Parent then
 				return
@@ -293,7 +281,8 @@ local function seatPlayerInVehicle(player, vehicle)
 				return
 			end
 
-			rootPart.CFrame = vehicleSeat.CFrame * CFrame.new(0, 3, 0)
+			rootPart.CFrame = vehicleSeat.CFrame * CFrame.new(0, 0.5, 0)
+			rootPart.AssemblyLinearVelocity = Vector3.zero
 			local ok = pcall(function()
 				vehicleSeat:Sit(humanoid)
 			end)

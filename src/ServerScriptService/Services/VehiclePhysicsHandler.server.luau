@@ -4,9 +4,6 @@
 -- Part of the Client-Server Input Split architecture
 
 -- Constants
-local MAX_ANGULAR_VELOCITY: number = 50  -- Max wheel rotation speed
-local MAX_STEER_ANGLE: number = 35  -- Max steering angle in degrees
-local BRAKE_MULTIPLIER: number = 0.1  -- How much braking slows wheels
 local INPUT_TIMEOUT: number = 0.5  -- Seconds before considering input stale
 
 -- Services
@@ -40,70 +37,26 @@ local function findVehicleForPlayer(userId: number): Model?
 	return Workspace:FindFirstChild(vehicleName) :: Model
 end
 
-local function findHingeConstraints(vehicle: Model): (HingeConstraint?, HingeConstraint?, HingeConstraint?, HingeConstraint?)
-	-- Find wheel HingeConstraints for drive and steering
-	-- Typical A-Chassis structure: wheels are under vehicle with HingeConstraints
-	local driveLeft: HingeConstraint? = nil
-	local driveRight: HingeConstraint? = nil
-	local steerLeft: HingeConstraint? = nil
-	local steerRight: HingeConstraint? = nil
-	
-	for _, descendant in ipairs(vehicle:GetDescendants()) do
-		if descendant:IsA("HingeConstraint") then
-			local hinge = descendant :: HingeConstraint
-			local name = string.lower(hinge.Name)
-			
-			-- Drive wheels (rear)
-			if string.find(name, "drive") or string.find(name, "rear") or string.find(name, "back") then
-				if string.find(name, "left") then
-					driveLeft = hinge
-				elseif string.find(name, "right") then
-					driveRight = hinge
-				end
-			-- Steering wheels (front)
-			elseif string.find(name, "steer") or string.find(name, "front") then
-				if string.find(name, "left") then
-					steerLeft = hinge
-				elseif string.find(name, "right") then
-					steerRight = hinge
-				end
-			end
-		end
+local function findDriveSeat(vehicle: Model): VehicleSeat?
+	-- Try named "DriveSeat" first (A-Chassis convention), fall back to any VehicleSeat
+	local named = vehicle:FindFirstChild("DriveSeat", true)
+	if named and named:IsA("VehicleSeat") then
+		return named :: VehicleSeat
 	end
-	
-	return driveLeft, driveRight, steerLeft, steerRight
+	return vehicle:FindFirstChildWhichIsA("VehicleSeat", true) :: VehicleSeat?
 end
 
 local function applyPhysicsToVehicle(vehicle: Model, input: InputProcessor.VehicleInput): ()
-	local driveLeft, driveRight, steerLeft, steerRight = findHingeConstraints(vehicle)
-	
-	-- Apply throttle/brake to drive wheels
-	local targetVelocity = input.throttle * MAX_ANGULAR_VELOCITY
-	
-	-- Braking reduces velocity
-	if input.brake > 0 then
-		targetVelocity = targetVelocity * (1 - input.brake * BRAKE_MULTIPLIER)
-	end
-	
-	-- Apply to drive wheels
-	if driveLeft then
-		driveLeft.AngularVelocity = targetVelocity
-	end
-	if driveRight then
-		driveRight.AngularVelocity = targetVelocity
-	end
-	
-	-- Apply steering to front wheels
-	local steerAngle = input.steer * MAX_STEER_ANGLE
-	
-	if steerLeft then
-		steerLeft.LowerAngle = -steerAngle
-		steerLeft.UpperAngle = steerAngle
-	end
-	if steerRight then
-		steerRight.LowerAngle = -steerAngle
-		steerRight.UpperAngle = steerAngle
-	end
+	-- A-Chassis reads VehicleSeat.Throttle and .Steer natively via its own server
+	-- Script and applies wheel forces internally.  Do NOT apply AngularVelocity to
+	-- HingeConstraints here — that creates competing torques that cause uncontrolled
+	-- drift and fight A-Chassis's physics system.
+	local seat = findDriveSeat(vehicle)
+	if not seat then return end
+
+	-- Braking takes priority: negative throttle signals deceleration to A-Chassis.
+	seat.Throttle = if input.brake > 0 then -input.brake else input.throttle
+	seat.Steer    = input.steer
 end
 
 local function calculateVehicleSpeed(vehicle: Model): number
