@@ -26,19 +26,19 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remotes ───────────────────────────────────────────────────────────────────
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+local remotesFolder = ReplicatedStorage:WaitForChild("Events", 10)
 if not remotesFolder then
-	warn("GameHUD: 'Remotes' folder not found in ReplicatedStorage")
+	warn("GameHUD: 'Events' folder not found in ReplicatedStorage")
 end
 
 local openPaintShop = remotesFolder and remotesFolder:WaitForChild("OpenPaintShop", 10)
 local openGarage    = remotesFolder and remotesFolder:WaitForChild("OpenGarage", 10)
 
 if not openPaintShop then
-	warn("GameHUD: RemoteEvent 'OpenPaintShop' not found in Remotes folder")
+	warn("GameHUD: RemoteEvent 'OpenPaintShop' not found in Events folder")
 end
 if not openGarage then
-	warn("GameHUD: RemoteEvent 'OpenGarage' not found in Remotes folder")
+	warn("GameHUD: RemoteEvent 'OpenGarage' not found in Events folder")
 end
 
 -- ── Theme ─────────────────────────────────────────────────────────────────────

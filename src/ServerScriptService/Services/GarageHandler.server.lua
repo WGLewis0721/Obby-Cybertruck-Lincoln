@@ -35,7 +35,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace         = game:GetService("Workspace")
 
 -- 2. Constants & shared modules
-local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+local sharedFolder = ReplicatedStorage:WaitForChild("Module", 10)
 local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
 local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 local VehicleData  = require(sharedFolder:WaitForChild("VehicleData", 10))
@@ -64,6 +64,7 @@ end
 local equipVehicleEvent = remotesFolder:WaitForChild("EquipVehicle", 10)
 local openGarageEvent   = remotesFolder:WaitForChild("OpenGarage", 10)
 local selectMapEvent    = remotesFolder:FindFirstChild("SelectMap")
+local vehicleSpawnedRemote = remotesFolder:FindFirstChild("VehicleSpawned")
 
 if not equipVehicleEvent then
 	Logger.Error(TAG, "EquipVehicle RemoteEvent not found")
@@ -387,7 +388,14 @@ local function spawnVehicle(player, vehicle)
 	newVehicle.Parent = workspace
 	seatPlayerInVehicle(player, newVehicle)
 
+	-- Fire server-side event bus
 	EventBus:Fire("VehicleSpawned", player, vehicle.Id)
+
+	-- Fire RemoteEvent to client so mobile controls can show
+	if vehicleSpawnedRemote then
+		vehicleSpawnedRemote:FireClient(player, newVehicle.Name, spawnCFrame.Position)
+	end
+
 	Logger.Info(TAG, "Spawned '%s' (Id=%d) for %s", vehicle.Name, vehicle.Id, player.Name)
 end
 

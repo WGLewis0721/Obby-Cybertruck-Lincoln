@@ -11,9 +11,9 @@ local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- ── Remote events ─────────────────────────────────────────────────────────────
-local remotesFolder = ReplicatedStorage:WaitForChild("Remotes", 10)
+local remotesFolder = ReplicatedStorage:WaitForChild("Events", 10)
 if not remotesFolder then
-	warn("GarageMenu: Remotes folder not found in ReplicatedStorage")
+	warn("GarageMenu: Events folder not found in ReplicatedStorage")
 	return
 end
 
@@ -42,7 +42,7 @@ if not purchaseSuccess then
 end
 
 -- ── Data modules ──────────────────────────────────────────────────────────────
-local sharedFolder  = ReplicatedStorage:WaitForChild("Shared", 10)
+local sharedFolder  = ReplicatedStorage:WaitForChild("Module", 10)
 local vehicleData   = require(sharedFolder:WaitForChild("VehicleData"))
 
 -- ── Theme ─────────────────────────────────────────────────────────────────────

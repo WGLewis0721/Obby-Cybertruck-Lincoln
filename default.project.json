@@ -22,6 +22,7 @@
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",
+      "$ignoreUnknownInstances": true,
       "StarterPlayerScripts": {
         "$path": "src/StarterPlayer/StarterPlayerScripts",
         "$ignoreUnknownInstances": true

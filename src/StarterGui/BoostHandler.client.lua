@@ -24,7 +24,7 @@ local TweenService      = game:GetService("TweenService")
 local player = Players.LocalPlayer
 
 -- ── Remote events ──────────────────────────────────────────────────────────────
-local remotesFolder   = ReplicatedStorage:WaitForChild("Remotes")
+local remotesFolder   = ReplicatedStorage:WaitForChild("Events")
 local applyBoost      = remotesFolder:WaitForChild("ApplyBoost")
 local bundlePurchased = remotesFolder:WaitForChild("BundlePurchased")
 

@@ -15,7 +15,7 @@
         - (All game events are routed through this module)
 
     Usage:
-        local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+        local sharedFolder = ReplicatedStorage:WaitForChild("Module", 10)
         local EventBus = require(sharedFolder:WaitForChild("EventBus", 10))
         EventBus:On("RaceFinished", function(player, mapId, elapsed) end)
         EventBus:Fire("RaceFinished", player, mapId, elapsed)
@@ -23,7 +23,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+local sharedFolder = ReplicatedStorage:WaitForChild("Module", 10)
 local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 
 local TAG = "EventBus"

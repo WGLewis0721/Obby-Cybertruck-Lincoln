@@ -31,7 +31,7 @@ if not RunService:IsServer() then
 end
 
 -- ── Dependencies ──────────────────────────────────────────────────────────────
-local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+local sharedFolder = ReplicatedStorage:WaitForChild("Module", 10)
 local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
 local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 local PlayerData   = require(sharedFolder:WaitForChild("PlayerData", 10))

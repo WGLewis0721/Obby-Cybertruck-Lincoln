@@ -27,7 +27,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
 
 -- 2. Constants & shared modules
-local sharedFolder = ReplicatedStorage:WaitForChild("Shared", 10)
+local sharedFolder = ReplicatedStorage:WaitForChild("Module", 10)
 local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
 local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
 

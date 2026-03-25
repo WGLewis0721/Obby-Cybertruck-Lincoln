@@ -60,7 +60,7 @@ Constants.GOLD    = Color3.fromRGB(255, 200, 0)
 Constants.WHITE   = Color3.new(1, 1, 1)
 
 -- ── Folder paths ──────────────────────────────────────────────────────────────
-Constants.REMOTES_PATH = "Remotes"
-Constants.SHARED_PATH  = "Shared"
+Constants.REMOTES_PATH = "Events"
+Constants.SHARED_PATH  = "Module"
 
 return Constants

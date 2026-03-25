@@ -4,7 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService      = game:GetService("TweenService")
 
 local player          = Players.LocalPlayer
-local remotesFolder   = ReplicatedStorage:WaitForChild("Remotes")
+local remotesFolder   = ReplicatedStorage:WaitForChild("Events")
 local openPaintShop   = remotesFolder:WaitForChild("OpenPaintShop")
 -- ApplyBoost fires from the server when the player owns a Speed Boost
 local applyBoost      = remotesFolder:WaitForChild("ApplyBoost")
@@ -15,7 +15,7 @@ local mapPurchased    = remotesFolder:WaitForChild("MapPurchased")
 local ownedMapsSync   = remotesFolder:WaitForChild("OwnedMapsSync")
 
 -- ── Shared shop data ───────────────────────────────────────────────────────────
-local sharedFolder = ReplicatedStorage:WaitForChild("Shared")
+local sharedFolder = ReplicatedStorage:WaitForChild("Module")
 local ShopItems    = require(sharedFolder:WaitForChild("ShopItems"))
 -- MapData provides the list of maps (free and purchasable)
 local MapData      = require(sharedFolder:WaitForChild("MapData"))

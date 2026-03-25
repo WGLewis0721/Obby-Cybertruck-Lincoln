@@ -1,0 +1,6 @@
+{
+  "attributes": {
+    "CommandLimitPerMinute": "60"
+  },
+  "className": "Configuration"
+}

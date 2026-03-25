@@ -1,0 +1,39 @@
+{
+  "name": "Obby-Cybertruck-Lincoln",
+  "tree": {
+    "$className": "DataModel",
+    "Workspace": {
+      "$className": "Workspace",
+      "$path": "src/Workspace",
+      "$ignoreUnknownInstances": true
+    },
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService",
+      "$ignoreUnknownInstances": true
+    },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "$path": "src/ServerStorage",
+      "$ignoreUnknownInstances": true
+    },
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage",
+      "$ignoreUnknownInstances": true
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayer/StarterPlayerScripts",
+        "$ignoreUnknownInstances": true
+      },
+      "StarterCharacterScripts": {
+        "$path": "src/StarterPlayer/StarterCharacterScripts",
+        "$ignoreUnknownInstances": true
+      }
+    },
+    "StarterGui": {
+      "$path": "src/StarterGui",
+      "$ignoreUnknownInstances": true
+    }
+  }
+}

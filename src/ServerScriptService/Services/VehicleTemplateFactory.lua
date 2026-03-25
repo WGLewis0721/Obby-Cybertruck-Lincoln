@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
-local Logger = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Logger"))
+local Logger = require(ReplicatedStorage:WaitForChild("Module"):WaitForChild("Logger"))
 
 local VehicleTemplateFactory = {}
 
