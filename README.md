@@ -8,37 +8,35 @@ A Roblox obstacle course (obby) game set inside and around a Tesla Cybertruck, b
 
 ```
 Obby-Cybertruck-Lincoln/
-├── _backup/                          # Raw Roblox model files (.rbxm) — not synced by Rojo
-│   ├── tesla_cybertruck.rbxm
-│   └── teslacybertruck.rbxm
+├── _backup/                          # Raw/disabled files — not synced by Rojo
 │
 ├── src/                              # All synced game source files
 │   ├── ReplicatedStorage/
-│   │   └── Module/
-│   │       └── ShopItems.lua         # ModuleScript: list of paint-job shop items
+│   │   ├── Events/                   # RemoteEvents (.rbxm)
+│   │   └── Module/                   # Shared ModuleScripts: ShopItems, MapData,
+│   │                                 # PlayerData, InputProcessor, Logger, EventBus...
 │   │
 │   ├── ServerScriptService/
-│   │   ├── PaintShopHandler.server.lua  # Handles paint-job purchases server-side
-│   │   └── test.server.lua              # Quick Rojo connectivity test
+│   │   ├── Documentation/            # Prose notes (.md) — NOT synced as scripts
+│   │   ├── Services/                 # PaintShopHandler, PlayerDataInterface,
+│   │   │                             # VehiclePhysicsHandler, GarageHandler, etc.
+│   │   └── Setup/                    # One-time map/RemoteEvent generation scripts
 │   │
-│   ├── StarterGui/
-│   │   ├── LoadingScreen.client.lua  # Loading screen (Play / Settings / Shop)
-│   │   ├── PaintShopButton.client.lua # In-game paint shop toggle button
-│   │   └── ShopGui_d/
-│   │       └── LoadShop.client.lua   # Populates the shop scroll frame from ShopItems
+│   ├── StarterGui/                   # HUD, shop UI, mobile controls, results screen
 │   │
 │   └── StarterPlayer/
-│       ├── StarterCharacterScripts/  # (reserved for character scripts)
+│       ├── StarterCharacterScripts/
 │       └── StarterPlayerScripts/
-│           └── Client/
-│               ├── ShopButtonHandler.client.lua  # Wires up the shop open button
-│               └── ShopMenuScript.client.lua     # Controls shop menu visibility
 │
 ├── default.project.json              # Rojo project definition
 ├── .github/
 │   └── copilot-instructions.md       # GitHub Copilot coding guidelines
 └── README.md
 ```
+
+> Note: files under `ServerScriptService/Documentation/` are intentionally `.md` — earlier
+> revisions gave some of these a `.luau`/`.server.luau` extension, which made Rojo sync them
+> as real (broken) script instances. Keep documentation in this folder as `.md` only.
 
 ---
 

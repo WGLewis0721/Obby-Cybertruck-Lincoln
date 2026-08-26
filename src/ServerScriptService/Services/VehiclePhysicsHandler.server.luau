@@ -13,7 +13,18 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 -- Modules
-local InputProcessor = require(ReplicatedStorage.Module.InputProcessor)
+local moduleFolder = ReplicatedStorage:WaitForChild("Module", 10)
+local InputProcessor = require(moduleFolder:WaitForChild("InputProcessor", 10) :: ModuleScript)
+
+-- Local type mirrors InputProcessor.VehicleInput.
+-- Declared here because require() over a WaitForChild path returns `any` in
+-- --!strict, making cross-module type references (InputProcessor.VehicleInput)
+-- unresolvable by the type checker.
+type VehicleInputData = {
+	throttle: number,
+	steer: number,
+	brake: number,
+}
 
 -- RemoteEvents
 local Remotes = ReplicatedStorage:WaitForChild("Events", 10) :: Folder
@@ -22,7 +33,7 @@ local HUDUpdate = Remotes:FindFirstChild("HUDUpdate") :: RemoteEvent
 
 -- State: player.UserId → last input + timestamp
 type PlayerInputState = {
-	input: InputProcessor.VehicleInput,
+	input: VehicleInputData,
 	timestamp: number,
 }
 local playerInputStates: {[number]: PlayerInputState} = {}
@@ -46,7 +57,7 @@ local function findDriveSeat(vehicle: Model): VehicleSeat?
 	return vehicle:FindFirstChildWhichIsA("VehicleSeat", true) :: VehicleSeat?
 end
 
-local function applyPhysicsToVehicle(vehicle: Model, input: InputProcessor.VehicleInput): ()
+local function applyPhysicsToVehicle(vehicle: Model, input: VehicleInputData): ()
 	-- A-Chassis reads VehicleSeat.Throttle and .Steer natively via its own server
 	-- Script and applies wheel forces internally.  Do NOT apply AngularVelocity to
 	-- HingeConstraints here — that creates competing torques that cause uncontrolled
