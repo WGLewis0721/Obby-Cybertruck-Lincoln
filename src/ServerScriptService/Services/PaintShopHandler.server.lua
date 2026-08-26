@@ -1,3 +1,4 @@
+--!strict
 --[[
 	PaintShopHandler.server.lua
 	Description: Handles paint job purchases, Speed Boost, Ultimate Bundle, and
@@ -34,27 +35,27 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage  = game:GetService("ReplicatedStorage")
 
 -- 2. Constants & shared modules
-local sharedFolder = ReplicatedStorage:WaitForChild("Module", 10)
-local Constants    = require(sharedFolder:WaitForChild("Constants", 10))
-local Logger       = require(sharedFolder:WaitForChild("Logger", 10))
-local VehicleData  = require(sharedFolder:WaitForChild("VehicleData", 10))
-local ShopItems    = require(sharedFolder:WaitForChild("ShopItems", 10))
-local MapData      = require(sharedFolder:WaitForChild("MapData", 10))
+local sharedFolder = ReplicatedStorage:WaitForChild("Module", 10) :: Folder
+local Constants    = require(sharedFolder:WaitForChild("Constants",   10) :: ModuleScript)
+local Logger       = require(sharedFolder:WaitForChild("Logger",      10) :: ModuleScript)
+local VehicleData  = require(sharedFolder:WaitForChild("VehicleData", 10) :: ModuleScript)
+local ShopItems    = require(sharedFolder:WaitForChild("ShopItems",   10) :: ModuleScript)
+local MapData      = require(sharedFolder:WaitForChild("MapData",     10) :: ModuleScript)
 
 -- 3. Server-only dependencies
 local servicesFolder      = script.Parent
-local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInterface", 10))
+local PlayerDataInterface = require(servicesFolder:WaitForChild("PlayerDataInterface", 10) :: ModuleScript)
 
 local TAG = "PaintShopHandler"
 
 -- 4. Remote events
-local remotesFolder   = ReplicatedStorage:WaitForChild(Constants.REMOTES_PATH, 10)
-local openPaintShop   = remotesFolder:WaitForChild("OpenPaintShop", 10)
-local applyBoost      = remotesFolder:WaitForChild("ApplyBoost", 10)
-local bundlePurchased = remotesFolder:WaitForChild("BundlePurchased", 10)
-local mapPurchased    = remotesFolder:WaitForChild("MapPurchased", 10)
-local ownedMapsSync   = remotesFolder:WaitForChild("OwnedMapsSync", 10)
-local openGarage      = remotesFolder:WaitForChild("OpenGarage", 10)
+local remotesFolder   = ReplicatedStorage:WaitForChild(Constants.REMOTES_PATH, 10) :: Folder
+local openPaintShop   = remotesFolder:WaitForChild("OpenPaintShop",   10) :: RemoteEvent
+local applyBoost      = remotesFolder:WaitForChild("ApplyBoost",      10) :: RemoteEvent
+local bundlePurchased = remotesFolder:WaitForChild("BundlePurchased", 10) :: RemoteEvent
+local mapPurchased    = remotesFolder:WaitForChild("MapPurchased",    10) :: RemoteEvent
+local ownedMapsSync   = remotesFolder:WaitForChild("OwnedMapsSync",   10) :: RemoteEvent
+local openGarage      = remotesFolder:WaitForChild("OpenGarage",      10) :: RemoteEvent
 
 -- 5. Private variables
 
@@ -88,7 +89,7 @@ local colorValues = {
 -- 6. Private functions
 
 -- Recolour all BaseParts in the "Body" Model of a player's vehicle
-local function applyPaintToVehicle(player, colorValue)
+local function applyPaintToVehicle(player: Player, colorValue: Color3): boolean
 	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
 	local truck       = workspace:FindFirstChild(vehicleName)
 	if not truck then

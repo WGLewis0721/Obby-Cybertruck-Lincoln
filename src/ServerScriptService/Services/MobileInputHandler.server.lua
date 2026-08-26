@@ -18,12 +18,14 @@
 
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Logger            = require(ReplicatedStorage:WaitForChild("Module"):WaitForChild("Logger"))
+
+local moduleFolder   = ReplicatedStorage:WaitForChild("Module", 10) :: Folder
+local Logger         = require(moduleFolder:WaitForChild("Logger", 10) :: ModuleScript)
 
 local TAG = "MobileInputHandler"
 
-local eventsFolder   = ReplicatedStorage:WaitForChild("Events")
-local mobileThrottle = eventsFolder:WaitForChild("MobileThrottle")
+local eventsFolder   = ReplicatedStorage:WaitForChild("Events", 10) :: Folder
+local mobileThrottle = eventsFolder:WaitForChild("MobileThrottle", 10) :: RemoteEvent
 
 -- ── Helpers ───────────────────────────────────────────────────────────────────
 
