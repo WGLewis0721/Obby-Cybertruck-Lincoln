@@ -40,7 +40,30 @@ local EventBus     = require(sharedFolder:WaitForChild("EventBus", 10))
 local TAG = "PlayerDataInterface"
 
 -- ── DataStore ─────────────────────────────────────────────────────────────────
-local playerDataStore = DataStoreService:GetDataStore(Constants.DATASTORE_NAME)
+-- GetDataStore itself can throw (e.g. an unpublished place in Studio has no
+-- PlaceId for DataStore to key off of). Never let that take down this module —
+-- everything else in the game requires() it, so a hard error here cascades
+-- into breaking the garage and paint shop too.
+local playerDataStore
+local dataStoreAvailable = true
+if game.PlaceId == 0 then
+	-- Unpublished place: DataStoreService has no PlaceId to key off of and will
+	-- always throw here. Skip the attempt instead of throwing-and-catching it —
+	-- Studio's Output panel logs pcall'd errors too, which reads as a real error
+	-- even though it's harmless, so this keeps local testing quiet.
+	dataStoreAvailable = false
+	warn(string.format("[%s] Place is unpublished (PlaceId=0) — running with in-memory-only data (no persistence)", TAG))
+else
+	local ok, result = pcall(function()
+		return DataStoreService:GetDataStore(Constants.DATASTORE_NAME)
+	end)
+	if ok then
+		playerDataStore = result
+	else
+		dataStoreAvailable = false
+		warn(string.format("[%s] DataStore unavailable (%s) — running with in-memory-only data (no persistence)", TAG, tostring(result)))
+	end
+end
 
 -- ── In-memory cache ───────────────────────────────────────────────────────────
 -- playerCache[userId] = data table
@@ -103,6 +126,9 @@ end
 
 -- ── Load / Save ───────────────────────────────────────────────────────────────
 local function loadData(userId)
+	if not dataStoreAvailable then
+		return PlayerData.GetDefault()
+	end
 	local ok, result = withRetry(function()
 		return playerDataStore:GetAsync(datastoreKey(userId))
 	end)
@@ -117,6 +143,9 @@ local function loadData(userId)
 end
 
 local function saveData(userId, data)
+	if not dataStoreAvailable then
+		return
+	end
 	if not data then
 		Logger.Warn(TAG, "saveData called with nil data for userId=%d", userId)
 		return

@@ -9,18 +9,18 @@
 
     Layout:
         LEFT SIDE  (AnchorPoint 0,1  bottom-left, 16 px from edges)
-            Row 1 (bottom):  [ ◄ SteerLeft ] [ SteerRight ► ]
-            Row 2 (above):   [    ↺ Reverse   ]
-            Row 3 (above):   [      Reset      ]  (smaller)
+            Analog steering joystick — circular base + draggable knob.
+            X-axis only: far left = -1, center = 0, far right = +1.
 
         RIGHT SIDE (AnchorPoint 1,1  bottom-right, 16 px from edges)
-            Row 1 (bottom):  [ ▼ Brake ] [ ▲ Gas ]  (tall pedals)
-            Row 2 (above):   [    ⚡ Boost    ]  (centered above pedals)
+            [ ▼ Brake ] [ ▲ Gas ]  (tall pedals, hold to apply)
 
     Input:
-        Each button frame has InputBegan / InputEnded connections so that
-        gas + steer can be held simultaneously (multi-touch works correctly).
-        VehicleInput fires every RunService.Heartbeat to the server.
+        Gas/Brake use InputBegan/InputEnded hold-tracking per frame so they
+        and the joystick can all be held down simultaneously (multi-touch).
+        The joystick tracks ONE specific touch by InputObject identity (set
+        on InputBegan over its base, cleared on that same touch's InputEnded)
+        so a second finger elsewhere never gets mistaken for steering input.
 
     Author: Cybertruck Obby Lincoln
     Last Updated: 2026
@@ -28,10 +28,16 @@
     Dependencies:
         - ReplicatedStorage.Events.ApplyBoost     (RemoteEvent)
         - ReplicatedStorage.Events.OpenGarage     (RemoteEvent)
-        - ReplicatedStorage.Events.VehicleInput   (RemoteEvent) fires to server
         - ReplicatedStorage.Events.VehicleSpawned (RemoteEvent) shows controls
-        - ReplicatedStorage.Events.MobileThrottle (RemoteEvent) server-auth throttle
         - ReplicatedStorage.Module.Logger          (ModuleScript)
+
+    Drives the vehicle by writing directly into MobileActive/MobileThrottle/
+    MobileBrake/MobileSteer value objects under the seated vehicle's own
+    "A-Chassis Interface" (client-authoritative, matching how AC6's own
+    keyboard input already works for the seated player). No RemoteEvent
+    round-trip: this script and the vehicle's Drive LocalScript both run on
+    the same client, since AC6's Drive script never reads VehicleSeat.Throttle/
+    .Steer at all — only raw UserInputService KeyCode events.
 --]]
 
 -- ── Services ──────────────────────────────────────────────────────────────────
@@ -56,15 +62,10 @@ local moduleFolder   = ReplicatedStorage:WaitForChild("Module", 10) :: Folder
 local Logger         = require(moduleFolder:WaitForChild("Logger", 10) :: ModuleScript)
 
 local eventsFolder   = ReplicatedStorage:WaitForChild("Events", 10) :: Folder
-local applyBoost     = eventsFolder:WaitForChild("ApplyBoost",     10) :: RemoteEvent
-local openGarage     = eventsFolder:WaitForChild("OpenGarage",     10) :: RemoteEvent
-local vehicleInput   = eventsFolder:WaitForChild("VehicleInput",   10) :: RemoteEvent
 local vehicleSpawned = eventsFolder:WaitForChild("VehicleSpawned", 10) :: RemoteEvent
-local mobileThrottle = eventsFolder:FindFirstChild("MobileThrottle") :: RemoteEvent?
-
-if not mobileThrottle then
-	Logger.Warn("MobileControls", "MobileThrottle RemoteEvent not found — using VehicleInput for throttle")
-end
+local openPaintShop  = eventsFolder:WaitForChild("OpenPaintShop", 10) :: RemoteEvent
+local openGarage     = eventsFolder:WaitForChild("OpenGarage", 10) :: RemoteEvent
+local selectMap      = eventsFolder:WaitForChild("SelectMap", 10) :: RemoteEvent
 
 -- ── Responsive sizing ─────────────────────────────────────────────────────────
 local camera = workspace.CurrentCamera
@@ -77,17 +78,12 @@ local _short = if _vp.X > 0 then math.min(_vp.X, _vp.Y) else 400
 -- Gas/Brake pedals are tall (0.18 × viewport height) per requirements.
 local VP_H      = _vp.Y > 0 and _vp.Y or 800
 local PAD       = 16  -- fixed 16 px edge inset (matches requirements)
-local STEER_W   = math.round(_short * 0.13)   -- steer button width
-local STEER_H   = math.round(_short * 0.12)   -- steer button height
-local PEDAL_W   = math.round(_short * 0.14)   -- gas / brake width
+local JOYSTICK_RADIUS = math.clamp(math.round(_short * 0.16), 70, 130)   -- outer base radius
+local KNOB_RADIUS     = math.round(JOYSTICK_RADIUS * 0.42)              -- draggable knob radius
+local STEER_DEADZONE  = 0.12   -- fraction of max travel ignored near center
+local PEDAL_W   = math.clamp(math.round(_short * 0.14), 64, 112)   -- gas / brake width
 local PEDAL_H   = math.round(VP_H   * 0.18)   -- gas / brake height (tall)
-local BOOST_W   = math.round(_short * 0.11)   -- boost button width
-local BOOST_H   = math.round(_short * 0.10)   -- boost button height
-local REV_W     = math.round(_short * 0.10)   -- reverse button
-local REV_H     = math.round(_short * 0.09)
-local RESET_W   = math.round(_short * 0.10)   -- reset button (slightly smaller)
-local RESET_H   = math.round(_short * 0.09)
-local GAP       = 8   -- gap between adjacent buttons
+local GAP       = math.clamp(math.round(_short * 0.02), 4, 8)   -- gap between adjacent buttons
 
 -- ── Theme ─────────────────────────────────────────────────────────────────────
 local COLOR_BG     = Color3.fromRGB(20, 20, 25)
@@ -98,13 +94,21 @@ local COLOR_TEXT   = Color3.new(1, 1, 1)
 -- ── Input state ───────────────────────────────────────────────────────────────
 local throttleHeld   = false
 local brakeHeld      = false
-local steerLeftHeld  = false
-local steerRightHeld = false
+local steerValue     = 0  -- authoritative -1..1, driven by the steering joystick
 
 -- ── Runtime refs ──────────────────────────────────────────────────────────────
 local isActive    = false
 local currentSeat: VehicleSeat? = nil
 local renderConn: RBXScriptConnection? = nil
+local chassisInterface: Instance? = nil
+
+-- Locates the seated vehicle's AC6 "A-Chassis Interface" so mobile input can be
+-- written straight into the values the (patched) Drive LocalScript reads.
+local function findChassisInterface(seat: VehicleSeat): Instance?
+	local vehicle = seat:FindFirstAncestor("Vehicle_" .. player.UserId)
+	if not vehicle then return nil end
+	return vehicle:FindFirstChild("A-Chassis Interface", true)
+end
 
 -- ── ScreenGui ─────────────────────────────────────────────────────────────────
 local screenGui = Instance.new("ScreenGui")
@@ -112,8 +116,90 @@ screenGui.Name           = "MobileControls"
 screenGui.ResetOnSpawn   = false
 screenGui.IgnoreGuiInset = true
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.DisplayOrder    = 10
+screenGui.ScreenInsets    = Enum.ScreenInsets.CoreUISafeInsets
 screenGui.Enabled        = false
 screenGui.Parent         = player:WaitForChild("PlayerGui")
+
+local utilityBar = Instance.new("Frame")
+utilityBar.Name = "UtilityBar"
+utilityBar.Size = UDim2.fromOffset(216, 36)
+utilityBar.Position = UDim2.new(0, PAD, 0, 16)
+utilityBar.BackgroundTransparency = 1
+utilityBar.Parent = screenGui
+
+local utilityLayout = Instance.new("UIListLayout")
+utilityLayout.FillDirection = Enum.FillDirection.Horizontal
+utilityLayout.Padding = UDim.new(0, GAP)
+utilityLayout.Parent = utilityBar
+
+local mapMenu = Instance.new("Frame")
+mapMenu.Name = "MapSelector"
+mapMenu.Size = UDim2.fromOffset(190, 72)
+mapMenu.Position = UDim2.new(0, PAD, 0, 58)
+mapMenu.BackgroundColor3 = COLOR_BG
+mapMenu.BackgroundTransparency = 0.08
+mapMenu.BorderSizePixel = 0
+mapMenu.Visible = false
+mapMenu.Parent = screenGui
+
+local mapChoice = Instance.new("TextButton")
+mapChoice.Name = "CityCircuitButton"
+mapChoice.Size = UDim2.new(1, -12, 1, -12)
+mapChoice.Position = UDim2.fromOffset(6, 6)
+mapChoice.BackgroundColor3 = Color3.fromRGB(35, 75, 95)
+mapChoice.BorderSizePixel = 0
+mapChoice.Text = "CITY CIRCUIT"
+mapChoice.Font = Enum.Font.GothamBold
+mapChoice.TextSize = 13
+mapChoice.TextColor3 = COLOR_TEXT
+mapChoice.Parent = mapMenu
+
+local mapCorner = Instance.new("UICorner")
+mapCorner.CornerRadius = UDim.new(0, 6)
+mapCorner.Parent = mapMenu
+local choiceCorner = Instance.new("UICorner")
+choiceCorner.CornerRadius = UDim.new(0, 5)
+choiceCorner.Parent = mapChoice
+
+local function makeUtilityButton(name: string, label: string): TextButton
+	local button = Instance.new("TextButton")
+	button.Name = name
+	button.Size = UDim2.fromOffset(68, 36)
+	button.BackgroundColor3 = COLOR_BG
+	button.BackgroundTransparency = 0.18
+	button.BorderSizePixel = 0
+	button.Text = label
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 12
+	button.TextColor3 = COLOR_TEXT
+	button.Parent = utilityBar
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 6)
+	corner.Parent = button
+	return button
+end
+
+local shopButton = makeUtilityButton("ShopButton", "SHOP")
+local mapButton = makeUtilityButton("MapButton", "MAP")
+local carsButton = makeUtilityButton("CarsButton", "CARS")
+
+shopButton.MouseButton1Click:Connect(function()
+	openPaintShop:FireServer()
+end)
+
+mapButton.MouseButton1Click:Connect(function()
+	mapMenu.Visible = not mapMenu.Visible
+end)
+
+mapChoice.MouseButton1Click:Connect(function()
+	selectMap:FireServer("skyscraper")
+	mapMenu.Visible = false
+end)
+
+carsButton.MouseButton1Click:Connect(function()
+	openGarage:FireServer()
+end)
 
 -- ── Helper: make a styled button frame ────────────────────────────────────────
 -- Returns (frame, textButton).
@@ -198,84 +284,98 @@ end
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- LEFT SIDE — bottom-left, AnchorPoint(0, 1)
---   Row 1 bottom : SteerLeft | SteerRight
---   Row 2 above  : Reverse   (centered above the pair)
---   Row 3 above  : Reset     (smaller, centered)
+--   Analog steering joystick: circular base + draggable knob, X-axis only.
 -- ═══════════════════════════════════════════════════════════════════════════════
 
--- Steer Left – bottom-left corner
-local steerPairW = STEER_W * 2 + GAP  -- total width of the two steer buttons
-local steerLeftFrame, _ = makeButton(
-	"SteerLeft", "◄",
-	Vector2.new(0, 1),
-	UDim2.new(0, PAD, 1, -PAD),
-	STEER_W, STEER_H)
+local joystickBase = Instance.new("Frame")
+joystickBase.Name                   = "SteeringJoystick"
+joystickBase.AnchorPoint            = Vector2.new(0, 1)
+joystickBase.Position               = UDim2.new(0, PAD, 1, -PAD)
+joystickBase.Size                   = UDim2.new(0, JOYSTICK_RADIUS * 2, 0, JOYSTICK_RADIUS * 2)
+joystickBase.BackgroundColor3       = COLOR_BG
+joystickBase.BackgroundTransparency = 0.35
+joystickBase.BorderSizePixel        = 0
+joystickBase.Parent                 = screenGui
 
-wireTouchButton(steerLeftFrame,
-	function()
-		steerLeftHeld = true
-		setPressed(steerLeftFrame, true)
-	end,
-	function()
-		steerLeftHeld = false
-		setPressed(steerLeftFrame, false)
+local baseCorner = Instance.new("UICorner")
+baseCorner.CornerRadius = UDim.new(1, 0)
+baseCorner.Parent       = joystickBase
+
+local baseStroke = Instance.new("UIStroke")
+baseStroke.Color        = COLOR_ACCENT
+baseStroke.Thickness    = 2
+baseStroke.Transparency = 0.3
+baseStroke.Parent       = joystickBase
+
+local knob = Instance.new("Frame")
+knob.Name                   = "Knob"
+knob.AnchorPoint            = Vector2.new(0.5, 0.5)
+knob.Position                = UDim2.new(0.5, 0, 0.5, 0)
+knob.Size                    = UDim2.new(0, KNOB_RADIUS * 2, 0, KNOB_RADIUS * 2)
+knob.BackgroundColor3       = COLOR_ACCENT
+knob.BackgroundTransparency = 0.1
+knob.BorderSizePixel        = 0
+knob.ZIndex                  = 2
+knob.Parent                  = joystickBase
+
+local knobCorner = Instance.new("UICorner")
+knobCorner.CornerRadius = UDim.new(1, 0)
+knobCorner.Parent       = knob
+
+-- ── Steering: track exactly one touch by identity, never global TouchMoved ────
+local steerTouch: InputObject? = nil
+local maxKnobOffset = JOYSTICK_RADIUS - KNOB_RADIUS
+
+local function resetSteering()
+	knob.Position = UDim2.new(0.5, 0, 0.5, 0)
+	steerValue = 0
+end
+
+local function updateSteeringFromPosition(inputPosition: Vector3)
+	local baseCenter = joystickBase.AbsolutePosition + joystickBase.AbsoluteSize / 2
+	local delta = Vector2.new(inputPosition.X, inputPosition.Y) - baseCenter
+
+	-- Clamp the knob to the base's radius so it never visually escapes the ring.
+	local dist = delta.Magnitude
+	local clamped = (dist > maxKnobOffset and maxKnobOffset > 0) and delta.Unit * maxKnobOffset or delta
+	knob.Position = UDim2.new(0.5, clamped.X, 0.5, clamped.Y)
+
+	-- Only the X axis drives steering: far left = -1, center = 0, far right = +1.
+	local raw = maxKnobOffset > 0 and (clamped.X / maxKnobOffset) or 0
+	if math.abs(raw) < STEER_DEADZONE then
+		raw = 0
+	else
+		-- Rescale past the deadzone so full deflection still reaches ±1.
+		local sign = raw > 0 and 1 or -1
+		raw = sign * (math.abs(raw) - STEER_DEADZONE) / (1 - STEER_DEADZONE)
 	end
-)
+	steerValue = math.clamp(raw, -1, 1)
+end
 
--- Steer Right – immediately right of SteerLeft
-local steerRightFrame, _ = makeButton(
-	"SteerRight", "►",
-	Vector2.new(0, 1),
-	UDim2.new(0, PAD + STEER_W + GAP, 1, -PAD),
-	STEER_W, STEER_H)
-
-wireTouchButton(steerRightFrame,
-	function()
-		steerRightHeld = true
-		setPressed(steerRightFrame, true)
-	end,
-	function()
-		steerRightHeld = false
-		setPressed(steerRightFrame, false)
-	end
-)
-
--- Reverse – centered above the steer pair
-local reverseX = PAD + (steerPairW - REV_W) / 2
-local reverseFrame, reverseBtn = makeButton(
-	"ReverseButton", "↺",
-	Vector2.new(0, 1),
-	UDim2.new(0, reverseX, 1, -(PAD + STEER_H + GAP + REV_H)),
-	REV_W, REV_H)
-
-reverseBtn.MouseButton1Click:Connect(function()
-	setPressed(reverseFrame, true)
-	local char = player.Character
-	if char then
-		local humanoid = char:FindFirstChildOfClass("Humanoid")
-		if humanoid then humanoid.Health = 0 end
-	end
-	task.delay(0.15, function() setPressed(reverseFrame, false) end)
+joystickBase.InputBegan:Connect(function(input: InputObject)
+	if input.UserInputType ~= Enum.UserInputType.Touch then return end
+	if steerTouch then return end -- one owner at a time; ignore a second finger here
+	steerTouch = input
+	updateSteeringFromPosition(input.Position)
 end)
 
--- Reset – centered above Reverse (smaller)
-local resetX = PAD + (steerPairW - RESET_W) / 2
-local resetFrame, resetBtn = makeButton(
-	"ResetButton", "✕",
-	Vector2.new(0, 1),
-	UDim2.new(0, resetX, 1, -(PAD + STEER_H + GAP + REV_H + GAP + RESET_H)),
-	RESET_W, RESET_H)
+-- Tracks the SAME touch as it drags beyond the base's bounds (thumbs drift).
+-- Filtered by identity, so this never treats an unrelated touch as steering.
+UserInputService.InputChanged:Connect(function(input: InputObject)
+	if input ~= steerTouch then return end
+	if input.UserInputType ~= Enum.UserInputType.Touch then return end
+	updateSteeringFromPosition(input.Position)
+end)
 
-resetBtn.MouseButton1Click:Connect(function()
-	setPressed(resetFrame, true)
-	if openGarage then openGarage:FireServer() end
-	task.delay(0.15, function() setPressed(resetFrame, false) end)
+UserInputService.InputEnded:Connect(function(input: InputObject)
+	if input ~= steerTouch then return end
+	steerTouch = nil
+	resetSteering()
 end)
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- RIGHT SIDE — bottom-right, AnchorPoint(1, 1)
 --   Row 1 bottom : BrakePedal (left) | GasPedal (right)  — tall, easy to tap
---   Row 2 above  : BoostButton  centered above the pedal pair
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 -- Gas pedal – rightmost button, bottom-right corner
@@ -290,12 +390,10 @@ wireTouchButton(gasFrame,
 	function()
 		throttleHeld = true
 		setPressed(gasFrame, true)
-		if mobileThrottle then mobileThrottle:FireServer(1) end
 	end,
 	function()
 		throttleHeld = false
 		setPressed(gasFrame, false)
-		if mobileThrottle then mobileThrottle:FireServer(0) end
 	end
 )
 
@@ -318,72 +416,28 @@ wireTouchButton(brakeFrame,
 	end
 )
 
--- Boost – centered above the pedal pair
-local pedalPairW = PEDAL_W * 2 + GAP
-local boostX = -(PAD + PEDAL_W + GAP + (pedalPairW - BOOST_W) / 2)
-local boostFrame, boostBtn = makeButton(
-	"BoostButton", "⚡",
-	Vector2.new(1, 1),
-	UDim2.new(1, boostX, 1, -(PAD + PEDAL_H + GAP + BOOST_H)),
-	BOOST_W, BOOST_H,
-	COLOR_BOOST)
-
-boostBtn.MouseButton1Click:Connect(function()
-	setPressed(boostFrame, true, COLOR_BOOST)
-	applyBoost:FireServer()
-	task.delay(0.15, function() setPressed(boostFrame, false, COLOR_BOOST) end)
-end)
-
 -- ── Reset input state ─────────────────────────────────────────────────────────
 local function resetInputs()
-	throttleHeld   = false
-	brakeHeld      = false
-	steerLeftHeld  = false
-	steerRightHeld = false
-	setPressed(gasFrame,        false)
-	setPressed(brakeFrame,      false, Color3.fromRGB(255, 80, 80))
-	setPressed(steerLeftFrame,  false)
-	setPressed(steerRightFrame, false)
-	local seat = currentSeat
-	if seat then
-		seat.Throttle = 0
-		seat.Steer    = 0
-	end
+	throttleHeld = false
+	brakeHeld    = false
+	steerTouch   = nil
+	resetSteering()
+	setPressed(gasFrame,   false)
+	setPressed(brakeFrame, false, Color3.fromRGB(255, 80, 80))
 end
 
--- ── Heartbeat: sync VehicleSeat + fire VehicleInput to server ────────────────
+-- ── Heartbeat: push held-button state into the vehicle's mobile input values ──
+-- Written directly (no RemoteEvent) because this script and the vehicle's own
+-- Drive LocalScript both run on the seated player's client.
 local function startRenderLoop()
 	if renderConn then renderConn:Disconnect() end
 	renderConn = RunService.Heartbeat:Connect(function()
-		local seat = currentSeat
-		if not seat then return end
+		if not chassisInterface then return end
+		local ci = chassisInterface :: any
 
-		local throttleValue = 0
-		local steerValue    = 0
-		local brakeValue    = 0
-
-		if throttleHeld then
-			throttleValue    = 1
-			seat.Throttle    = 1
-		elseif brakeHeld then
-			throttleValue    = -1
-			brakeValue       = 1
-			seat.Throttle    = -1
-		else
-			seat.Throttle    = 0
-		end
-
-		if steerLeftHeld and not steerRightHeld then
-			steerValue    = -1
-			seat.Steer    = -1
-		elseif steerRightHeld and not steerLeftHeld then
-			steerValue    = 1
-			seat.Steer    = 1
-		else
-			seat.Steer    = 0
-		end
-
-		vehicleInput:FireServer(throttleValue, steerValue, brakeValue)
+		ci.MobileThrottle.Value = throttleHeld and 1 or 0
+		ci.MobileBrake.Value    = brakeHeld and 1 or 0
+		ci.MobileSteer.Value    = steerValue
 	end)
 end
 
@@ -400,7 +454,13 @@ local function showControls(driveSeat: VehicleSeat)
 	isActive          = true
 	-- Do NOT set driveSeat.Disabled = true.
 	-- A-Chassis checks Disabled to show its own HUD — disabling the seat
-	-- silences it.  Server-side throttle authority is handled by MobileInputHandler.
+	-- silences it.
+	chassisInterface = findChassisInterface(driveSeat)
+	if chassisInterface then
+		(chassisInterface :: any).MobileActive.Value = true
+	else
+		Logger.Warn("MobileControls", "A-Chassis Interface not found under %s — mobile input will not drive the vehicle", driveSeat:GetFullName())
+	end
 	screenGui.Enabled = true
 	startRenderLoop()
 	player:SetAttribute("IsDriving", true)
@@ -411,6 +471,14 @@ local function hideControls()
 	screenGui.Enabled = false
 	resetInputs()
 	stopRenderLoop()
+	if chassisInterface then
+		local ci = chassisInterface :: any
+		ci.MobileActive.Value   = false
+		ci.MobileThrottle.Value = 0
+		ci.MobileBrake.Value    = 0
+		ci.MobileSteer.Value    = 0
+	end
+	chassisInterface = nil
 	currentSeat = nil
 	player:SetAttribute("IsDriving", false)
 end
@@ -451,8 +519,9 @@ player.CharacterAdded:Connect(function(character: Model)
 end)
 
 -- ── VehicleSpawned listener ───────────────────────────────────────────────────
+-- Informational only — controls activate via onSeated when the player sits.
+-- Speedo/Speed layout is owned solely by ResponsiveHudController.client.luau.
 vehicleSpawned.OnClientEvent:Connect(function(vehicleName: string)
 	Logger.Info("MobileControls", "Vehicle spawned: %s", vehicleName)
-	-- Controls activate via onSeated when the player sits; this is informational.
 end)
 

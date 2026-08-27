@@ -60,10 +60,58 @@ local COLOR_TAB_IDLE    = Color3.fromRGB(30, 30, 60)
 
 -- ── Paint jobs: filter from the shared ShopItems module ───────────────────────
 -- Only include purchasable paint items (Color field present, ProductId non-zero).
-local paintJobs = {}
-for _, item in ipairs(ShopItems) do
-	if item.Color ~= nil and item.ProductId ~= 0 then
-		table.insert(paintJobs, item)
+-- Paints now come from ShopConfig so every colour is listed. Each can be bought
+-- with Racing Coins; the few with a real Developer Product also accept Robux.
+local ShopConfig        = require(sharedFolder:WaitForChild("ShopConfig"))
+local purchaseWithCoins = remotesFolder:WaitForChild("PurchaseWithCoins", 20)
+local getShopState      = remotesFolder:WaitForChild("GetShopState", 20)
+
+local COLOR_COIN = Color3.fromRGB(255, 205, 60)
+local paintJobs  = ShopConfig.Paints
+
+local shopState    = { coins = 0, ownedPaints = {}, ownedTracks = {} }
+local paintCoinBtns = {}
+local trackCoinBtns = {}
+
+local function ownsItem(list, value)
+	if type(list) ~= "table" then return false end
+	return table.find(list, value) ~= nil
+end
+
+-- Pulls authoritative balance/ownership from the server and repaints buttons.
+local refreshShopState
+refreshShopState = function()
+	local s = getShopState:InvokeServer()
+	if s then shopState = s end
+
+	for name, btn in pairs(paintCoinBtns) do
+		local paint = ShopConfig.GetPaint(name)
+		if ownsItem(shopState.ownedPaints, name) then
+			btn.Text = "OWNED"
+			btn.BackgroundColor3 = Color3.fromRGB(70, 75, 90)
+			btn.TextColor3 = Color3.fromRGB(160, 160, 175)
+			btn.Active = false
+		else
+			btn.Text = tostring(paint and paint.CoinPrice or 0) .. "c"
+			local afford = shopState.coins >= (paint and paint.CoinPrice or 0)
+			btn.BackgroundColor3 = afford and COLOR_COIN or Color3.fromRGB(70, 75, 90)
+			btn.TextColor3 = Color3.fromRGB(20, 20, 25)
+			btn.Active = true
+		end
+	end
+
+	for id, btn in pairs(trackCoinBtns) do
+		local track = ShopConfig.GetTrack(id)
+		if ownsItem(shopState.ownedTracks, id) then
+			btn.Text = "OWNED"
+			btn.BackgroundColor3 = Color3.fromRGB(70, 75, 90)
+			btn.Active = false
+		else
+			btn.Text = tostring(track and track.CoinPrice or 0) .. " Coins"
+			local afford = shopState.coins >= (track and track.CoinPrice or 0)
+			btn.BackgroundColor3 = afford and COLOR_COIN or Color3.fromRGB(70, 75, 90)
+			btn.Active = true
+		end
 	end
 end
 
@@ -112,12 +160,20 @@ end -- replaced by GameHUD
 -- ── Shop frame (hidden by default) ────────────────────────────────────────────
 local frame = Instance.new("Frame")
 frame.Name = "ShopFrame"
-frame.Size = UDim2.new(0, 660, 0, 360)
-frame.Position = UDim2.new(0, 20, 0.5, -230)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+frame.Size = UDim2.new(0.92, 0, 0.85, 0)
 frame.BackgroundColor3 = COLOR_PANEL
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Parent = screenGui
+
+-- Scale-based sizing keeps this from overflowing small phones while a pixel
+-- clamp keeps the desktop/tablet look identical to the original fixed size.
+local frameConstraint = Instance.new("UISizeConstraint")
+frameConstraint.MinSize = Vector2.new(320, 300)
+frameConstraint.MaxSize = Vector2.new(660, 360)
+frameConstraint.Parent = frame
 
 local fCorner = Instance.new("UICorner")
 fCorner.CornerRadius = UDim.new(0, 16)
@@ -133,8 +189,9 @@ fStroke.Parent = frame
 -- Fades in above the shop frame when a map is purchased, then fades out after 3 s.
 local mapNotifLabel = Instance.new("TextLabel")
 mapNotifLabel.Name = "MapNotification"
+mapNotifLabel.AnchorPoint = Vector2.new(0.5, 1)
 mapNotifLabel.Size = UDim2.new(0, 320, 0, 44)
-mapNotifLabel.Position = UDim2.new(0, 20, 0.5, -286)
+mapNotifLabel.Position = UDim2.new(0.5, 0, 0, -8)
 mapNotifLabel.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 mapNotifLabel.BorderSizePixel = 0
 mapNotifLabel.Text = ""
@@ -144,7 +201,9 @@ mapNotifLabel.TextColor3 = Color3.fromRGB(74, 240, 255)
 mapNotifLabel.TextXAlignment = Enum.TextXAlignment.Center
 mapNotifLabel.BackgroundTransparency = 1
 mapNotifLabel.TextTransparency = 1
-mapNotifLabel.Parent = screenGui
+-- Parented to the shop frame (not screenGui) so it stays correctly positioned
+-- above it now that the frame is centered with a variable, scale-based size.
+mapNotifLabel.Parent = frame
 
 local notifCorner = Instance.new("UICorner")
 notifCorner.CornerRadius = UDim.new(0, 10)
@@ -221,12 +280,14 @@ tabLayout.Parent = tabBar
 local function makeTab(label, order)
 local tab = Instance.new("TextButton")
 tab.Name = label .. "Tab"
-tab.Size = UDim2.new(0, 100, 1, 0)
+-- Scale-based (not a fixed 100px) so all 4 tabs always fit the frame's width,
+-- including on narrow phones where the frame itself has shrunk.
+tab.Size = UDim2.new(0.25, -6, 1, 0)
 tab.BackgroundColor3 = COLOR_TAB_IDLE
 tab.BorderSizePixel = 0
 tab.Text = label
 tab.Font = Enum.Font.GothamBold
-tab.TextSize = 13
+tab.TextScaled = true
 tab.TextColor3 = COLOR_TEXT
 tab.AutoButtonColor = false
 tab.LayoutOrder = order
@@ -234,6 +295,10 @@ tab.Parent = tabBar
 local tc = Instance.new("UICorner")
 tc.CornerRadius = UDim.new(0, 8)
 tc.Parent = tab
+local tCap = Instance.new("UITextSizeConstraint")
+tCap.MaxTextSize = 13
+tCap.MinTextSize = 9
+tCap.Parent = tab
 return tab
 end
 
@@ -251,11 +316,19 @@ contentArea.BackgroundTransparency = 1
 contentArea.Parent = frame
 
 -- ── Paint tab content ──────────────────────────────────────────────────────────
-local paintContent = Instance.new("Frame")
+-- ScrollingFrame (not a plain Frame) so paint jobs stay reachable by horizontal
+-- swipe/drag even when the shrunk mobile panel can't fit them all at once.
+local paintContent = Instance.new("ScrollingFrame")
 paintContent.Name = "PaintContent"
 paintContent.Size = UDim2.new(1, 0, 1, 0)
 paintContent.BackgroundTransparency = 1
+paintContent.BorderSizePixel = 0
 paintContent.Visible = true
+paintContent.ScrollingDirection = Enum.ScrollingDirection.X
+paintContent.AutomaticCanvasSize = Enum.AutomaticSize.X
+paintContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+paintContent.ScrollBarThickness = 6
+paintContent.ScrollBarImageColor3 = COLOR_ACCENT
 paintContent.Parent = contentArea
 
 local paintLayout = Instance.new("UIListLayout")
@@ -263,13 +336,13 @@ paintLayout.FillDirection = Enum.FillDirection.Horizontal
 paintLayout.SortOrder = Enum.SortOrder.LayoutOrder
 paintLayout.Padding = UDim.new(0, 10)
 paintLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-paintLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+paintLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 paintLayout.Parent = paintContent
 
 for idx, job in ipairs(paintJobs) do
 local card = Instance.new("TextButton")
 card.Name = job.Name
-card.Size = UDim2.new(0, 90, 0, 120)
+card.Size = UDim2.new(0, 90, 0, 158)
 card.BackgroundColor3 = COLOR_BTN
 card.BorderSizePixel = 0
 card.Text = ""
@@ -314,15 +387,46 @@ local priceLabel = Instance.new("TextLabel")
 priceLabel.Size = UDim2.new(1, -4, 0, 18)
 priceLabel.Position = UDim2.new(0, 2, 0, 96)
 priceLabel.BackgroundTransparency = 1
-priceLabel.Text = job.Price .. " R$"
+priceLabel.Text = (job.ProductId ~= 0) and ("R$ " .. tostring(job.Price or 0)) or ""
 priceLabel.Font = Enum.Font.Gotham
 priceLabel.TextSize = 11
 priceLabel.TextColor3 = COLOR_SUBTEXT
 priceLabel.TextXAlignment = Enum.TextXAlignment.Center
 priceLabel.Parent = card
 
+-- Coin purchase button (server re-validates balance + ownership)
+local coinBtn = Instance.new("TextButton")
+coinBtn.Name = "CoinBuy"
+coinBtn.Size = UDim2.new(1, -12, 0, 26)
+coinBtn.Position = UDim2.new(0, 6, 0, 124)
+coinBtn.BackgroundColor3 = COLOR_COIN
+coinBtn.BorderSizePixel = 0
+coinBtn.Text = tostring(job.CoinPrice) .. "c"
+coinBtn.Font = Enum.Font.GothamBold
+coinBtn.TextSize = 12
+coinBtn.TextColor3 = Color3.fromRGB(20, 20, 25)
+coinBtn.Parent = card
+local cbCorner = Instance.new("UICorner")
+cbCorner.CornerRadius = UDim.new(0, 6)
+cbCorner.Parent = coinBtn
+paintCoinBtns[job.Name] = coinBtn
+
+coinBtn.MouseButton1Click:Connect(function()
+	if not coinBtn.Active then return end
+	local res = purchaseWithCoins:InvokeServer("paint", job.Name)
+	if res and res.ok then
+		refreshShopState()
+	else
+		coinBtn.Text = (res and res.reason) or "Failed"
+		task.delay(1.5, refreshShopState)
+	end
+end)
+
+-- Robux path stays on the card body, for paints that have a real product
 card.MouseButton1Click:Connect(function()
-MarketplaceService:PromptProductPurchase(player, job.ProductId)
+	if job.ProductId and job.ProductId ~= 0 then
+		MarketplaceService:PromptProductPurchase(player, job.ProductId)
+	end
 end)
 end
 
@@ -532,19 +636,27 @@ end)
 -- ── Maps tab content ───────────────────────────────────────────────────────────
 -- Shows only maps where Type == "Robux". Free maps are skipped because they are
 -- always available without purchase.
-local mapsContent = Instance.new("Frame")
+-- ScrollingFrame (not a plain Frame) so maps stay reachable by horizontal
+-- swipe/drag even when the shrunk mobile panel can't fit them all at once.
+local mapsContent = Instance.new("ScrollingFrame")
 mapsContent.Name = "MapsContent"
 mapsContent.Size = UDim2.new(1, 0, 1, 0)
 mapsContent.BackgroundTransparency = 1
+mapsContent.BorderSizePixel = 0
 mapsContent.Visible = false
+mapsContent.ScrollingDirection = Enum.ScrollingDirection.X
+mapsContent.AutomaticCanvasSize = Enum.AutomaticSize.X
+mapsContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+mapsContent.ScrollBarThickness = 6
+mapsContent.ScrollBarImageColor3 = Color3.fromRGB(74, 240, 255)
 mapsContent.Parent = contentArea
 
--- Horizontal layout: centres the cards in the content area
+-- Horizontal layout: left-aligned so scroll position 0 shows the first card
 local mapsLayout = Instance.new("UIListLayout")
 mapsLayout.FillDirection = Enum.FillDirection.Horizontal
 mapsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 mapsLayout.Padding = UDim.new(0, 12)
-mapsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+mapsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 mapsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 mapsLayout.Parent = mapsContent
 

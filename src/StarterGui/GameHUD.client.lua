@@ -30,9 +30,11 @@ local remotesFolder = ReplicatedStorage:WaitForChild("Events", 10)
 if not remotesFolder then
 	warn("GameHUD: 'Events' folder not found in ReplicatedStorage")
 end
+	local selectMap     = remotesFolder and remotesFolder:WaitForChild("SelectMap", 10)
 
 local openPaintShop = remotesFolder and remotesFolder:WaitForChild("OpenPaintShop", 10)
 local openGarage    = remotesFolder and remotesFolder:WaitForChild("OpenGarage", 10)
+local selectMap     = remotesFolder and remotesFolder:WaitForChild("SelectMap", 10)
 
 if not openPaintShop then
 	warn("GameHUD: RemoteEvent 'OpenPaintShop' not found in Events folder")
@@ -46,12 +48,18 @@ local COLOR_BG     = Color3.fromRGB(20, 20, 25)
 local COLOR_ACCENT = Color3.fromRGB(74, 240, 255)
 local COLOR_TEXT   = Color3.new(1, 1, 1)
 
-local BTN_W, BTN_H, BTN_GAP = 140, 44, 8
+local isTouchDevice = UserInputService.TouchEnabled
+local viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+local compactLayout = isTouchDevice and math.min(viewport.X, viewport.Y) < 600
+local BTN_W = compactLayout and 92 or (isTouchDevice and 112 or 140)
+local BTN_H = compactLayout and 38 or (isTouchDevice and 40 or 44)
+local BTN_GAP = compactLayout and 5 or 8
 
 -- ── ScreenGui ─────────────────────────────────────────────────────────────────
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name           = "GameHUD"
 screenGui.IgnoreGuiInset = true
+screenGui.ScreenInsets    = Enum.ScreenInsets.CoreUISafeInsets
 screenGui.ResetOnSpawn   = false
 screenGui.Enabled        = false
 screenGui.Parent         = playerGui
@@ -61,7 +69,7 @@ local container = Instance.new("Frame")
 container.Name                 = "NavButtons"
 container.Size                 = UDim2.new(0, BTN_W, 0, BTN_H * 3 + BTN_GAP * 2)
 container.AnchorPoint          = Vector2.new(0, 0.5)
-container.Position             = UDim2.new(-0.2, 0, 0.5, 0) -- off-screen left initially
+container.Position             = UDim2.new(-0.2, 0, 0.5, 0)
 container.BackgroundTransparency = 1
 container.Parent               = screenGui
 
@@ -77,6 +85,7 @@ local function createNavButton(label, yOffset)
 	btn.Text                  = label
 	btn.Font                  = Enum.Font.GothamBold
 	btn.TextSize              = 15
+	btn.TextScaled             = compactLayout
 	btn.TextColor3            = COLOR_TEXT
 	btn.AutoButtonColor       = false
 	btn.Parent                = container
@@ -109,12 +118,11 @@ local function createNavButton(label, yOffset)
 end
 
 -- ── Create three nav buttons ──────────────────────────────────────────────────
-local shopBtn   = createNavButton("🛒  Shop",   0)
-local garageBtn = createNavButton("🚗  Garage", BTN_H + BTN_GAP)
-local mapBtn    = createNavButton("🗺️  Map",    (BTN_H + BTN_GAP) * 2)
+local shopBtn   = createNavButton("SHOP",   0)
+local garageBtn = createNavButton("GARAGE", BTN_H + BTN_GAP)
+local mapBtn    = createNavButton("MAP",    (BTN_H + BTN_GAP) * 2)
 
--- ── Map "coming soon" notification ───────────────────────────────────────────
--- Parented to mapBtn so it always stays above the Map button.
+-- ── Map selector ──────────────────────────────────────────────────────────────
 local mapNotif = Instance.new("TextLabel")
 mapNotif.Name                  = "MapComingSoonNotif"
 mapNotif.Size                  = UDim2.new(0, 220, 0, 36)
@@ -123,7 +131,7 @@ mapNotif.Position              = UDim2.new(0, 0, 0, -6)   -- 6 px above button t
 mapNotif.BackgroundColor3      = Color3.fromRGB(15, 15, 20)
 mapNotif.BackgroundTransparency = 1
 mapNotif.BorderSizePixel       = 0
-mapNotif.Text                  = "🗺️ More maps coming soon!"
+mapNotif.Text                  = ""
 mapNotif.Font                  = Enum.Font.GothamBold
 mapNotif.TextSize              = 14
 mapNotif.TextColor3            = COLOR_TEXT
@@ -135,6 +143,45 @@ local notifCorner = Instance.new("UICorner")
 notifCorner.CornerRadius = UDim.new(0, 6)
 notifCorner.Parent = mapNotif
 
+local mapMenu = Instance.new("Frame")
+mapMenu.Name = "MapMenu"
+mapMenu.Size = UDim2.fromOffset(220, 92)
+mapMenu.Position = UDim2.new(0, BTN_W + 12, 0.5, -46)
+mapMenu.BackgroundColor3 = COLOR_BG
+mapMenu.BackgroundTransparency = 0.08
+mapMenu.BorderSizePixel = 0
+mapMenu.Visible = false
+mapMenu.Parent = screenGui
+
+local mapMenuCorner = Instance.new("UICorner")
+mapMenuCorner.CornerRadius = UDim.new(0, 8)
+mapMenuCorner.Parent = mapMenu
+
+local mapMenuTitle = Instance.new("TextLabel")
+mapMenuTitle.Size = UDim2.new(1, 0, 0, 30)
+mapMenuTitle.BackgroundTransparency = 1
+mapMenuTitle.Text = "SELECT MAP"
+mapMenuTitle.Font = Enum.Font.GothamBold
+mapMenuTitle.TextSize = 15
+mapMenuTitle.TextColor3 = COLOR_ACCENT
+mapMenuTitle.Parent = mapMenu
+
+local cityCircuitButton = Instance.new("TextButton")
+cityCircuitButton.Name = "CityCircuitButton"
+cityCircuitButton.Size = UDim2.new(1, -20, 0, 42)
+cityCircuitButton.Position = UDim2.fromOffset(10, 38)
+cityCircuitButton.BackgroundColor3 = Color3.fromRGB(35, 75, 95)
+cityCircuitButton.BorderSizePixel = 0
+cityCircuitButton.Text = "CITY CIRCUIT"
+cityCircuitButton.Font = Enum.Font.GothamBold
+cityCircuitButton.TextSize = 14
+cityCircuitButton.TextColor3 = COLOR_TEXT
+cityCircuitButton.Parent = mapMenu
+
+local cityButtonCorner = Instance.new("UICorner")
+cityButtonCorner.CornerRadius = UDim.new(0, 6)
+cityButtonCorner.Parent = cityCircuitButton
+
 -- ── Button click handlers ─────────────────────────────────────────────────────
 
 -- Shop: ask the server to open the paint shop (server fires ownedMapsSync back,
@@ -142,6 +189,7 @@ notifCorner.Parent = mapNotif
 shopBtn.MouseButton1Click:Connect(function()
 	if openPaintShop then
 		openPaintShop:FireServer()
+		mapMenu.Visible = not mapMenu.Visible
 	end
 end)
 
@@ -152,29 +200,13 @@ garageBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Map: show a brief "coming soon" popup instead of opening a menu.
-local notifActive = false
 mapBtn.MouseButton1Click:Connect(function()
-	if notifActive then return end
-	notifActive = true
+	mapMenu.Visible = not mapMenu.Visible
+end)
 
-	-- Fade in
-	TweenService:Create(mapNotif, TweenInfo.new(0.2), {
-		TextTransparency      = 0,
-		BackgroundTransparency = 0.2,
-	}):Play()
-
-	task.wait(2)
-
-	-- Fade out
-	local fadeOut = TweenService:Create(mapNotif, TweenInfo.new(0.5), {
-		TextTransparency      = 1,
-		BackgroundTransparency = 1,
-	})
-	fadeOut:Play()
-	fadeOut.Completed:Connect(function()
-		notifActive = false
-	end)
+cityCircuitButton.MouseButton1Click:Connect(function()
+	if selectMap then selectMap:FireServer("skyscraper") end
+	mapMenu.Visible = false
 end)
 
 -- ── Reveal HUD when the character spawns ─────────────────────────────────────
@@ -201,8 +233,6 @@ end
 -- ── Mobile: hide HUD while driving to prevent overlap with MobileControls ─────
 -- Treat any touch-capable client as eligible so the HUD state stays correct
 -- in Studio's device emulator and on touch devices with keyboard support.
-local isTouchDevice = UserInputService.TouchEnabled
-
 if isTouchDevice then
 	player:GetAttributeChangedSignal("IsDriving"):Connect(function()
 		local isDriving = player:GetAttribute("IsDriving")

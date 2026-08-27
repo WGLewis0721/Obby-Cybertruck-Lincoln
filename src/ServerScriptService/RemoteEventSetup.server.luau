@@ -14,8 +14,6 @@ end
 
 -- Required RemoteEvents for vehicle input pipeline
 local requiredRemotes: {string} = {
-	"VehicleInput",
-	"HUDUpdate",
 	"VehicleSpawned",
 }
 

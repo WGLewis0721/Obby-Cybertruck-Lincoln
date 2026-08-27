@@ -5,6 +5,19 @@
 -- created on the Roblox Creator Dashboard.
 local MapData = {
 	{
+		Id             = "cityhub",
+		Name           = "City Hub",
+		Description    = "Free-drive lobby with garages, shops and city streets.",
+		Unlocked       = true,
+		Type           = "Lobby",
+		Price          = 0,
+		ProductId      = 0,
+		BestTimeTarget = 0,
+		FolderName     = "CityHub",
+		SpawnName      = "VehicleSpawn",
+		Thumbnail      = "rbxassetid://0",
+	},
+	{
 		Id             = "skyscraper",
 		Name           = "Skyscraper",
 		Description    = "Navigate surface streets and underground tunnels through a neon-lit city of towering skyscrapers.",

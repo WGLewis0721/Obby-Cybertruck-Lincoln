@@ -23,7 +23,7 @@ Constants.VEHICLE_SPAWN_OFFSET  = Vector3.new(0, 5, 0)
 
 -- ── Maps ──────────────────────────────────────────────────────────────────────
 Constants.MAP_FOLDER_PREFIX     = "Map_"
-Constants.DEFAULT_MAP_ID        = "skyscraper"
+Constants.DEFAULT_MAP_ID        = "cityhub"
 
 -- ── DataStore ─────────────────────────────────────────────────────────────────
 Constants.DATASTORE_NAME        = "PlayerData_v1"
@@ -37,15 +37,7 @@ Constants.MIN_RACE_TIME         = 5                 -- seconds; anti-cheat floor
 Constants.MAX_RACE_TIME         = 600               -- 10 minutes; timeout
 
 -- ── Coins ─────────────────────────────────────────────────────────────────────
-Constants.COIN_BASE_REWARD          = 50
-Constants.COIN_PERSONAL_BEST_BONUS  = 100
-Constants.COIN_BEAT_TARGET_BONUS    = 150
-Constants.COIN_FIRST_COMPLETION_BONUS = 200
-Constants.COIN_BOOST_MULTIPLIER     = 1.5
-
--- Legacy coin reward values (kept for backward-compat with CoinHandler logic)
-Constants.COINS_FIRST_COMPLETION = 100   -- first time completing a map
-Constants.COINS_REPEAT           = 25    -- all subsequent completions
+-- Reward amounts live in ReplicatedStorage.Module.EconomyConfig, not here.
 
 -- ── UI ────────────────────────────────────────────────────────────────────────
 Constants.HUD_TWEEN_DURATION    = 0.4

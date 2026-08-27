@@ -1,9 +1,14 @@
 -- VehicleData.lua
 -- Shared module containing all vehicle definitions for the garage system.
+-- This is the SINGLE source of truth for cars: it drives spawning
+-- (GarageHandler), purchasing (ShopService) and the summon UI (CarSelector).
+-- Adding a car = one entry here + a Model of the same ModelName in ServerStorage.
+--
 -- Each vehicle entry has:
 --   Id         - unique numeric identifier
 --   Name       - display name shown in the garage UI
 --   Price      - Robux price shown on the "Buy" button
+--   CoinPrice  - in-game Racing Coins price (0 = not sold for coins)
 --   ProductId  - Roblox Developer Product ID for purchasing (0 = placeholder)
 --   Unlocked   - true if the vehicle is free/default; false requires purchase
 --   ModelName  - name of the Model instance in ServerStorage
@@ -15,6 +20,7 @@ local VehicleData = {
 		Id          = 1,
 		Name        = "Tesla Cybertruck",
 		Price       = 0,
+		CoinPrice   = 0,
 		ProductId   = 0,
 		Unlocked    = true,   -- default vehicle; every player starts with this
 		ModelName   = "Tesla Cybertruck",
@@ -25,6 +31,7 @@ local VehicleData = {
 		Id          = 2,
 		Name        = "Tesla Model 3",
 		Price       = 100,
+		CoinPrice   = 7500,
 		ProductId   = 0,     -- TODO: replace with real Roblox Developer Product ID
 		Unlocked    = false,
 		ModelName   = "Tesla Model 3",
@@ -35,6 +42,7 @@ local VehicleData = {
 		Id          = 3,
 		Name        = "Tesla Roadster",
 		Price       = 200,
+		CoinPrice   = 55000,
 		ProductId   = 0,     -- TODO: replace with real Roblox Developer Product ID
 		Unlocked    = false,
 		ModelName   = "Tesla Roadster",
@@ -45,6 +53,7 @@ local VehicleData = {
 		Id          = 4,
 		Name        = "Tesla Model Y",
 		Price       = 150,
+		CoinPrice   = 20000,
 		ProductId   = 0,     -- TODO: replace with real Roblox Developer Product ID
 		Unlocked    = false,
 		ModelName   = "Tesla Model Y",

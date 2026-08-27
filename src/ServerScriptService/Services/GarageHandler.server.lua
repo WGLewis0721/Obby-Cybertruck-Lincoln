@@ -64,6 +64,8 @@ end
 local equipVehicleEvent = remotesFolder:WaitForChild("EquipVehicle", 10)
 local openGarageEvent   = remotesFolder:WaitForChild("OpenGarage", 10)
 local selectMapEvent    = remotesFolder:FindFirstChild("SelectMap")
+local startRaceEvent    = remotesFolder:FindFirstChild("StartRace")
+local returnHomeEvent   = remotesFolder:FindFirstChild("ReturnToLobby")
 local vehicleSpawnedRemote = remotesFolder:FindFirstChild("VehicleSpawned")
 
 if not equipVehicleEvent then
@@ -296,7 +298,7 @@ local function seatPlayerInVehicle(player, vehicle)
 	end)
 end
 
-local function spawnVehicle(player, vehicle)
+local function spawnVehicle(player, vehicle, raceMapId)
 	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, player.UserId)
 	local chosenSpawnPart = nil
 
@@ -323,41 +325,27 @@ local function spawnVehicle(player, vehicle)
 		return
 	end
 
-	-- Determine spawn CFrame (priority: VehicleSpawn > map spawn > HumanoidRootPart > origin)
+	-- Race starts use the requested map grid; ordinary spawns use the lobby marker.
 	local spawnCFrame = CFrame.new(Constants.VEHICLE_SPAWN_OFFSET)
 
-	local spawnMarker = workspace:FindFirstChild("VehicleSpawn")
+	local spawnMarker = nil
+	if raceMapId then
+		for _, mapInfo in ipairs(MapData) do
+			if mapInfo.Id == raceMapId and mapInfo.SpawnName then
+				local mapSpawn = workspace:FindFirstChild(mapInfo.SpawnName, true)
+				if mapSpawn and mapSpawn:IsA("BasePart") then
+					spawnMarker = mapSpawn
+					break
+				end
+			end
+		end
+	end
+	if not spawnMarker then
+		spawnMarker = workspace:FindFirstChild("VehicleSpawn")
+	end
 	if spawnMarker and spawnMarker:IsA("BasePart") then
 		spawnCFrame = spawnMarker.CFrame
 		chosenSpawnPart = spawnMarker
-	else
-		local selectedMap = workspace:GetAttribute("SelectedMap")
-		if selectedMap then
-			for _, mapInfo in ipairs(MapData) do
-				if mapInfo.Id == selectedMap and mapInfo.SpawnName then
-					local mapSpawn = workspace:FindFirstChild(mapInfo.SpawnName, true)
-					if mapSpawn and mapSpawn:IsA("BasePart") then
-						spawnCFrame = mapSpawn.CFrame
-						chosenSpawnPart = mapSpawn
-						break
-					end
-				end
-			end
-		end
-
-		if spawnCFrame == CFrame.new(Constants.VEHICLE_SPAWN_OFFSET) then
-			local character = player.Character
-			if character then
-				local rootPart = character:FindFirstChild("HumanoidRootPart")
-				if rootPart then
-					spawnCFrame = rootPart.CFrame * CFrame.new(0, 0, -10)
-				else
-					Logger.Warn(TAG, "HumanoidRootPart not found for %s — using default spawn", player.Name)
-				end
-			else
-				Logger.Warn(TAG, "No character for %s — using default spawn", player.Name)
-			end
-		end
 	end
 
 	spawnCFrame = resolveSpawnSlotCFrame(player, spawnCFrame)
@@ -375,6 +363,9 @@ local function spawnVehicle(player, vehicle)
 
 	newVehicle:SetAttribute("OwnerUserId", player.UserId)
 	newVehicle.Parent = workspace
+	if raceMapId then
+		player:SetAttribute("RaceVehicleSpawned", true)
+	end
 	seatPlayerInVehicle(player, newVehicle)
 
 	-- Fire server-side event bus
@@ -387,6 +378,36 @@ local function spawnVehicle(player, vehicle)
 
 	Logger.Info(TAG, "Spawned '%s' (Id=%d) for %s", vehicle.Name, vehicle.Id, player.Name)
 end
+
+if startRaceEvent then
+	startRaceEvent.OnServerEvent:Connect(function(player, mapId)
+		if typeof(player) ~= "Instance" or not player:IsA("Player") or type(mapId) ~= "string" then return end
+		if player:GetAttribute("RaceVehicleSpawned") then return end
+		local data = PlayerDataInterface.GetData(player.UserId)
+		if not data then return end
+		local vehicle = getVehicleById(data.EquippedVehicle or Constants.DEFAULT_VEHICLE_ID)
+		if vehicle then
+			spawnVehicle(player, vehicle, mapId)
+		end
+	end)
+end
+
+if not returnHomeEvent then
+	returnHomeEvent = Instance.new("RemoteEvent")
+	returnHomeEvent.Name = "ReturnToLobby"
+	returnHomeEvent.Parent = remotesFolder
+end
+
+returnHomeEvent.OnServerEvent:Connect(function(player)
+	if typeof(player) ~= "Instance" or not player:IsA("Player") then return end
+	local data = PlayerDataInterface.GetData(player.UserId)
+	if not data then return end
+	local vehicle = getVehicleById(data.EquippedVehicle or Constants.DEFAULT_VEHICLE_ID)
+	if vehicle then
+		player:SetAttribute("RaceVehicleSpawned", false)
+		spawnVehicle(player, vehicle)
+	end
+end)
 
 spawnEquippedVehicle = function(player)
 	local data = PlayerDataInterface.GetData(player.UserId)
@@ -480,7 +501,7 @@ equipVehicleEvent.OnServerEvent:Connect(function(player, vehicleId)
 	Logger.Info(TAG, "%s equipped '%s' (Id=%d)", player.Name, vehicle.Name, vehicleId)
 end)
 
--- SelectMap: re-spawn vehicle at the new map's spawn point
+-- SelectMap: move the vehicle to the selected map or keep it in CityHub.
 if selectMapEvent then
 	selectMapEvent.OnServerEvent:Connect(function(player, mapId)
 		if typeof(player) ~= "Instance" or not player:IsA("Player") then return end
@@ -488,7 +509,30 @@ if selectMapEvent then
 			Logger.Warn(TAG, "Invalid mapId from %s: %s", player.Name, tostring(mapId))
 			return
 		end
-		spawnEquippedVehicle(player)
+		local mapInfo
+		for _, candidate in ipairs(MapData) do
+			if candidate.Id == mapId then
+				mapInfo = candidate
+				break
+			end
+		end
+		if not mapInfo then
+			Logger.Warn(TAG, "Unknown mapId from %s: %s", player.Name, mapId)
+			return
+		end
+
+		workspace:SetAttribute("SelectedMap", mapId)
+		local data = PlayerDataInterface.GetData(player.UserId)
+		if not data then return end
+		local vehicle = getVehicleById(data.EquippedVehicle or Constants.DEFAULT_VEHICLE_ID)
+		if not vehicle then return end
+
+		player:SetAttribute("RaceVehicleSpawned", false)
+		if mapInfo.Type == "Lobby" then
+			spawnVehicle(player, vehicle)
+		else
+			spawnVehicle(player, vehicle, mapId)
+		end
 	end)
 end
 

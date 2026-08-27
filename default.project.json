@@ -23,6 +23,9 @@
     "StarterPlayer": {
       "$className": "StarterPlayer",
       "$ignoreUnknownInstances": true,
+      "$properties": {
+        "DevTouchMovementMode": { "Enum": 5 }
+      },
       "StarterPlayerScripts": {
         "$path": "src/StarterPlayer/StarterPlayerScripts",
         "$ignoreUnknownInstances": true
