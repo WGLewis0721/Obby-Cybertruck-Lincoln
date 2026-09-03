@@ -105,6 +105,18 @@ local function bumpSpawnToken(userId)
 	return scheduledSpawnTokens[userId]
 end
 
+local function clearStaleChassisGui(userId)
+	local player = Players:GetPlayerByUserId(userId)
+	if not player then return end
+	local playerGui = player:FindFirstChildOfClass("PlayerGui")
+	if not playerGui then return end
+	for _, gui in ipairs(playerGui:GetChildren()) do
+		if gui.Name == "A-Chassis Interface" then
+			gui:Destroy()
+		end
+	end
+end
+
 local function destroyPlayerVehicles(userId)
 	local vehicleName = string.format(Constants.VEHICLE_NAME_FORMAT, userId)
 	local destroyedCount = 0
@@ -114,6 +126,10 @@ local function destroyPlayerVehicles(userId)
 			child:Destroy()
 			destroyedCount += 1
 		end
+	end
+
+	if destroyedCount > 0 then
+		clearStaleChassisGui(userId)
 	end
 
 	return destroyedCount
@@ -365,6 +381,8 @@ local function spawnVehicle(player, vehicle, raceMapId)
 	newVehicle.Parent = workspace
 	if raceMapId then
 		player:SetAttribute("RaceVehicleSpawned", true)
+		-- Scale race vehicles down for tighter turning and higher perceived speed.
+		pcall(function() newVehicle:ScaleTo(0.6) end)
 	end
 	seatPlayerInVehicle(player, newVehicle)
 

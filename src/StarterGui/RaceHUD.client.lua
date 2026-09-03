@@ -161,9 +161,17 @@ lapTimeLabel.Parent                = lapTimePanel
 
 local raceControls = Instance.new("Frame")
 raceControls.Name = "RaceControls"
-raceControls.Size = UDim2.fromOffset(500, 42)
-raceControls.Position = UDim2.new(0.5, 0, 1, -20)
-raceControls.AnchorPoint = Vector2.new(0.5, 1)
+raceControls.AnchorPoint = Vector2.new(0.5, 0)
+local isTouch = game:GetService("UserInputService").TouchEnabled
+if isTouch then
+	-- Mobile: sit at the very top-center under the Roblox topbar, so the bottom
+	-- of the screen is clear for the joystick and gas/brake pedals.
+	raceControls.Position = UDim2.new(0.5, 0, 0, 56)
+	raceControls.Size = UDim2.fromOffset(400, 36)
+else
+	raceControls.Position = UDim2.new(0.5, 0, 1, -62)
+	raceControls.Size = UDim2.fromOffset(500, 42)
+end
 raceControls.BackgroundTransparency = 1
 raceControls.Visible = false
 raceControls.Parent = screenGui

@@ -130,8 +130,8 @@ local function buildCheckpoints(track, pts, folder)
 
 		local cp = makePart(
 			folder, string.format("Checkpoint_%d", n),
-			Vector3.new(TrackConfig.ROAD_WIDTH, 14, 3),
-			cf * CFrame.new(0, 7, 0),
+			Vector3.new(TrackConfig.ROAD_WIDTH, 8, 2),
+			cf * CFrame.new(0, 4, 0),
 			Constants.CYAN, Enum.Material.Neon
 		)
 		cp.Transparency = 0.55
@@ -146,8 +146,8 @@ local function buildCheckpoints(track, pts, folder)
 
 	local finish = makePart(
 		folder, string.format("Checkpoint_%d", Constants.CHECKPOINT_FINISH),
-		Vector3.new(TrackConfig.ROAD_WIDTH, 16, 3),
-		cf * CFrame.new(0, 8, 0),
+		Vector3.new(TrackConfig.ROAD_WIDTH, 9, 2),
+		cf * CFrame.new(0, 4.5, 0),
 		Color3.fromRGB(255, 255, 255), Enum.Material.Neon
 	)
 	finish.Transparency = 0.5
@@ -183,8 +183,8 @@ local function buildCoins(track, pts, folder)
 			-- Cylinder axis is local X. Rotating 90deg about Y aims that axis down
 			-- the road so the disc faces oncoming drivers (most visible at speed),
 			-- and the client's Y-axis spin reads as a coin turning face-on.
-			Vector3.new(0.8, 11, 11),
-			cf * CFrame.new(side, 6, 0) * CFrame.Angles(0, math.rad(90), 0),
+			Vector3.new(0.5, 6, 6),
+			cf * CFrame.new(side, 3.5, 0) * CFrame.Angles(0, math.rad(90), 0),
 			Color3.fromRGB(255, 215, 0), Enum.Material.Neon
 		)
 		coin.Shape      = Enum.PartType.Cylinder

@@ -78,6 +78,8 @@ local _short = if _vp.X > 0 then math.min(_vp.X, _vp.Y) else 400
 -- Gas/Brake pedals are tall (0.18 × viewport height) per requirements.
 local VP_H      = _vp.Y > 0 and _vp.Y or 800
 local PAD       = 16  -- fixed 16 px edge inset (matches requirements)
+-- Sit at the very bottom of the viewport; RaceHUD is repositioned on mobile.
+local BOTTOM_SAFE = PAD
 local JOYSTICK_RADIUS = math.clamp(math.round(_short * 0.16), 70, 130)   -- outer base radius
 local KNOB_RADIUS     = math.round(JOYSTICK_RADIUS * 0.42)              -- draggable knob radius
 local STEER_DEADZONE  = 0.12   -- fraction of max travel ignored near center
@@ -102,12 +104,43 @@ local currentSeat: VehicleSeat? = nil
 local renderConn: RBXScriptConnection? = nil
 local chassisInterface: Instance? = nil
 
--- Locates the seated vehicle's AC6 "A-Chassis Interface" so mobile input can be
--- written straight into the values the (patched) Drive LocalScript reads.
-local function findChassisInterface(seat: VehicleSeat): Instance?
-	local vehicle = seat:FindFirstAncestor("Vehicle_" .. player.UserId)
-	if not vehicle then return nil end
-	return vehicle:FindFirstChild("A-Chassis Interface", true)
+-- AC6 clones "A-Chassis Interface" into PlayerGui when the player sits.
+-- Its Drive LocalScript runs there, so we must write into that clone — the
+-- one still under the vehicle is inert.
+local function findChassisInterface(_seat: VehicleSeat): Instance?
+	local playerGui = player:FindFirstChildOfClass("PlayerGui")
+	if not playerGui then return nil end
+	local deadline = os.clock() + 2
+	repeat
+		local iface = playerGui:FindFirstChild("A-Chassis Interface")
+		if iface then return iface end
+		task.wait(0.05)
+	until os.clock() > deadline
+	return playerGui:FindFirstChild("A-Chassis Interface")
+end
+
+-- Stock AC6 interfaces don't ship with MobileActive/MobileThrottle/MobileBrake/
+-- MobileSteer value objects; create any that are missing so writes never error.
+local function ensureMobileValues(ci: Instance)
+	local bools = { MobileActive = false }
+	for name, default in pairs(bools) do
+		local existing = ci:FindFirstChild(name)
+		if not existing then
+			local v = Instance.new("BoolValue")
+			v.Name = name
+			v.Value = default
+			v.Parent = ci
+		end
+	end
+	for _, name in ipairs({ "MobileThrottle", "MobileBrake", "MobileSteer" }) do
+		local existing = ci:FindFirstChild(name)
+		if not existing then
+			local v = Instance.new("NumberValue")
+			v.Name = name
+			v.Value = 0
+			v.Parent = ci
+		end
+	end
 end
 
 -- ── ScreenGui ─────────────────────────────────────────────────────────────────
@@ -118,88 +151,12 @@ screenGui.IgnoreGuiInset = true
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.DisplayOrder    = 10
 screenGui.ScreenInsets    = Enum.ScreenInsets.CoreUISafeInsets
-screenGui.Enabled        = false
+-- Always visible on touch devices; menus/dialogs may cover them but never hide them.
+screenGui.Enabled        = true
 screenGui.Parent         = player:WaitForChild("PlayerGui")
 
-local utilityBar = Instance.new("Frame")
-utilityBar.Name = "UtilityBar"
-utilityBar.Size = UDim2.fromOffset(216, 36)
-utilityBar.Position = UDim2.new(0, PAD, 0, 16)
-utilityBar.BackgroundTransparency = 1
-utilityBar.Parent = screenGui
-
-local utilityLayout = Instance.new("UIListLayout")
-utilityLayout.FillDirection = Enum.FillDirection.Horizontal
-utilityLayout.Padding = UDim.new(0, GAP)
-utilityLayout.Parent = utilityBar
-
-local mapMenu = Instance.new("Frame")
-mapMenu.Name = "MapSelector"
-mapMenu.Size = UDim2.fromOffset(190, 72)
-mapMenu.Position = UDim2.new(0, PAD, 0, 58)
-mapMenu.BackgroundColor3 = COLOR_BG
-mapMenu.BackgroundTransparency = 0.08
-mapMenu.BorderSizePixel = 0
-mapMenu.Visible = false
-mapMenu.Parent = screenGui
-
-local mapChoice = Instance.new("TextButton")
-mapChoice.Name = "CityCircuitButton"
-mapChoice.Size = UDim2.new(1, -12, 1, -12)
-mapChoice.Position = UDim2.fromOffset(6, 6)
-mapChoice.BackgroundColor3 = Color3.fromRGB(35, 75, 95)
-mapChoice.BorderSizePixel = 0
-mapChoice.Text = "CITY CIRCUIT"
-mapChoice.Font = Enum.Font.GothamBold
-mapChoice.TextSize = 13
-mapChoice.TextColor3 = COLOR_TEXT
-mapChoice.Parent = mapMenu
-
-local mapCorner = Instance.new("UICorner")
-mapCorner.CornerRadius = UDim.new(0, 6)
-mapCorner.Parent = mapMenu
-local choiceCorner = Instance.new("UICorner")
-choiceCorner.CornerRadius = UDim.new(0, 5)
-choiceCorner.Parent = mapChoice
-
-local function makeUtilityButton(name: string, label: string): TextButton
-	local button = Instance.new("TextButton")
-	button.Name = name
-	button.Size = UDim2.fromOffset(68, 36)
-	button.BackgroundColor3 = COLOR_BG
-	button.BackgroundTransparency = 0.18
-	button.BorderSizePixel = 0
-	button.Text = label
-	button.Font = Enum.Font.GothamBold
-	button.TextSize = 12
-	button.TextColor3 = COLOR_TEXT
-	button.Parent = utilityBar
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 6)
-	corner.Parent = button
-	return button
-end
-
-local shopButton = makeUtilityButton("ShopButton", "SHOP")
-local mapButton = makeUtilityButton("MapButton", "MAP")
-local carsButton = makeUtilityButton("CarsButton", "CARS")
-
-shopButton.MouseButton1Click:Connect(function()
-	openPaintShop:FireServer()
-end)
-
-mapButton.MouseButton1Click:Connect(function()
-	mapMenu.Visible = not mapMenu.Visible
-end)
-
-mapChoice.MouseButton1Click:Connect(function()
-	selectMap:FireServer("skyscraper")
-	mapMenu.Visible = false
-end)
-
-carsButton.MouseButton1Click:Connect(function()
-	openGarage:FireServer()
-end)
+-- Nav buttons (SHOP/GARAGE/MAP) are owned by GameHUD on all platforms —
+-- MobileControls only provides driving controls (joystick + gas + brake).
 
 -- ── Helper: make a styled button frame ────────────────────────────────────────
 -- Returns (frame, textButton).
@@ -267,16 +224,19 @@ local function setPressed(frame: Frame, pressed: boolean, accentColor: Color3?)
 	end
 end
 
--- ── Helper: wire InputBegan/InputEnded on a frame for multi-touch ─────────────
+-- ── Helper: wire InputBegan/InputEnded on a GuiObject for multi-touch ──────
+-- Also listens for MouseButton1Down/Up so desktop emulator + hybrid devices work.
 -- onDown / onUp receive no arguments.
-local function wireTouchButton(frame: Frame, onDown: () -> (), onUp: () -> ())
-	frame.InputBegan:Connect(function(input: InputObject)
-		if input.UserInputType == Enum.UserInputType.Touch then
+local function wireTouchButton(target: GuiObject, onDown: () -> (), onUp: () -> ())
+	target.InputBegan:Connect(function(input: InputObject)
+		if input.UserInputType == Enum.UserInputType.Touch
+			or input.UserInputType == Enum.UserInputType.MouseButton1 then
 			onDown()
 		end
 	end)
-	frame.InputEnded:Connect(function(input: InputObject)
-		if input.UserInputType == Enum.UserInputType.Touch then
+	target.InputEnded:Connect(function(input: InputObject)
+		if input.UserInputType == Enum.UserInputType.Touch
+			or input.UserInputType == Enum.UserInputType.MouseButton1 then
 			onUp()
 		end
 	end)
@@ -290,7 +250,7 @@ end
 local joystickBase = Instance.new("Frame")
 joystickBase.Name                   = "SteeringJoystick"
 joystickBase.AnchorPoint            = Vector2.new(0, 1)
-joystickBase.Position               = UDim2.new(0, PAD, 1, -PAD)
+joystickBase.Position               = UDim2.new(0, PAD, 1, -BOTTOM_SAFE)
 joystickBase.Size                   = UDim2.new(0, JOYSTICK_RADIUS * 2, 0, JOYSTICK_RADIUS * 2)
 joystickBase.BackgroundColor3       = COLOR_BG
 joystickBase.BackgroundTransparency = 0.35
@@ -379,14 +339,14 @@ end)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 -- Gas pedal – rightmost button, bottom-right corner
-local gasFrame, _ = makeButton(
+local gasFrame, gasBtn = makeButton(
 	"GasPedal", "▲",
 	Vector2.new(1, 1),
-	UDim2.new(1, -PAD, 1, -PAD),
+	UDim2.new(1, -PAD, 1, -BOTTOM_SAFE),
 	PEDAL_W, PEDAL_H,
 	COLOR_ACCENT, 0.3)
 
-wireTouchButton(gasFrame,
+wireTouchButton(gasBtn,
 	function()
 		throttleHeld = true
 		setPressed(gasFrame, true)
@@ -398,14 +358,14 @@ wireTouchButton(gasFrame,
 )
 
 -- Brake pedal – left of Gas
-local brakeFrame, _ = makeButton(
+local brakeFrame, brakeBtn = makeButton(
 	"BrakePedal", "▼",
 	Vector2.new(1, 1),
-	UDim2.new(1, -(PAD + PEDAL_W + GAP), 1, -PAD),
+	UDim2.new(1, -(PAD + PEDAL_W + GAP), 1, -BOTTOM_SAFE),
 	PEDAL_W, PEDAL_H,
 	Color3.fromRGB(255, 80, 80), 0.3)
 
-wireTouchButton(brakeFrame,
+wireTouchButton(brakeBtn,
 	function()
 		brakeHeld = true
 		setPressed(brakeFrame, true, Color3.fromRGB(255, 80, 80))
@@ -429,15 +389,29 @@ end
 -- ── Heartbeat: push held-button state into the vehicle's mobile input values ──
 -- Written directly (no RemoteEvent) because this script and the vehicle's own
 -- Drive LocalScript both run on the seated player's client.
+local hideControls
 local function startRenderLoop()
 	if renderConn then renderConn:Disconnect() end
 	renderConn = RunService.Heartbeat:Connect(function()
-		if not chassisInterface then return end
-		local ci = chassisInterface :: any
+		local ci = chassisInterface
+		if not ci then return end
+		-- Interface destroyed (map teleport / respawn / seat exit): bail out.
+		if not ci.Parent then
+			if hideControls then hideControls() end
+			return
+		end
+		local car = ci:FindFirstChild("Car")
+		if car and (not car.Value or not car.Value.Parent) then
+			if hideControls then hideControls() end
+			return
+		end
 
-		ci.MobileThrottle.Value = throttleHeld and 1 or 0
-		ci.MobileBrake.Value    = brakeHeld and 1 or 0
-		ci.MobileSteer.Value    = steerValue
+		local mt = ci:FindFirstChild("MobileThrottle")
+		local mb = ci:FindFirstChild("MobileBrake")
+		local ms = ci:FindFirstChild("MobileSteer")
+		if mt then mt.Value = throttleHeld and 1 or 0 end
+		if mb then mb.Value = brakeHeld and 1 or 0 end
+		if ms then ms.Value = steerValue end
 	end)
 end
 
@@ -449,39 +423,78 @@ local function stopRenderLoop()
 end
 
 -- ── Show / hide controls ──────────────────────────────────────────────────────
+-- ScreenGui stays visible; showControls only binds to the chassis interface and
+-- starts the write loop while seated. Buttons remain onscreen when not driving.
+local function bindInterface(iface: Instance)
+	chassisInterface = iface
+	ensureMobileValues(iface);
+	(iface :: any).MobileActive.Value = true
+	startRenderLoop()
+end
+
 local function showControls(driveSeat: VehicleSeat)
 	currentSeat       = driveSeat
 	isActive          = true
-	-- Do NOT set driveSeat.Disabled = true.
-	-- A-Chassis checks Disabled to show its own HUD — disabling the seat
-	-- silences it.
-	chassisInterface = findChassisInterface(driveSeat)
-	if chassisInterface then
-		(chassisInterface :: any).MobileActive.Value = true
+	local iface = findChassisInterface(driveSeat)
+	if iface then
+		bindInterface(iface)
 	else
 		Logger.Warn("MobileControls", "A-Chassis Interface not found under %s — mobile input will not drive the vehicle", driveSeat:GetFullName())
 	end
-	screenGui.Enabled = true
-	startRenderLoop()
 	player:SetAttribute("IsDriving", true)
 end
 
-local function hideControls()
+-- Reactively rebind when AC6 clones a new interface into PlayerGui (race
+-- teleport, respawn). Seat events aren't always reliable across teleports.
+local function isSeatedInOwnVehicle(): (VehicleSeat?, boolean)
+	local char = player.Character
+	if not char then return nil, false end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return nil, false end
+	local sp = hum.SeatPart
+	if sp and sp.Name == "DriveSeat" and sp:FindFirstAncestor("Vehicle_" .. player.UserId) then
+		return sp :: VehicleSeat, true
+	end
+	return nil, false
+end
+
+local function watchPlayerGui()
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	if not pg then return end
+	pg.ChildAdded:Connect(function(child)
+		if child.Name ~= "A-Chassis Interface" then return end
+		task.wait() -- let AC6 finish parenting its children
+		local seat, seated = isSeatedInOwnVehicle()
+		if seated and seat then
+			currentSeat = seat
+			isActive = true
+			player:SetAttribute("IsDriving", true)
+			bindInterface(child)
+		end
+	end)
+end
+watchPlayerGui()
+
+local function hideControls_impl()
 	isActive          = false
-	screenGui.Enabled = false
 	resetInputs()
 	stopRenderLoop()
 	if chassisInterface then
-		local ci = chassisInterface :: any
-		ci.MobileActive.Value   = false
-		ci.MobileThrottle.Value = 0
-		ci.MobileBrake.Value    = 0
-		ci.MobileSteer.Value    = 0
+		local ci = chassisInterface
+		local a = ci:FindFirstChild("MobileActive")
+		if a then a.Value = false end
+		local t = ci:FindFirstChild("MobileThrottle")
+		if t then t.Value = 0 end
+		local b = ci:FindFirstChild("MobileBrake")
+		if b then b.Value = 0 end
+		local s = ci:FindFirstChild("MobileSteer")
+		if s then s.Value = 0 end
 	end
 	chassisInterface = nil
 	currentSeat = nil
 	player:SetAttribute("IsDriving", false)
 end
+hideControls = hideControls_impl
 
 -- ── Seat detection ────────────────────────────────────────────────────────────
 local function onSeated(isSeated: boolean, seat: BasePart?)

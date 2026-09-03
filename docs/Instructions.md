@@ -404,24 +404,105 @@ Required mobile driving actions currently are:
 - acceleration
 - brake/reverse
 
-Do NOT create a new mobile nitro/boost driving system unless specifically
-requested.
+Do NOT add a boost/nitro button, directional D-pad arrows, or any control beyond
+the three above unless specifically requested.
 
 Mobile controls must support MULTI-TOUCH.
 
 Example:
 
 LEFT THUMB:
-steering
+analog steering joystick
 
 RIGHT THUMB:
-accelerator/brake
+accelerator + brake pedals
 
 The player must be able to steer while holding the accelerator.
 
 Track individual touch InputObjects where necessary.
 
 Do not let an unrelated second touch take ownership of steering.
+
+### Current working implementation (as of 2026-08-27)
+
+Owner: `StarterGui/MobileControls.client.luau`. Single ScreenGui, no duplicates.
+
+Detection:
+- Load-time guard: `if not UserInputService.TouchEnabled then return end`.
+- `StarterPlayer.DevTouchMovementMode = Enum.DevTouchMovementMode.Scriptable`
+  is set both server-side in `default.project.json` (`"Enum": 5`) and reasserted
+  client-side. This suppresses Roblox's default DynamicThumbstick so it doesn't
+  overlap the joystick.
+
+Layout (all controls sit `BOTTOM_SAFE = 88 px` above the viewport bottom so they
+clear the RaceHUD `END RACE / HOME / RESTART / START RACE` bar):
+
+- Bottom-left: analog joystick. Circular base + draggable knob. X-axis only:
+  far left = -1, center = 0, far right = +1. 12 % deadzone rescaled past the
+  deadzone so full deflection still reaches ±1. Radius is
+  `clamp(short_side * 0.16, 70, 130) px`.
+- Bottom-right: Gas (accelerator) TextButton, then Brake TextButton to its left.
+  Each is tall (`0.18 × viewport height`) for easy thumb reach.
+
+Touch pipeline:
+- Joystick tracks exactly ONE touch by `InputObject` identity: set on the base's
+  `InputBegan` (Touch only), updated via `UserInputService.InputChanged` filtered
+  by identity, cleared on `InputEnded` with matching identity.
+- Pedals use `wireTouchButton` which listens on the TextButton child
+  (`InputBegan`/`InputEnded` for both `Touch` and `MouseButton1`). Listening on
+  the outer Frame does NOT work — the TextButton child intercepts touches.
+- Multi-touch works because each button has its own connection and the joystick
+  only claims its own tracked `InputObject`.
+
+Visibility rule:
+- ScreenGui.Enabled = true from init. Controls stay visible at all times on any
+  touch device. Menu ScreenGuis (Shop/Garage/CarSelector/RaceHUD/etc.) may cover
+  them visually but never hide them.
+- `showControls()` / `hideControls()` only bind/unbind the chassis interface and
+  start/stop the write loop; they no longer toggle ScreenGui.Enabled.
+
+Vehicle input bridge (AC6, client-authoritative):
+- MobileControls writes to four value objects under
+  `PlayerGui["A-Chassis Interface"]` (the clone AC6's `Initialize` places there
+  when the player sits — NOT the copy inside the vehicle model):
+  - `MobileActive`   (BoolValue)   — set true while seated, false on exit.
+  - `MobileThrottle` (NumberValue) — 0 or 1 from the gas pedal.
+  - `MobileBrake`    (NumberValue) — 0 or 1 from the brake pedal.
+  - `MobileSteer`    (NumberValue) — analog -1..1 from the joystick.
+- `ensureMobileValues(ci)` creates any missing value objects with FindFirstChild
+  so first-time seating doesn't error, and `hideControls()` reads back with
+  FindFirstChild so a stale/orphaned interface doesn't crash.
+- No RemoteEvent is used. MobileControls and AC6's Drive both run on the seated
+  player's client, so direct value writes are correct.
+
+AC6 Drive script patch (in `ServerStorage.Tesla Cybertruck` template so every
+clone inherits it):
+- `-- ACL_MOBILE_GUARD_V1` — `_acl_alive()` at the top of `Steering()`,
+  `Engine()`, and `RPM()` self-destroys the ScreenGui when `car.Parent == nil`,
+  killing the "Wheels is not a valid member of Model" spam when the vehicle is
+  destroyed on race teleport / respawn.
+- `-- ACL_MOBILE_INPUT_V1` — `_acl_applyMobile()` runs first inside the Stepped
+  loop and, when `MobileActive` is true, overrides `_GThrot`/`_GBrake`/`_GSteerT`
+  from `MobileThrottle`/`MobileBrake`/`MobileSteer`.
+- `-- ACL_IGN_V1` — inside `_acl_applyMobile()`, forces `IsOn.Value = true`.
+  AC6 requires a keyboard-only Ignition plugin keystroke to start the engine;
+  without this the mobile throttle produces zero torque even when the value hits
+  1. This is the one non-obvious step that makes mobile actually drive.
+
+Server-side hygiene (`ServerScriptService/Services/GarageHandler.server.lua`):
+- `destroyPlayerVehicles(userId)` also calls `clearStaleChassisGui(userId)`,
+  which removes any leftover `A-Chassis Interface` ScreenGui from PlayerGui.
+  Without this, the previous Drive LocalScript keeps ticking on a destroyed
+  `car` reference after a map teleport.
+- `VehicleTemplateFactory.EnsureTemplate` sets `Archivable = true` on the
+  template and every descendant before `Clone()`. Without this, non-Archivable
+  descendants are dropped from the clone and AC6 fails to find `Wheels`.
+
+Nav ownership:
+- SHOP / GARAGE / MAP nav column is owned by `StarterGui/GameHUD.client.lua`
+  on both desktop and mobile. MobileControls does NOT render its own nav bar.
+  On compact/touch layouts GameHUD anchors top-left so it doesn't compete with
+  the bottom-left joystick.
 
 ---
 
@@ -455,11 +536,7 @@ document the reason before using an exception.
 
 # 17. MOBILE HUD VISIBILITY
 
-Do not simply test TouchEnabled and permanently show mobile driving controls.
-
-Where appropriate, inspect:
-
-UserInputService.PreferredInput
+Where appropriate, inspect `UserInputService.PreferredInput`.
 
 A touch-capable device may currently be controlled by:
 
@@ -467,10 +544,15 @@ A touch-capable device may currently be controlled by:
 - keyboard
 - gamepad
 
-Driving controls should generally appear when:
+Current project decision (2026-08-27): mobile driving controls are shown
+permanently on any device with `UserInputService.TouchEnabled == true`. The
+buttons remain visible even when the player is on foot or a menu is open; menus
+cover them visually but never hide them. This trades a small amount of screen
+real estate for eliminating the entire class of "controls appear at the wrong
+time" bugs and keeps state simple.
 
-1. the local player is the driver; AND
-2. touch is the appropriate current input mode.
+The write loop that pushes touch state into the vehicle only runs while seated,
+so idle touches don't affect anything.
 
 On vehicle exit:
 
@@ -478,7 +560,7 @@ On vehicle exit:
 - brake released
 - steering centered
 - temporary input bindings released
-- driving HUD hidden
+- driving HUD stays visible but inert
 
 Re-entering must not create duplicate connections.
 

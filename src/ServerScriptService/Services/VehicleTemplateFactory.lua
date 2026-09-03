@@ -38,6 +38,13 @@ local function anchorModel(model)
 	end
 end
 
+local function makeCloneComplete(model)
+	model.Archivable = true
+	for _, descendant in ipairs(model:GetDescendants()) do
+		descendant.Archivable = true
+	end
+end
+
 local function setInitializeScriptDisabled(model, isDisabled)
 	local initializeScript = model:FindFirstChild("Initialize", true)
 	if initializeScript and initializeScript:IsA("Script") then
@@ -74,6 +81,7 @@ function VehicleTemplateFactory.EnsureTemplate(modelName)
 
 	configureDriveSeat(driveSeat)
 	modelTemplate.PrimaryPart = driveSeat
+	makeCloneComplete(modelTemplate)
 	anchorModel(modelTemplate)
 	setInitializeScriptDisabled(modelTemplate, true)
 

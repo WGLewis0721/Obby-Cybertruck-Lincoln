@@ -65,11 +65,19 @@ screenGui.Enabled        = false
 screenGui.Parent         = playerGui
 
 -- ── Button container ─────────────────────────────────────────────────────────
+-- Mobile (compact): horizontal row across the top, so joystick + pedals stay
+-- clear of the nav. Desktop: vertical column centered on the left edge.
 local container = Instance.new("Frame")
 container.Name                 = "NavButtons"
-container.Size                 = UDim2.new(0, BTN_W, 0, BTN_H * 3 + BTN_GAP * 2)
-container.AnchorPoint          = Vector2.new(0, 0.5)
-container.Position             = UDim2.new(-0.2, 0, 0.5, 0)
+if compactLayout then
+	container.Size                 = UDim2.new(0, BTN_W * 3 + BTN_GAP * 2, 0, BTN_H)
+	container.AnchorPoint          = Vector2.new(0.5, 0)
+	container.Position             = UDim2.new(0.5, 0, 0, 2)
+else
+	container.Size                 = UDim2.new(0, BTN_W, 0, BTN_H * 3 + BTN_GAP * 2)
+	container.AnchorPoint          = Vector2.new(0, 0.5)
+	container.Position             = UDim2.new(-0.2, 0, 0.5, 0)
+end
 container.BackgroundTransparency = 1
 container.Parent               = screenGui
 
@@ -80,11 +88,11 @@ local function createNavButton(label, yOffset)
 	btn.Size                  = UDim2.new(0, BTN_W, 0, BTN_H)
 	btn.Position              = UDim2.new(0, 0, 0, yOffset)
 	btn.BackgroundColor3      = COLOR_BG
-	btn.BackgroundTransparency = 0.15
+	btn.BackgroundTransparency = 0.18
 	btn.BorderSizePixel       = 0
 	btn.Text                  = label
 	btn.Font                  = Enum.Font.GothamBold
-	btn.TextSize              = 15
+	btn.TextSize              = 12
 	btn.TextScaled             = compactLayout
 	btn.TextColor3            = COLOR_TEXT
 	btn.AutoButtonColor       = false
@@ -93,11 +101,6 @@ local function createNavButton(label, yOffset)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 6)
 	corner.Parent = btn
-
-	local stroke = Instance.new("UIStroke")
-	stroke.Color     = COLOR_ACCENT
-	stroke.Thickness = 1.5
-	stroke.Parent    = btn
 
 	-- Hover: tween to cyan tint, revert on leave
 	btn.MouseEnter:Connect(function()
@@ -110,7 +113,7 @@ local function createNavButton(label, yOffset)
 	btn.MouseLeave:Connect(function()
 		TweenService:Create(btn, TweenInfo.new(0.15), {
 			BackgroundColor3      = COLOR_BG,
-			BackgroundTransparency = 0.15,
+			BackgroundTransparency = 0.18,
 		}):Play()
 	end)
 
@@ -118,9 +121,19 @@ local function createNavButton(label, yOffset)
 end
 
 -- ── Create three nav buttons ──────────────────────────────────────────────────
-local shopBtn   = createNavButton("SHOP",   0)
-local garageBtn = createNavButton("GARAGE", BTN_H + BTN_GAP)
-local mapBtn    = createNavButton("MAP",    (BTN_H + BTN_GAP) * 2)
+local shopBtn, garageBtn, mapBtn
+if compactLayout then
+	shopBtn   = createNavButton("SHOP",   0)
+	garageBtn = createNavButton("GARAGE", 0)
+	mapBtn    = createNavButton("MAP",    0)
+	shopBtn.Position   = UDim2.new(0, 0, 0, 0)
+	garageBtn.Position = UDim2.new(0, BTN_W + BTN_GAP, 0, 0)
+	mapBtn.Position    = UDim2.new(0, (BTN_W + BTN_GAP) * 2, 0, 0)
+else
+	shopBtn   = createNavButton("SHOP",   0)
+	garageBtn = createNavButton("GARAGE", BTN_H + BTN_GAP)
+	mapBtn    = createNavButton("MAP",    (BTN_H + BTN_GAP) * 2)
+end
 
 -- ── Map selector ──────────────────────────────────────────────────────────────
 local mapNotif = Instance.new("TextLabel")
@@ -212,13 +225,21 @@ end)
 -- ── Reveal HUD when the character spawns ─────────────────────────────────────
 local function showHUD()
 	screenGui.Enabled = true
-	container.Position = UDim2.new(-0.2, 0, 0.5, 0)
-
-	TweenService:Create(
-		container,
-		TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-		{ Position = UDim2.new(0, 12, 0.5, 0) }
-	):Play()
+	if compactLayout then
+		container.Position = UDim2.new(0.5, 0, 0, -60)
+		TweenService:Create(
+			container,
+			TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{ Position = UDim2.new(0.5, 0, 0, 2) }
+		):Play()
+	else
+		container.Position = UDim2.new(-0.2, 0, 0.5, 0)
+		TweenService:Create(
+			container,
+			TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{ Position = UDim2.new(0, 12, 0.5, 0) }
+		):Play()
+	end
 end
 
 if player.Character then
@@ -230,12 +251,5 @@ else
 	end)
 end
 
--- ── Mobile: hide HUD while driving to prevent overlap with MobileControls ─────
--- Treat any touch-capable client as eligible so the HUD state stays correct
--- in Studio's device emulator and on touch devices with keyboard support.
-if isTouchDevice then
-	player:GetAttributeChangedSignal("IsDriving"):Connect(function()
-		local isDriving = player:GetAttribute("IsDriving")
-		container.Visible = not isDriving
-	end)
-end
+-- Nav column stays visible while driving on mobile (top-left, out of the way
+-- of the bottom-left joystick and bottom-right pedals).
