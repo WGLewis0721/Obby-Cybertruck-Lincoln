@@ -15,16 +15,12 @@ local playerGui     = player:WaitForChild("PlayerGui")
 local camera        = Workspace.CurrentCamera
 local remotesFolder = ReplicatedStorage:WaitForChild("Events", 10)
 local openPaintShop = remotesFolder and remotesFolder:WaitForChild("OpenPaintShop", 10)
-local equipVehicleEvent = remotesFolder and remotesFolder:WaitForChild("EquipVehicle", 10)
 
 if not openPaintShop then
 	warn("MainMenu: OpenPaintShop RemoteEvent not found")
 end
 if not remotesFolder then
 	warn("MainMenu: Events folder not found in ReplicatedStorage")
-end
-if not equipVehicleEvent then
-	warn("MainMenu: EquipVehicle RemoteEvent not found")
 end
 
 -- ── Respawn guard ─────────────────────────────────────────────────────────────
@@ -305,12 +301,10 @@ playBtn.MouseButton1Click:Connect(function()
 			end
 		end
 
-		-- Equip the default vehicle (Cybertruck) via the server.
-		task.delay(0.3, function()
-			if equipVehicleEvent then
-				equipVehicleEvent:FireServer(1)  -- 1 == Cybertruck
-			end
-		end)
+		-- Vehicle spawning is owned entirely by GarageHandler's own
+		-- PlayerDataLoaded -> CharacterAdded auto-spawn; firing EquipVehicle here
+		-- too raced it (same vehicle name reused mid-swap), which transiently
+		-- broke the AC6 Drive script ("Wheels is not a valid member of Model").
 
 		-- Remove the menu entirely.
 		screenGui:Destroy()
