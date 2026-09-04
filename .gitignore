@@ -10,6 +10,8 @@ sourcemap.json
 *.rbxlx.lock
 *.rbxmx
 full-game.rbxm
+Obby-cyber-truck.obj
+Obby-cyber-truck.mtl
 fix*.js
 fix*.lua
 *.md.server.lua
