@@ -280,8 +280,14 @@ local function stampByKind(kind: string, parent, cf: CFrame)
 end
 
 -- ── Buildings ────────────────────────────────────────────────────────────────
+-- Two facade tiers, chosen per-placement by buildCityBlocks: "simple" (cheap,
+-- used for background/skyline buildings a racer never gets close to) and
+-- "full" (richer facade, used near the track and throughout Downtown where
+-- the extra detail is actually visible). Both read the same BuildingKinds
+-- archetype table so a kind looks like a plainer or richer version of the
+-- same building, never a different one.
 
-local function stampBuilding(parent, cf: CFrame, kindName: string)
+local function stampBuildingSimple(parent, cf: CFrame, kindName: string)
 	local def = CityDecorConfig.BuildingKinds[kindName]
 	local footprint = def.footprint[1] + math.random() * (def.footprint[2] - def.footprint[1])
 	local depth = footprint * (0.8 + math.random() * 0.4)
@@ -346,6 +352,128 @@ local function stampBuilding(parent, cf: CFrame, kindName: string)
 	end
 
 	return model
+end
+
+local function stampBuildingDetailed(parent, cf: CFrame, kindName: string)
+	local def = CityDecorConfig.BuildingKinds[kindName]
+	local footprint = def.footprint[1] + math.random() * (def.footprint[2] - def.footprint[1])
+	local depth = footprint * (0.8 + math.random() * 0.4)
+	local height = def.height[1] + math.random() * (def.height[2] - def.height[1])
+	local groundHeight = math.min(13, height * 0.22)
+	local upperHeight = height - groundHeight
+	local groundColor = def.groundColor or def.color:Lerp(Color3.new(0, 0, 0), 0.35)
+	-- LookVector (-Z) points toward the track, so the "front" facade sits at -Z.
+	local frontZ = -(depth * 0.5 + 0.15)
+
+	local model = Instance.new("Model")
+	model.Name = kindName
+	model.Parent = parent
+
+	-- Upper mass sits on top of a slightly wider ground floor -- the ledge
+	-- between them reads as facade depth without any extra parts.
+	makePart(model, "Base", Vector3.new(footprint, upperHeight, depth),
+		cf * CFrame.new(0, groundHeight + upperHeight * 0.5, 0), def.color, def.material)
+	makePart(model, "GroundFloor", Vector3.new(footprint + 0.5, groundHeight, depth + 0.5),
+		cf * CFrame.new(0, groundHeight * 0.5, 0), groundColor, Enum.Material.Concrete)
+
+	if def.storefront then
+		makePart(model, "Storefront", Vector3.new(footprint * 0.9, groundHeight - 2.5, 0.3),
+			cf * CFrame.new(0, groundHeight * 0.5 + 0.6, frontZ), Color3.fromRGB(40, 50, 60), Enum.Material.Glass, false)
+
+		local sign = makePart(model, "Sign", Vector3.new(footprint * 0.5, 2.4, 0.25),
+			cf * CFrame.new(0, groundHeight + 2.6, frontZ), Color3.fromRGB(18, 18, 18), Enum.Material.SmoothPlastic, false)
+		sign.CastShadow = false
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = Enum.NormalId.Front
+		gui.LightInfluence = 0
+		gui.Parent = sign
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.fromScale(1, 1)
+		label.BackgroundTransparency = 1
+		label.Text = CityDecorConfig.BusinessNames[math.random(#CityDecorConfig.BusinessNames)]
+		label.TextColor3 = Color3.fromRGB(255, 225, 150)
+		label.TextScaled = true
+		label.Font = Enum.Font.GothamBold
+		label.Parent = gui
+	end
+
+	if def.entrance then
+		-- Recessed doorway: a dark inset flush with the ground-floor face.
+		makePart(model, "Entrance", Vector3.new(footprint * 0.2, groundHeight - 3, 0.5),
+			cf * CFrame.new(0, (groundHeight - 3) * 0.5, frontZ + 0.4), Color3.fromRGB(14, 14, 15), Enum.Material.Metal, false).CastShadow = false
+	end
+
+	if def.awning then
+		makePart(model, "Awning", Vector3.new(footprint * 0.8, 0.4, 3),
+			cf * CFrame.new(0, groundHeight + 0.6, frontZ + 1.6), def.accentColor or Color3.fromRGB(150, 40, 40), Enum.Material.Fabric, false)
+	end
+
+	if def.columns then
+		for i = 0, 3 do
+			local t = (i / 3 - 0.5) * footprint * 0.85
+			makePart(model, "Column" .. i, Vector3.new(1.3, groundHeight, 1.3),
+				cf * CFrame.new(t, groundHeight * 0.5, frontZ + 0.85), groundColor:Lerp(Color3.new(1, 1, 1), 0.12), Enum.Material.Concrete)
+		end
+	end
+
+	-- Framed windows: each band is narrower than the facade so the base
+	-- material shows through as a mullion frame -- same one-part-per-floor
+	-- cost as the simple tier, just proportioned to read as glazing + frame.
+	local floors = math.clamp(math.floor(upperHeight / 14), 1, 8)
+	for f = 1, floors do
+		if math.random() < 0.6 then
+			local y = groundHeight + math.min(upperHeight - 4, f * 14)
+			makePart(model, "Windows" .. f, Vector3.new(footprint * 0.82, 3.2, depth * 0.86),
+				cf * CFrame.new(0, y, 0), Color3.fromRGB(255, 214, 120), Enum.Material.Neon, false).CastShadow = false
+		end
+	end
+
+	if def.balcony then
+		for i = 1, 2 do
+			local y = groundHeight + 14 * (i * 2)
+			if y < height - 6 then
+				makePart(model, "Balcony" .. i, Vector3.new(footprint * 0.5, 0.6, 2.4),
+					cf * CFrame.new(0, y, frontZ - 1), groundColor, Enum.Material.Concrete, false)
+			end
+		end
+	end
+
+	if def.hvac then
+		for i = 1, math.random(1, 3) do
+			local hx = (math.random() - 0.5) * footprint * 0.5
+			local hz = (math.random() - 0.5) * depth * 0.5
+			makePart(model, "HVAC" .. i, Vector3.new(4, 2.5, 4), cf * CFrame.new(hx, height + 1.25, hz), Color3.fromRGB(150, 150, 150), Enum.Material.Metal)
+		end
+	end
+
+	-- Cornice + rooftop parapet combined into a single cap slab.
+	makePart(model, "RoofCap", Vector3.new(footprint + 1.6, 1, depth + 1.6),
+		cf * CFrame.new(0, height + 0.5, 0), groundColor:Lerp(Color3.new(1, 1, 1), 0.15), Enum.Material.Concrete, false)
+
+	if def.spire then
+		makePart(model, "Spire", Vector3.new(3, 20, 3), cf * CFrame.new(0, height + 11, 0), Color3.fromRGB(200, 200, 200), Enum.Material.Metal, false)
+	end
+
+	if def.garage then
+		for lvl = 1, 4 do
+			local y = lvl * (height / 4)
+			makePart(model, "Slat" .. lvl, Vector3.new(footprint - 4, 0.6, depth - 4),
+				cf * CFrame.new(0, y, 0), Color3.fromRGB(90, 90, 92), Enum.Material.Concrete, false)
+			makePart(model, "Opening" .. lvl, Vector3.new(footprint - 6, (height / 4) - 1.4, depth * 0.15),
+				cf * CFrame.new(0, y + (height / 4) * 0.5, frontZ + 0.5), Color3.fromRGB(8, 8, 9), Enum.Material.Metal, false).CastShadow = false
+		end
+		makePart(model, "ServiceDoor", Vector3.new(footprint * 0.28, groundHeight - 2, 0.4),
+			cf * CFrame.new(footprint * 0.25, (groundHeight - 2) * 0.5, frontZ + 0.35), Color3.fromRGB(40, 40, 42), Enum.Material.Metal, false)
+	end
+
+	return model
+end
+
+local function stampBuilding(parent, cf: CFrame, kindName: string, detailLevel: string)
+	if detailLevel == "full" then
+		return stampBuildingDetailed(parent, cf, kindName)
+	end
+	return stampBuildingSimple(parent, cf, kindName)
 end
 
 -- ── Phase 4: track-edge trim ─────────────────────────────────────────────────
@@ -436,10 +564,10 @@ end
 
 -- ── City blocks ──────────────────────────────────────────────────────────────
 
-local function placeBlock(folder, center: Vector3, zone, faceTarget: Vector3)
+local function placeBlock(folder, center: Vector3, zone, faceTarget: Vector3, detailLevel: string)
 	local kind = pickWeighted(zone.buildingWeight)
 	local cf   = CFrame.lookAt(center, faceTarget)
-	stampBuilding(folder, cf, kind)
+	stampBuilding(folder, cf, kind, detailLevel)
 
 	local front = cf.LookVector
 	local right = cf.RightVector
@@ -475,7 +603,7 @@ end
 local function buildCityBlocks(trackModel, folder, exclusionZones)
 	local ground = trackModel:FindFirstChild("Terrain") and trackModel.Terrain:FindFirstChild("Ground")
 	if not ground then
-		return 0
+		return 0, 0
 	end
 
 	local minX = ground.Position.X - ground.Size.X * 0.5 - CityDecorConfig.OUTER_PAD
@@ -488,6 +616,7 @@ local function buildCityBlocks(trackModel, folder, exclusionZones)
 
 	local blockSize = CityDecorConfig.BLOCK_SIZE
 	local placed = 0
+	local detailed = 0
 
 	local x = minX + blockSize * 0.5
 	while x < maxX do
@@ -501,7 +630,17 @@ local function buildCityBlocks(trackModel, folder, exclusionZones)
 					angle += 360
 				end
 				local zone = pickZoneForAngle(angle)
-				placeBlock(folder, point, zone, trackCenter)
+
+				-- Full detail near the track (what a racer actually drives past)
+				-- and throughout Downtown (skyscrapers read even from a distance).
+				-- Everything else keeps the cheaper background facade.
+				local isNearTrack = not isPointClear(point, exclusionZones, CityDecorConfig.BLOCK_MARGIN + CityDecorConfig.NEAR_RING_DEPTH)
+				local detailLevel = (isNearTrack or zone.name == "Downtown") and "full" or "simple"
+				if detailLevel == "full" then
+					detailed += 1
+				end
+
+				placeBlock(folder, point, zone, trackCenter, detailLevel)
 				placed += 1
 			end
 			z += blockSize
@@ -509,7 +648,7 @@ local function buildCityBlocks(trackModel, folder, exclusionZones)
 		x += blockSize
 	end
 
-	return placed
+	return placed, detailed
 end
 
 -- ── Public API ───────────────────────────────────────────────────────────────
@@ -546,10 +685,11 @@ function CityDecorBuilder.Build(trackKey: string, trackModel: Model): Model
 
 	buildTrackEdgeTrim(trackModel, folders.EdgeTrim)
 	buildIntersectionMarkers(trackModel, folders.Intersections)
-	local blocksPlaced = buildCityBlocks(trackModel, folders.Blocks, exclusionZones)
+	local blocksPlaced, detailedBlocks = buildCityBlocks(trackModel, folders.Blocks, exclusionZones)
 
 	model.Parent = workspace
 	model:SetAttribute("BlocksPlaced", blocksPlaced)
+	model:SetAttribute("DetailedBlocks", detailedBlocks)
 	model:SetAttribute("PartCount", #model:GetDescendants())
 
 	return model

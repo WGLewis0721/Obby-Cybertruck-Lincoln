@@ -35,26 +35,37 @@ CityDecorConfig.BLOCK_SIZE      = 150  -- grid cell size, studs
 CityDecorConfig.BLOCK_MARGIN    = CityDecorConfig.TRACK_CLEARANCE + 40 -- extra clearance for whole blocks
 CityDecorConfig.OUTER_PAD       = 260  -- how far past the ground plane's edge the grid still tries to fill
 
+-- Buildings within this extra margin of the track (beyond BLOCK_MARGIN) get the
+-- full detailed facade treatment; everything past it uses the cheaper simple
+-- one. Roughly one block-ring deep, so "near track" == "what a racer actually
+-- passes close to" (corners, straightaways, intersections, start/finish).
+CityDecorConfig.NEAR_RING_DEPTH = 170
+
 -- Zones are picked by angle (degrees, 0-360 normalized atan2 around the track's
 -- centroid). Band edges sit at 0/90/180/270 -- NOT centered on a zone -- so no
 -- wraparound handling is needed when matching an angle to a band.
 -- Kept to four bands so the drive-by silhouette reads as distinct districts.
 CityDecorConfig.Zones = {
-	{ name = "Downtown",   minDeg =   0, maxDeg =  90, buildingWeight = { Skyscraper = 3, MidriseA = 3, MidriseB = 2 } },
+	{ name = "Downtown",   minDeg =   0, maxDeg =  90, buildingWeight = { SkyscraperA = 2, SkyscraperB = 2, MidriseA = 2, MidriseB = 2 } },
 	{ name = "Commercial", minDeg =  90, maxDeg = 180, buildingWeight = { LowriseA = 3, LowriseB = 3, LowriseC = 2, MidriseA = 1 } },
 	{ name = "Parking",    minDeg = 180, maxDeg = 270, buildingWeight = { ParkingGarage = 3, LowriseB = 2 } },
 	{ name = "Quiet",      minDeg = 270, maxDeg = 360, buildingWeight = { LowriseA = 2, LowriseC = 3 } },
 }
 
--- Building archetypes. footprint/height are {min, max} ranges sampled per placement.
+-- Building archetypes. footprint/height are {min, max} ranges sampled per
+-- placement. groundColor is the differentiated ground-floor band; accentColor
+-- tints awnings. entrance/awning/columns/balcony/garage/hvac/spire/storefront
+-- are flags the detailed facade (Services.CityDecorBuilder) reads to decide
+-- which details to add -- the simple/background facade ignores all of them.
 CityDecorConfig.BuildingKinds = {
-	LowriseA      = { footprint = {26, 34}, height = {18, 26}, color = Color3.fromRGB(196, 176, 150), material = Enum.Material.Brick,    storefront = true },
-	LowriseB      = { footprint = {24, 30}, height = {16, 22}, color = Color3.fromRGB(150, 158, 150), material = Enum.Material.Concrete, storefront = true },
-	LowriseC      = { footprint = {22, 30}, height = {14, 20}, color = Color3.fromRGB(178, 150, 130), material = Enum.Material.Brick,    storefront = false },
-	MidriseA      = { footprint = {34, 44}, height = {50, 80}, color = Color3.fromRGB(120, 130, 140), material = Enum.Material.Concrete, storefront = true, hvac = true },
-	MidriseB      = { footprint = {32, 42}, height = {46, 70}, color = Color3.fromRGB(150, 140, 120), material = Enum.Material.Brick,    storefront = true, hvac = true },
-	Skyscraper    = { footprint = {44, 58}, height = {140, 220}, color = Color3.fromRGB(90, 150, 200), material = Enum.Material.Glass,   storefront = true, hvac = true, spire = true },
-	ParkingGarage = { footprint = {50, 64}, height = {28, 36}, color = Color3.fromRGB(120, 120, 122), material = Enum.Material.Concrete, storefront = false, garage = true },
+	LowriseA      = { footprint = {26, 34}, height = {18, 26},  color = Color3.fromRGB(196, 176, 150), groundColor = Color3.fromRGB(92, 70, 54),  accentColor = Color3.fromRGB(160, 40, 40),  material = Enum.Material.Brick,    storefront = true, entrance = true, awning = true, columns = true },
+	LowriseB      = { footprint = {24, 30}, height = {16, 22},  color = Color3.fromRGB(150, 158, 150), groundColor = Color3.fromRGB(70, 78, 80),  accentColor = Color3.fromRGB(40, 90, 140),  material = Enum.Material.Concrete, storefront = true, entrance = true, awning = true, columns = true },
+	LowriseC      = { footprint = {22, 30}, height = {14, 20},  color = Color3.fromRGB(178, 150, 130), groundColor = Color3.fromRGB(80, 60, 50),  material = Enum.Material.Brick,    storefront = false, entrance = true },
+	MidriseA      = { footprint = {34, 44}, height = {50, 80},  color = Color3.fromRGB(120, 130, 140), groundColor = Color3.fromRGB(60, 64, 70),  material = Enum.Material.Concrete, storefront = true, entrance = true, hvac = true, balcony = true },
+	MidriseB      = { footprint = {32, 42}, height = {46, 70},  color = Color3.fromRGB(150, 140, 120), groundColor = Color3.fromRGB(70, 60, 50),  material = Enum.Material.Brick,    storefront = true, entrance = true, hvac = true, balcony = true },
+	SkyscraperA   = { footprint = {44, 58}, height = {140, 220},color = Color3.fromRGB(90, 150, 200),  groundColor = Color3.fromRGB(30, 40, 50),  material = Enum.Material.Glass,    storefront = true, entrance = true, hvac = true, spire = true },
+	SkyscraperB   = { footprint = {40, 52}, height = {160, 240},color = Color3.fromRGB(206, 188, 150), groundColor = Color3.fromRGB(50, 45, 40),  material = Enum.Material.Metal,    storefront = true, entrance = true, hvac = true },
+	ParkingGarage = { footprint = {50, 64}, height = {28, 36},  color = Color3.fromRGB(120, 120, 122), groundColor = Color3.fromRGB(70, 70, 72),  material = Enum.Material.Concrete, storefront = false, garage = true },
 }
 
 CityDecorConfig.BusinessNames = {
